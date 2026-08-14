@@ -59,7 +59,7 @@
 ## Final evidence and receipt pass
 - [x] Add route draft update/edit API and UI for existing saved drafts.
 - [x] Render a real audit-history list and transaction-receipt panel in the frontend.
-- [ ] Implement chain/provider receipt verification before allowing confirmed status.
+- [x] Implement chain/provider receipt verification before allowing confirmed status.
 - [x] Add consistent retry actions for route, recipient, and transaction mutations.
 - [ ] Perform authenticated browser validation of sign-in, recipient lifecycle, route persistence, refresh, and transaction recording.
 
@@ -81,3 +81,6 @@
 
 ## Route edit verification evidence
 - [x] Add a focused test covering draft edit state restoration and non-draft edit gating, then rerun the full verification suite.
+
+## Logo treatment refinement
+- [x] Remove the square logo container and render the VeilPay mark independently with transparent treatment across desktop and mobile surfaces.

@@ -164,9 +164,7 @@ export default function Home() {
       <div className="relative z-10 flex min-h-screen">
         <aside className="hidden w-[236px] shrink-0 border-r border-white/10 bg-[#151614]/95 px-6 py-7 lg:flex lg:flex-col">
           <div className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-[10px] bg-[#F0563A] shadow-[0_0_28px_rgba(240,86,58,.25)]">
-              <img src="/manus-storage/veilpay-logo_9b291ef8.png" alt="VeilPay mark" className="h-7 w-7 object-contain" />
-            </div>
+            <img src="/manus-storage/veilpay-logo_9b291ef8.png" alt="VeilPay mark" className="h-10 w-10 object-contain drop-shadow-[0_0_18px_rgba(240,86,58,.28)]" />
             <div>
               <div className="font-display text-[17px] font-bold tracking-[-0.04em]">VeilPay</div>
               <div className="font-mono text-[9px] tracking-[0.18em] text-[#918B81]">STRK20 / PRIVATE</div>
