@@ -43,7 +43,7 @@
 - [x] Persist blockchain transaction records on submit/confirm with receipt verification and idempotent retry handling.
 - [x] Validate recipient ownership, token format, and route ownership inside mutations.
 - [x] Add complete query/mutation error and retry UI states.
-- [ ] Implement workspace switching.
+- [x] Implement workspace switching.
 - [x] Re-verify authenticated workspace flows in the browser after these fixes.
 
 ## Final hardening pass
@@ -84,3 +84,11 @@
 
 ## Logo treatment refinement
 - [x] Remove the square logo container and render the VeilPay mark independently with transparent treatment across desktop and mobile surfaces.
+
+## Workspace switching verification
+- [x] Add focused workspace-selection tests for membership-scoped resolution and invalid workspace fallback.
+- [x] Add an equivalent mobile workspace selector or responsive control.
+- [x] Include workspace-list loading/error handling in the shared retry surface and rerun verification.
+
+## Workspace resolver evidence
+- [x] Add focused tests proving member-selected workspace resolution and unauthorized-ID fallback to the default accessible workspace.

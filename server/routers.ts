@@ -3,15 +3,24 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient } from "./db";
+import { parseWorkspaceId } from "./workspaceSelection";
+import { resolveWorkspaceSelection } from "./workspaceResolver";
+import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient } from "./db";
 
-async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null }) {
+async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null; req?: { headers?: Record<string, string | string[] | undefined> } }) {
   if (!ctx.user) throw new Error("Authentication required");
-  const existing = await getWorkspaceForUser(ctx.user.id);
-  if (existing) return existing;
-  const workspace = await ensureWorkspaceForUser(ctx.user.id, ctx.user.name);
-  if (!workspace) throw new Error("Database is not configured");
-  return { workspace, memberRole: "owner" as const };
+  const user = ctx.user;
+  const requestedId = parseWorkspaceId(ctx.req?.headers?.["x-workspace-id"]);
+  return resolveWorkspaceSelection(
+    requestedId,
+    (workspaceId) => getWorkspaceByIdForUser(user.id, workspaceId),
+    () => getWorkspaceForUser(user.id),
+    async () => {
+      const workspace = await ensureWorkspaceForUser(user.id, user.name);
+      if (!workspace) throw new Error("Database is not configured");
+      return { workspace, memberRole: "owner" as const };
+    },
+  );
 }
 
 const walletAddress = z.string().trim().min(4).max(100).regex(/^0x[0-9a-fA-F]+$/, "Enter a valid Starknet address");

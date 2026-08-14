@@ -1,5 +1,5 @@
 // Copper Veil style reminder: editorial brutalism, graphite canvas, ivory surfaces, Veil Vermilion #F0563A, Space Grotesk + IBM Plex Mono, visible privacy state.
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -34,7 +34,13 @@ export default function Home() {
   // nonce cookie and must run only at the moment of navigation.
   const { user, loading, error, isAuthenticated, logout } = useAuth();
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<number | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = Number(window.localStorage.getItem("veilpay-active-workspace"));
+    return Number.isInteger(stored) && stored > 0 ? stored : null;
+  });
   const [editingRouteId, setEditingRouteId] = useState<number | null>(null);
+  const workspaceListQuery = trpc.workspace.list.useQuery(undefined, { enabled: isAuthenticated, retry: false });
   const overviewQuery = trpc.workspace.overview.useQuery(undefined, { enabled: isAuthenticated, retry: false });
   const liveRoutes = overviewQuery.data?.routes ?? [];
   const recipientsQuery = trpc.recipients.list.useQuery(undefined, { enabled: isAuthenticated, retry: false });
@@ -56,8 +62,23 @@ export default function Home() {
   const displayActivity = isAuthenticated
     ? liveRoutes.map((route) => ({ id: `VP-${String(route.id).padStart(3, "0")}`, routeId: route.id, title: route.name, detail: `${route.token} · ${route.totalAmount}`, state: route.status.toUpperCase(), time: new Date(route.createdAt).toLocaleDateString() }))
     : activity;
-  const workspaceError = overviewQuery.error ?? recipientsQuery.error ?? auditQuery.error ?? transactionsQuery.error;
+  const workspaceError = workspaceListQuery.error ?? overviewQuery.error ?? recipientsQuery.error ?? auditQuery.error ?? transactionsQuery.error;
   const visibleError = workspaceError?.message ?? mutationError;
+  useEffect(() => {
+    const firstWorkspace = workspaceListQuery.data?.[0];
+    if (!activeWorkspaceId && firstWorkspace) {
+      setActiveWorkspaceId(firstWorkspace.workspace.id);
+      window.localStorage.setItem("veilpay-active-workspace", String(firstWorkspace.workspace.id));
+    }
+  }, [activeWorkspaceId, workspaceListQuery.data]);
+
+  function switchWorkspace(value: string) {
+    const nextId = Number(value);
+    if (!Number.isInteger(nextId) || nextId <= 0) return;
+    setActiveWorkspaceId(nextId);
+    window.localStorage.setItem("veilpay-active-workspace", String(nextId));
+    window.location.reload();
+  }
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<"routes" | "ledger" | "identity">("routes");
@@ -194,14 +215,14 @@ export default function Home() {
             </div>
             <div className="hidden font-mono text-[10px] tracking-[0.16em] text-[#918B81] lg:block">PRIVATE ROUTES / 2026.08</div>
             <div className="flex items-center gap-3">
-              <span className="hidden font-mono text-[10px] tracking-[0.12em] text-[#918B81] sm:block">{loading ? "CHECKING SESSION" : isAuthenticated ? `WORKSPACE / ${user?.name ?? "ACTIVE"}` : "PUBLIC PREVIEW / SIGN IN TO SAVE"}</span>
+              {isAuthenticated ? <label className="hidden items-center gap-2 font-mono text-[10px] tracking-[0.12em] text-[#918B81] sm:flex">WORKSPACE / <select aria-label="Active workspace" value={activeWorkspaceId ?? ""} onChange={(event) => switchWorkspace(event.target.value)} className="max-w-[150px] bg-transparent text-[#F3EEE5] outline-none"><option value="" disabled>{user?.name ?? "ACTIVE"}</option>{(workspaceListQuery.data ?? []).map((membership) => <option key={membership.workspace.id} value={membership.workspace.id}>{membership.workspace.name}</option>)}</select></label> : <span className="hidden font-mono text-[10px] tracking-[0.12em] text-[#918B81] sm:block">{loading ? "CHECKING SESSION" : "PUBLIC PREVIEW / SIGN IN TO SAVE"}</span>}
               {!isAuthenticated ? <Button onClick={startLogin} className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10">SIGN IN</Button> : <Button onClick={() => void logout()} className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10">SIGN OUT</Button>}
               <Button onClick={handleWalletConnect} className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]">{connected ? (walletAddress ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}` : "DEMO CONNECTED") : "CONNECT WALLET"}</Button>
             </div>
           </header>
 
-          {mobileOpen && <div className="border-b border-white/10 bg-[#171815] px-5 py-4 lg:hidden"><button onClick={() => goToSection("routes")} className={`nav-item w-full ${activeSection === "routes" ? "nav-item-active" : ""}`}>Payment routes <span className="ml-auto font-mono text-[10px]">{isAuthenticated ? String(liveRoutes.length).padStart(2, "0") : "03"}</span></button><button onClick={() => goToSection("ledger")} className={`nav-item w-full ${activeSection === "ledger" ? "nav-item-active" : ""}`}>Proof ledger</button><button onClick={() => goToSection("identity")} className={`nav-item w-full ${activeSection === "identity" ? "nav-item-active" : ""}`}>Identity keys</button></div>}
-          {visibleError && isAuthenticated && <div className="flex items-center justify-between gap-4 border-b border-[#F0563A]/30 bg-[#F0563A]/10 px-5 py-3 font-mono text-[10px] tracking-[0.08em] text-[#FFB1A3] sm:px-8 lg:px-12"><span>WORKSPACE ACTION FAILED / {visibleError.slice(0, 100)}</span><button onClick={() => { if (retryAction) retryAction(); else { void overviewQuery.refetch(); void recipientsQuery.refetch(); void auditQuery.refetch(); void transactionsQuery.refetch(); } setMutationError(null); }} className="shrink-0 rounded-full border border-[#F0563A]/40 px-3 py-1 text-[#F3EEE5] hover:bg-[#F0563A] hover:text-[#111210]">RETRY</button></div>}
+          {mobileOpen && <div className="border-b border-white/10 bg-[#171815] px-5 py-4 lg:hidden">{isAuthenticated && <label className="mb-3 flex items-center justify-between gap-3 border-b border-white/10 pb-3 font-mono text-[10px] tracking-[0.12em] text-[#918B81]">WORKSPACE<select aria-label="Mobile active workspace" value={activeWorkspaceId ?? ""} onChange={(event) => switchWorkspace(event.target.value)} className="max-w-[190px] bg-transparent text-right text-[#F3EEE5] outline-none"><option value="" disabled>SELECT</option>{(workspaceListQuery.data ?? []).map((membership) => <option key={membership.workspace.id} value={membership.workspace.id}>{membership.workspace.name}</option>)}</select></label>}<button onClick={() => goToSection("routes")} className={`nav-item w-full ${activeSection === "routes" ? "nav-item-active" : ""}`}>Payment routes <span className="ml-auto font-mono text-[10px]">{isAuthenticated ? String(liveRoutes.length).padStart(2, "0") : "03"}</span></button><button onClick={() => goToSection("ledger")} className={`nav-item w-full ${activeSection === "ledger" ? "nav-item-active" : ""}`}>Proof ledger</button><button onClick={() => goToSection("identity")} className={`nav-item w-full ${activeSection === "identity" ? "nav-item-active" : ""}`}>Identity keys</button></div>}
+          {visibleError && isAuthenticated && <div className="flex items-center justify-between gap-4 border-b border-[#F0563A]/30 bg-[#F0563A]/10 px-5 py-3 font-mono text-[10px] tracking-[0.08em] text-[#FFB1A3] sm:px-8 lg:px-12"><span>WORKSPACE ACTION FAILED / {visibleError.slice(0, 100)}</span><button onClick={() => { if (retryAction) retryAction(); else { void workspaceListQuery.refetch(); void overviewQuery.refetch(); void recipientsQuery.refetch(); void auditQuery.refetch(); void transactionsQuery.refetch(); } setMutationError(null); }} className="shrink-0 rounded-full border border-[#F0563A]/40 px-3 py-1 text-[#F3EEE5] hover:bg-[#F0563A] hover:text-[#111210]">RETRY</button></div>}
 
           <section className="relative isolate overflow-hidden border-b border-white/10 px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
             <img src="/manus-storage/veilpay-hero_c0925870.png" alt="Copper cryptographic veil texture" className="absolute inset-0 -z-20 h-full w-full object-cover opacity-45" />

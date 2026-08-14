@@ -248,3 +248,15 @@ export async function listRouteRecipientIds(workspaceId: number, routeId: number
   const rows = await db.select({ recipientId: routeRecipients.recipientId }).from(routeRecipients).innerJoin(paymentRoutes, eq(routeRecipients.routeId, paymentRoutes.id)).where(and(eq(routeRecipients.routeId, routeId), eq(paymentRoutes.workspaceId, workspaceId)));
   return rows.map((row) => row.recipientId);
 }
+
+export async function getWorkspaceByIdForUser(userId: number, workspaceId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select({ workspace: workspaces, memberRole: workspaceMembers.role })
+    .from(workspaceMembers)
+    .innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id))
+    .where(and(eq(workspaceMembers.userId, userId), eq(workspaceMembers.workspaceId, workspaceId)))
+    .limit(1);
+  return rows[0];
+}
