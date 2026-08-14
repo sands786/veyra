@@ -94,10 +94,10 @@
 - [x] Add focused tests proving member-selected workspace resolution and unauthorized-ID fallback to the default accessible workspace.
 
 ## STRK20 Private Sprint compliance audit
-- [ ] Verify official eligibility, scope, deadline, judging rubric, and submission channel.
-- [ ] Verify required STRK20 SDK integration, registry metadata, deployment, and mainnet transaction evidence.
-- [ ] Verify repository, demo URL, video, README, and public proof requirements.
-- [ ] Map every requirement to VeilPay evidence and record honest gaps.
+- [x] Verify official eligibility, scope, deadline, judging rubric, and submission channel.
+- [x] Verify required STRK20 SDK integration, registry metadata, deployment, and mainnet transaction evidence.
+- [x] Verify repository, demo URL, video, README, and public proof requirements.
+- [x] Map every requirement to VeilPay evidence and record honest gaps.
 
 ## Illustration blend refinement
 - [x] Blend the right-corner privacy illustration into its dark panel with seamless masking, scale, placement, and responsive behavior.
