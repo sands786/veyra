@@ -65,3 +65,19 @@
 
 ## Mutation retry completeness
 - [x] Add retry/error handlers for every remaining route, recipient, and transaction mutation, including draft updates, recipient archive/update/restore, and transaction confirmation.
+
+## Navigation bug report
+- [x] Make Payment routes, Proof ledger, and Identity keys sidebar items functional with active-state switching and section-specific content.
+
+## Interaction completeness
+- [x] Make every visible button functional: navigation, view contracts, proof actions, wallet controls, route actions, recipient actions, and mobile menu controls.
+- [x] Add honest feedback or gated states for actions requiring authentication, a connected wallet, or persisted data.
+- [x] Verify all visible controls with typecheck, tests, build, and responsive visual QA.
+
+## Route edit feedback hardening
+- [x] Make the proof-ledger EDIT action explicitly gated for non-draft routes.
+- [x] Restore persisted route recipient assignments when loading a draft for editing.
+- [x] Verify draft and non-draft edit behavior with tests or browser validation.
+
+## Route edit verification evidence
+- [x] Add a focused test covering draft edit state restoration and non-draft edit gating, then rerun the full verification suite.

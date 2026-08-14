@@ -241,3 +241,10 @@ export async function updatePaymentRoute(input: { workspaceId: number; routeId: 
   const rows = await db.select().from(paymentRoutes).where(eq(paymentRoutes.id, input.routeId)).limit(1);
   return rows[0];
 }
+
+export async function listRouteRecipientIds(workspaceId: number, routeId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ recipientId: routeRecipients.recipientId }).from(routeRecipients).innerJoin(paymentRoutes, eq(routeRecipients.routeId, paymentRoutes.id)).where(and(eq(routeRecipients.routeId, routeId), eq(paymentRoutes.workspaceId, workspaceId)));
+  return rows.map((row) => row.recipientId);
+}

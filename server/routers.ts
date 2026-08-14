@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient } from "./db";
+import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -91,6 +91,10 @@ export const appRouter = router({
     list: protectedProcedure.query(async ({ ctx }) => {
       const membership = await workspaceFor(ctx);
       return listWorkspaceRoutes(membership.workspace.id);
+    }),
+    recipients: protectedProcedure.input(z.object({ routeId: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return listRouteRecipientIds(membership.workspace.id, input.routeId);
     }),
     create: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
