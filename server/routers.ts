@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { archiveRecipient, createPaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspaceRecipients, listWorkspaceRoutes, recordBlockchainTransaction, restoreRecipient, transitionPaymentRoute, updateRecipient } from "./db";
+import { archiveRecipient, createPaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, recordBlockchainTransaction, restoreRecipient, transitionPaymentRoute, updateRecipient } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -30,6 +30,11 @@ export const appRouter = router({
     }),
   }),
   workspace: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      return listWorkspacesForUser(actorId);
+    }),
     overview: protectedProcedure.query(async ({ ctx }) => {
       const membership = await workspaceFor(ctx);
       const [recipientRows, routeRows] = await Promise.all([

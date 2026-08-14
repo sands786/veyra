@@ -194,3 +194,9 @@ export async function listRouteTransactions(workspaceId: number, routeId: number
   if (!ownedRoute[0]) throw new Error("Route not found in workspace");
   return db.select().from(blockchainTransactions).where(eq(blockchainTransactions.routeId, routeId)).orderBy(desc(blockchainTransactions.submittedAt));
 }
+
+export async function listWorkspacesForUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({ workspace: workspaces, memberRole: workspaceMembers.role }).from(workspaceMembers).innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id)).where(eq(workspaceMembers.userId, userId)).orderBy(desc(workspaces.updatedAt));
+}
