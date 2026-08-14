@@ -101,3 +101,6 @@
 
 ## Illustration blend refinement
 - [x] Blend the right-corner privacy illustration into its dark panel with seamless masking, scale, placement, and responsive behavior.
+
+## Desktop composition refinement
+- [x] Reduce unused sidebar and content whitespace while preserving readable navigation and responsive behavior.
