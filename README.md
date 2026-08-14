@@ -43,3 +43,7 @@ Winners are announced September 4, 2026. See the official sprint repository and 
 ## License
 
 MIT
+
+## Security and privacy boundary
+
+VeilPay does not custody private keys, seed phrases, viewing keys, proof payloads, or plaintext private-transfer notes. Wallet signing remains in the user’s privacy-enabled Starknet wallet. The database stores workspace metadata, recipient wallet addresses entered by the workspace operator, route totals and lifecycle state, public transaction hashes, and audit metadata. Recipient notes are optional operational labels only; teams must not place secrets, private keys, or sensitive payment narratives in them. The server validates workspace membership and role before every mutation and verifies that route recipients belong to the same workspace.

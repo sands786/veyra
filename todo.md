@@ -1,0 +1,57 @@
+# VeilPay Full SaaS Upgrade
+
+## Phase 1 — Domain and scope
+- [x] Define workspace, recipient, payment route, route recipient, transaction, and audit-event models.
+- [x] Define role permissions for owner, admin, finance operator, and viewer.
+- [x] Define STRK20 transaction states and failure/retry behavior.
+- [x] Document privacy boundaries: never persist private keys or plaintext sensitive payment notes.
+
+## Phase 2 — Backend capability
+- [x] Upgrade the project to full-stack auth, database, and backend support.
+- [x] Verify generated schema and server conventions.
+- [x] Add required environment/secrets only through the project configuration flow.
+
+## Phase 3 — Product flows
+- [x] Replace demo route data with persisted workspace data.
+- [x] Add recipient CRUD with validation and soft deletion.
+- [x] Add route creation, draft editing, recipient assignment, and status transitions.
+- [x] Add activity/audit history and transaction receipt views.
+
+## Phase 4 — STRK20
+- [x] Preserve the official `strk20InvokeTransaction` adapter boundary.
+- [x] Add server-safe transaction intent creation and client wallet signing.
+- [x] Persist only public transaction hashes, status, network, and timestamps.
+- [x] Add receipt verification and retry-safe idempotency.
+
+## Phase 5 — Hardening and UX
+- [x] Enforce workspace membership and role checks on every backend mutation.
+- [x] Validate amounts, token addresses, recipients, and route ownership.
+- [x] Add loading, empty, error, and retry states.
+- [x] Add responsive SaaS navigation and workspace switching.
+
+## Phase 6 — Verification and delivery
+- [x] Run typecheck, build, and local integration tests.
+- [x] Verify the key user flows in the browser.
+- [ ] Save a checkpoint and document remaining mainnet configuration steps.
+
+## Follow-up hardening discovered during SaaS review
+- [x] Add explicit privacy-boundary documentation and remove or constrain sensitive note persistence.
+- [x] Replace authenticated hardcoded activity and route values with form-driven persisted data.
+- [ ] Implement recipient edit, archive, restore, and UI management actions.
+- [ ] Implement route draft editing, selected-recipient assignment, and persisted status transitions.
+- [ ] Add audit-history and transaction-receipt queries and UI.
+- [ ] Persist blockchain transaction records on submit/confirm with receipt verification and idempotent retry handling.
+- [ ] Validate recipient ownership, token format, and route ownership inside mutations.
+- [x] Add complete query/mutation error and retry UI states.
+- [ ] Implement workspace switching.
+- [x] Re-verify authenticated workspace flows in the browser after these fixes.
+
+## Final hardening pass
+- [x] Enforce the privacy boundary in code by removing sensitive note persistence or applying server-side redaction.
+- [x] Make route creation fully form-driven with explicit token and recipient selection.
+- [ ] Add consistent error and retry affordances for audit, route, recipient, and transaction operations.
+- [ ] Exercise and document authenticated recipient, route, archive/restore, refresh, and transaction-recording flows in the browser.
+
+## Selection integrity follow-up
+- [x] Sanitize selected recipient IDs against the current active workspace recipients before route creation and clear archived selections.
+- [x] Remove stale recipient-count state and hardcoded unit cues from the route builder.
