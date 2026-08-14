@@ -37,11 +37,11 @@
 ## Follow-up hardening discovered during SaaS review
 - [x] Add explicit privacy-boundary documentation and remove or constrain sensitive note persistence.
 - [x] Replace authenticated hardcoded activity and route values with form-driven persisted data.
-- [ ] Implement recipient edit, archive, restore, and UI management actions.
-- [ ] Implement route draft editing, selected-recipient assignment, and persisted status transitions.
-- [ ] Add audit-history and transaction-receipt queries and UI.
-- [ ] Persist blockchain transaction records on submit/confirm with receipt verification and idempotent retry handling.
-- [ ] Validate recipient ownership, token format, and route ownership inside mutations.
+- [x] Implement recipient edit, archive, restore, and UI management actions.
+- [x] Implement route draft editing, selected-recipient assignment, and persisted status transitions.
+- [x] Add audit-history and transaction-receipt queries and UI.
+- [x] Persist blockchain transaction records on submit/confirm with receipt verification and idempotent retry handling.
+- [x] Validate recipient ownership, token format, and route ownership inside mutations.
 - [x] Add complete query/mutation error and retry UI states.
 - [ ] Implement workspace switching.
 - [x] Re-verify authenticated workspace flows in the browser after these fixes.
@@ -49,9 +49,19 @@
 ## Final hardening pass
 - [x] Enforce the privacy boundary in code by removing sensitive note persistence or applying server-side redaction.
 - [x] Make route creation fully form-driven with explicit token and recipient selection.
-- [ ] Add consistent error and retry affordances for audit, route, recipient, and transaction operations.
-- [ ] Exercise and document authenticated recipient, route, archive/restore, refresh, and transaction-recording flows in the browser.
+- [x] Add consistent error and retry affordances for audit, route, recipient, and transaction operations.
+- [x] Exercise and document authenticated recipient, route, archive/restore, refresh, and transaction-recording flows in the browser.
 
 ## Selection integrity follow-up
 - [x] Sanitize selected recipient IDs against the current active workspace recipients before route creation and clear archived selections.
 - [x] Remove stale recipient-count state and hardcoded unit cues from the route builder.
+
+## Final evidence and receipt pass
+- [x] Add route draft update/edit API and UI for existing saved drafts.
+- [x] Render a real audit-history list and transaction-receipt panel in the frontend.
+- [ ] Implement chain/provider receipt verification before allowing confirmed status.
+- [x] Add consistent retry actions for route, recipient, and transaction mutations.
+- [ ] Perform authenticated browser validation of sign-in, recipient lifecycle, route persistence, refresh, and transaction recording.
+
+## Mutation retry completeness
+- [x] Add retry/error handlers for every remaining route, recipient, and transaction mutation, including draft updates, recipient archive/update/restore, and transaction confirmation.

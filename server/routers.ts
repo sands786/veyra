@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { archiveRecipient, createPaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, recordBlockchainTransaction, restoreRecipient, transitionPaymentRoute, updateRecipient } from "./db";
+import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -99,6 +99,13 @@ export const appRouter = router({
       if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot create payment routes");
       return createPaymentRoute({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
     }),
+    update: protectedProcedure.input(z.object({ id: z.number().int().positive(), name: z.string().trim().min(2).max(160), token: tokenSymbol, totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot edit payment routes");
+      return updatePaymentRoute({ workspaceId: membership.workspace.id, routeId: input.id, actorUserId: actorId, name: input.name, token: input.token, totalAmount: input.totalAmount, recipientAmounts: input.recipientAmounts });
+    }),
     transition: protectedProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(["draft", "shielded", "routed", "settled", "failed", "cancelled"]) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
@@ -124,6 +131,14 @@ export const appRouter = router({
       if (!actorId) throw new Error("Authentication required");
       if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot record transactions");
       return recordBlockchainTransaction({ workspaceId: membership.workspace.id, actorUserId: actorId, ...input });
+    }),
+    confirm: protectedProcedure.input(z.object({ transactionHash: z.string().trim().regex(/^0x[0-9a-fA-F]+$/) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot confirm transactions");
+      const verified = await verifyStarknetReceipt(input.transactionHash);
+      return confirmBlockchainTransaction({ workspaceId: membership.workspace.id, actorUserId: actorId, transactionHash: input.transactionHash, status: verified.status });
     }),
   }),
 });

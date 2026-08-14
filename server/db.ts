@@ -1,5 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import { RpcProvider } from "starknet";
 import {
   auditEvents,
   blockchainTransactions,
@@ -199,4 +200,44 @@ export async function listWorkspacesForUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
   return db.select({ workspace: workspaces, memberRole: workspaceMembers.role }).from(workspaceMembers).innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id)).where(eq(workspaceMembers.userId, userId)).orderBy(desc(workspaces.updatedAt));
+}
+
+export async function verifyStarknetReceipt(transactionHash: string) {
+  const provider = new RpcProvider({ nodeUrl: process.env.STARKNET_RPC_URL || "https://rpc.starknet.lava.build" });
+  const receipt = await provider.getTransactionReceipt(transactionHash);
+  const executionStatus = String((receipt as { execution_status?: string }).execution_status || "").toUpperCase();
+  const finalityStatus = String((receipt as { finality_status?: string }).finality_status || "").toUpperCase();
+  const status = executionStatus === "SUCCEEDED" && ["ACCEPTED_ON_L2", "ACCEPTED_ON_L1"].includes(finalityStatus) ? "confirmed" : executionStatus === "REVERTED" ? "reverted" : "unknown";
+  return { status, finalityStatus, executionStatus } as const;
+}
+
+export async function confirmBlockchainTransaction(input: { workspaceId: number; actorUserId: number; transactionHash: string; status: "confirmed" | "reverted" | "unknown" }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const rows = await db.select({ tx: blockchainTransactions, route: paymentRoutes }).from(blockchainTransactions).innerJoin(paymentRoutes, eq(blockchainTransactions.routeId, paymentRoutes.id)).where(and(eq(blockchainTransactions.transactionHash, input.transactionHash), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
+  const current = rows[0];
+  if (!current) throw new Error("Transaction not found in workspace");
+  await db.update(blockchainTransactions).set({ status: input.status, confirmedAt: input.status === "confirmed" ? new Date() : null }).where(eq(blockchainTransactions.transactionHash, input.transactionHash));
+  const routeStatus = input.status === "confirmed" ? "settled" : input.status === "reverted" ? "failed" : "routed";
+  await transitionPaymentRoute(input.workspaceId, current.route.id, input.actorUserId, routeStatus);
+  const updated = await db.select().from(blockchainTransactions).where(eq(blockchainTransactions.transactionHash, input.transactionHash)).limit(1);
+  return updated[0];
+}
+
+export async function updatePaymentRoute(input: { workspaceId: number; routeId: number; actorUserId: number; name: string; token: string; totalAmount: string; recipientAmounts: Array<{ recipientId: number; amount: string }> }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const existing = await db.select().from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
+  if (!existing[0]) throw new Error("Route not found in workspace");
+  if (existing[0].status !== "draft") throw new Error("Only draft routes can be edited");
+  const recipientIds = Array.from(new Set(input.recipientAmounts.map((item) => item.recipientId)));
+  const owned = await db.select({ id: recipients.id }).from(recipients).where(and(eq(recipients.workspaceId, input.workspaceId), eq(recipients.status, "active")));
+  const ownedIds = new Set(owned.map((row) => row.id));
+  if (!recipientIds.length || recipientIds.some((id) => !ownedIds.has(id))) throw new Error("All selected recipients must be active workspace recipients");
+  await db.update(paymentRoutes).set({ name: input.name, token: input.token, totalAmount: input.totalAmount }).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId)));
+  await db.delete(routeRecipients).where(eq(routeRecipients.routeId, input.routeId));
+  await db.insert(routeRecipients).values(input.recipientAmounts.map((item) => ({ routeId: input.routeId, recipientId: item.recipientId, amount: item.amount })));
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "payment_route", entityId: input.routeId, action: "updated" });
+  const rows = await db.select().from(paymentRoutes).where(eq(paymentRoutes.id, input.routeId)).limit(1);
+  return rows[0];
 }
