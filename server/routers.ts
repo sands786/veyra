@@ -8,7 +8,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { parseWorkspaceId } from "./workspaceSelection";
 import { buildPayrollCron } from "@shared/operations";
 import { resolveWorkspaceSelection } from "./workspaceResolver";
-import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, exportWorkspaceAuditCsv } from "./db";
+import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null; req?: { headers?: Record<string, string | string[] | undefined> } }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -72,6 +72,43 @@ export const appRouter = router({
       return workspace;
     }),
   }),
+  treasury: router({
+    balances: protectedProcedure.query(async ({ ctx }) => {
+      const membership = await workspaceFor(ctx);
+      return listWorkspaceTreasuryBalances(membership.workspace.id);
+    }),
+    recordBalance: protectedProcedure.input(z.object({ token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]), availableBalance: amount, source: z.string().trim().max(40).optional() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      if (!['owner', 'admin', 'operator'].includes(membership.memberRole)) throw new Error("Only workspace operators can record treasury balances");
+      return recordTreasuryBalanceSnapshot({ workspaceId: membership.workspace.id, ...input });
+    }),
+    simulate: protectedProcedure.input(z.object({ token: tokenSymbol, totalAmount: amount, approvalCount: z.number().int().min(0).max(20), network: z.enum(["mainnet", "sepolia"]).default("mainnet") })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return simulateTreasuryPolicy(membership.workspace.id, input);
+    }),
+    policies: protectedProcedure.query(async ({ ctx }) => {
+      const membership = await workspaceFor(ctx);
+      return listWorkspaceTreasuryPolicies(membership.workspace.id);
+    }),
+    createPolicy: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]), maxRouteAmount: amount, dailyLimit: amount, approvalThreshold: z.number().int().min(1).max(20) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!['owner', 'admin'].includes(membership.memberRole)) throw new Error("Only owners and admins can create treasury policies");
+      return createTreasuryPolicy({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
+    }),
+  }),
+  claims: router({
+    create: protectedProcedure.input(z.object({ routeId: z.number().int().positive(), recipientId: z.number().int().positive(), expiresAt: z.coerce.date() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!['owner', 'admin', 'operator'].includes(membership.memberRole)) throw new Error("Only workspace operators can create claim links");
+      return createRecipientClaimLink({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
+    }),
+    public: publicProcedure.input(z.object({ token: z.string().trim().regex(/^claim-[a-f0-9]{32}$/) })).query(({ input }) => getPublicClaim(input.token)),
+    redeem: publicProcedure.input(z.object({ token: z.string().trim().regex(/^claim-[a-f0-9]{32}$/), walletAddress })).mutation(({ input }) => claimRecipientLink(input.token, input.walletAddress)),
+  }),
   recipients: router({
     list: protectedProcedure.query(async ({ ctx }) => {
       const membership = await workspaceFor(ctx);
@@ -115,14 +152,14 @@ export const appRouter = router({
       const membership = await workspaceFor(ctx);
       return listRouteRecipientIds(membership.workspace.id, input.routeId);
     }),
-    create: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
+    create: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]).default("mainnet"), totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
       if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot create payment routes");
       return createPaymentRoute({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
     }),
-    update: protectedProcedure.input(z.object({ id: z.number().int().positive(), name: z.string().trim().min(2).max(160), token: tokenSymbol, totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
+    update: protectedProcedure.input(z.object({ id: z.number().int().positive(), name: z.string().trim().min(2).max(160), token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]).default("mainnet"), totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
@@ -223,6 +260,10 @@ export const appRouter = router({
     public: publicProcedure.input(z.object({ slug: z.string().trim().regex(/^vp-[a-f0-9]{20}$/) })).query(({ input }) => getPublicProof(input.slug)),
   }),
   analytics: router({
+    health: protectedProcedure.query(async ({ ctx }) => {
+      const membership = await workspaceFor(ctx);
+      return listWorkspaceOperationsHealth(membership.workspace.id);
+    }),
     summary: protectedProcedure.query(async ({ ctx }) => {
       const membership = await workspaceFor(ctx);
       return listWorkspaceAnalytics(membership.workspace.id);

@@ -24,3 +24,19 @@ export function nextPayrollRunAt(current: Date, frequency: PayrollFrequency): Da
 export function isPublicProofSlug(value: string): boolean {
   return /^vp-[a-f0-9]{20}$/.test(value);
 }
+
+export type PolicyEvaluation = { maxRouteAmount: string; dailyLimit: string; approvalThreshold: number; network: "mainnet" | "sepolia" };
+
+export function evaluateTreasuryPolicy(policy: PolicyEvaluation | undefined, input: { totalAmount: string; approvalCount: number; network: "mainnet" | "sepolia"; dailyUsed: string }) {
+  if (!policy) return { policyFound: false, allowed: true, reasons: ["No active policy for this token"] } as const;
+  const reasons: string[] = [];
+  if (input.network !== policy.network) reasons.push(`Policy is restricted to ${policy.network}`);
+  if (Number(input.totalAmount) > Number(policy.maxRouteAmount)) reasons.push(`Amount exceeds per-route limit of ${policy.maxRouteAmount}`);
+  if (Number(input.dailyUsed) + Number(input.totalAmount) > Number(policy.dailyLimit)) reasons.push(`Daily limit of ${policy.dailyLimit} would be exceeded`);
+  if (input.approvalCount < policy.approvalThreshold) reasons.push(`Requires ${policy.approvalThreshold} approval(s)`);
+  return { policyFound: true, allowed: reasons.length === 0, reasons, maxRouteAmount: policy.maxRouteAmount, dailyLimit: policy.dailyLimit, approvalThreshold: policy.approvalThreshold, network: policy.network } as const;
+}
+
+export function isClaimToken(value: string): boolean {
+  return /^claim-[a-f0-9]{32}$/.test(value);
+}

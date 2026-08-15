@@ -112,3 +112,16 @@
 - [x] Add workspace-scoped operational analytics and CSV audit export.
 - [x] Add backend authorization, validation, idempotency, and focused tests for the four operations features.
 - [x] Add responsive UI states, authenticated gating, empty/error feedback, retry surfaces, and browser-verifiable controls for the four operations features.
+
+## Differentiation expansion
+- [x] Add a privacy-safe treasury command center with balance snapshots, reusable policies, spending limits, and route-level budget enforcement.
+- [x] Add reusable payment policy templates with approval rules, token/network constraints, dry-run simulation, and wallet-signing guardrails.
+- [x] Add a recipient self-claim flow using expiring private claim links, persist redemption data, and connect it to route fulfillment without exposing the roster publicly.
+- [x] Add Starknet-native operational intelligence with proof-health and receipt-monitoring views plus privacy-preserving workspace activity insights.
+- [x] Add focused Vitest coverage, responsive UI states, and production verification for the differentiation expansion.
+
+## Differentiation hardening gaps
+- [x] Enforce treasury daily-limit usage across active routes and include it in dry-run simulation.
+- [x] Enforce policy network constraints in dry-run and route-creation guardrails.
+- [x] Connect recipient claim redemption to route-recipient fulfillment state and payout readiness.
+- [x] Add concrete proof-health and unresolved-receipt monitoring views, not only aggregate counters.

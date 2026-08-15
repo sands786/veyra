@@ -2,12 +2,16 @@ import { and, desc, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { RpcProvider } from "starknet";
+import { evaluateTreasuryPolicy } from "@shared/operations";
 import {
   auditEvents,
+  claimLinks,
+  treasuryBalanceSnapshots,
   blockchainTransactions,
   payrollSchedules,
   routeApprovals,
   shareableProofs,
+  treasuryPolicies,
   InsertUser,
   paymentRoutes,
   recipients,
@@ -105,6 +109,92 @@ export async function updateWorkspaceApprovalThreshold(workspaceId: number, acto
   return rows[0];
 }
 
+export async function listWorkspaceTreasuryBalances(workspaceId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(treasuryBalanceSnapshots).where(eq(treasuryBalanceSnapshots.workspaceId, workspaceId)).orderBy(desc(treasuryBalanceSnapshots.capturedAt)).limit(12);
+}
+
+export async function recordTreasuryBalanceSnapshot(input: { workspaceId: number; token: string; network: "mainnet" | "sepolia"; availableBalance: string; source?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const inserted = await db.insert(treasuryBalanceSnapshots).values(input).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not record treasury balance snapshot");
+  const rows = await db.select().from(treasuryBalanceSnapshots).where(eq(treasuryBalanceSnapshots.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function simulateTreasuryPolicy(workspaceId: number, input: { token: string; totalAmount: string; approvalCount: number; network: "mainnet" | "sepolia" }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const policy = (await db.select().from(treasuryPolicies).where(and(eq(treasuryPolicies.workspaceId, workspaceId), eq(treasuryPolicies.token, input.token), eq(treasuryPolicies.status, "active"))).orderBy(desc(treasuryPolicies.createdAt)).limit(1))[0];
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  const todayRoutes = await db.select().from(paymentRoutes).where(eq(paymentRoutes.workspaceId, workspaceId));
+  const dailyUsed = todayRoutes.filter((route) => route.token === input.token && route.network === input.network && route.createdAt >= start && !["failed", "cancelled"].includes(route.status)).reduce((sum, route) => sum + Number(route.totalAmount), 0).toString();
+  const evaluation = evaluateTreasuryPolicy(policy, { ...input, dailyUsed });
+  return { ...evaluation, dailyUsed, ...(policy ? { policyName: policy.name } : {}) } as const;
+}
+
+export async function listWorkspaceTreasuryPolicies(workspaceId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(treasuryPolicies).where(and(eq(treasuryPolicies.workspaceId, workspaceId), eq(treasuryPolicies.status, "active"))).orderBy(desc(treasuryPolicies.createdAt));
+}
+
+export async function createTreasuryPolicy(input: { workspaceId: number; createdByUserId: number; name: string; token: string; network: "mainnet" | "sepolia"; maxRouteAmount: string; dailyLimit: string; approvalThreshold: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const existing = await db.select().from(treasuryPolicies).where(and(eq(treasuryPolicies.workspaceId, input.workspaceId), eq(treasuryPolicies.name, input.name), eq(treasuryPolicies.status, "active"))).limit(1);
+  if (existing[0]) return existing[0];
+  const inserted = await db.insert(treasuryPolicies).values(input).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not create treasury policy");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "treasury_policy", entityId: id, action: "created" });
+  const rows = await db.select().from(treasuryPolicies).where(eq(treasuryPolicies.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function createRecipientClaimLink(input: { workspaceId: number; routeId: number; recipientId: number; createdByUserId: number; expiresAt: Date }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const route = await db.select({ id: paymentRoutes.id }).from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
+  const recipient = await db.select({ id: recipients.id }).from(recipients).where(and(eq(recipients.id, input.recipientId), eq(recipients.workspaceId, input.workspaceId), eq(recipients.status, "active"))).limit(1);
+  if (!route[0] || !recipient[0]) throw new Error("Route or recipient not found in workspace");
+  if (input.expiresAt <= new Date()) throw new Error("Claim link must expire in the future");
+  const existing = await db.select().from(claimLinks).where(and(eq(claimLinks.workspaceId, input.workspaceId), eq(claimLinks.routeId, input.routeId), eq(claimLinks.recipientId, input.recipientId), eq(claimLinks.status, "pending"))).limit(1);
+  if (existing[0] && existing[0].expiresAt > new Date()) return existing[0];
+  const token = `claim-${randomUUID().replaceAll("-", "")}`;
+  const inserted = await db.insert(claimLinks).values({ ...input, token }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not create claim link");
+  await db.update(routeRecipients).set({ fulfillmentStatus: "claim_ready" }).where(and(eq(routeRecipients.routeId, input.routeId), eq(routeRecipients.recipientId, input.recipientId)));
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "claim_link", entityId: id, action: "created" });
+  const rows = await db.select().from(claimLinks).where(eq(claimLinks.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function getPublicClaim(token: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select({ claim: claimLinks, route: paymentRoutes }).from(claimLinks).innerJoin(paymentRoutes, eq(claimLinks.routeId, paymentRoutes.id)).where(and(eq(claimLinks.token, token), eq(claimLinks.status, "pending"))).limit(1);
+  const row = rows[0];
+  if (!row || row.claim.expiresAt <= new Date()) return undefined;
+  return { token: row.claim.token, expiresAt: row.claim.expiresAt, routeName: row.route.name, asset: row.route.token, amount: row.route.totalAmount, status: row.route.status };
+}
+
+export async function claimRecipientLink(token: string, walletAddress: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const current = await db.select().from(claimLinks).where(and(eq(claimLinks.token, token), eq(claimLinks.status, "pending"))).limit(1);
+  if (!current[0] || current[0].expiresAt <= new Date()) throw new Error("Claim link is invalid or expired");
+  await db.update(claimLinks).set({ status: "claimed", claimedAt: new Date(), claimedWalletAddress: walletAddress }).where(and(eq(claimLinks.id, current[0].id), eq(claimLinks.status, "pending")));
+  await db.update(routeRecipients).set({ fulfillmentStatus: "claimed", fulfilledWalletAddress: walletAddress }).where(and(eq(routeRecipients.routeId, current[0].routeId), eq(routeRecipients.recipientId, current[0].recipientId)));
+  await db.insert(auditEvents).values({ workspaceId: current[0].workspaceId, actorUserId: current[0].createdByUserId, entityType: "claim_link", entityId: current[0].id, action: "redeemed" });
+  return { success: true, walletAddress, claimId: current[0].id } as const;
+}
+
 export async function listWorkspaceRecipients(workspaceId: number) {
   const db = await getDb();
   if (!db) return [];
@@ -136,14 +226,21 @@ export async function archiveRecipient(workspaceId: number, recipientId: number,
   return { success: true } as const;
 }
 
-export async function createPaymentRoute(input: { workspaceId: number; createdByUserId: number; name: string; token: string; totalAmount: string; recipientAmounts: Array<{ recipientId: number; amount: string }> }) {
+export async function createPaymentRoute(input: { workspaceId: number; createdByUserId: number; name: string; token: string; network: "mainnet" | "sepolia"; totalAmount: string; recipientAmounts: Array<{ recipientId: number; amount: string }> }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
+  const activePolicy = (await db.select().from(treasuryPolicies).where(and(eq(treasuryPolicies.workspaceId, input.workspaceId), eq(treasuryPolicies.token, input.token), eq(treasuryPolicies.status, "active"))).orderBy(desc(treasuryPolicies.createdAt)).limit(1))[0];
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  const todayRoutes = await db.select().from(paymentRoutes).where(eq(paymentRoutes.workspaceId, input.workspaceId));
+  const dailyUsed = todayRoutes.filter((route) => route.token === input.token && route.network === input.network && route.createdAt >= start && !["failed", "cancelled"].includes(route.status)).reduce((sum, route) => sum + Number(route.totalAmount), 0).toString();
+  const evaluation = evaluateTreasuryPolicy(activePolicy, { totalAmount: input.totalAmount, approvalCount: 0, network: input.network, dailyUsed });
+  if (!evaluation.allowed && evaluation.reasons.some((reason) => reason.includes("limit") || reason.includes("restricted") || reason.includes("exceeded"))) throw new Error(evaluation.reasons.join(" / "));
   const recipientIds = Array.from(new Set(input.recipientAmounts.map((item) => item.recipientId)));
   const ownedRecipients = recipientIds.length ? await db.select({ id: recipients.id }).from(recipients).where(and(eq(recipients.workspaceId, input.workspaceId), eq(recipients.status, "active"))) : [];
   const ownedIds = new Set(ownedRecipients.map((row) => row.id));
   if (recipientIds.some((id) => !ownedIds.has(id))) throw new Error("One or more recipients do not belong to this workspace");
-  const inserted = await db.insert(paymentRoutes).values({ workspaceId: input.workspaceId, createdByUserId: input.createdByUserId, name: input.name, token: input.token, totalAmount: input.totalAmount }).$returningId();
+  const inserted = await db.insert(paymentRoutes).values({ workspaceId: input.workspaceId, createdByUserId: input.createdByUserId, name: input.name, token: input.token, network: input.network, totalAmount: input.totalAmount }).$returningId();
   const routeId = inserted[0]?.id;
   if (!routeId) throw new Error("Could not create payment route");
   if (input.recipientAmounts.length) {
@@ -249,6 +346,13 @@ export async function updatePaymentRoute(input: { workspaceId: number; routeId: 
   const existing = await db.select().from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
   if (!existing[0]) throw new Error("Route not found in workspace");
   if (existing[0].status !== "draft") throw new Error("Only draft routes can be edited");
+  const activePolicy = (await db.select().from(treasuryPolicies).where(and(eq(treasuryPolicies.workspaceId, input.workspaceId), eq(treasuryPolicies.token, input.token), eq(treasuryPolicies.status, "active"))).orderBy(desc(treasuryPolicies.createdAt)).limit(1))[0];
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  const todayRoutes = await db.select().from(paymentRoutes).where(eq(paymentRoutes.workspaceId, input.workspaceId));
+  const dailyUsed = todayRoutes.filter((route) => route.id !== input.routeId && route.token === input.token && route.network === existing[0].network && route.createdAt >= start && !["failed", "cancelled"].includes(route.status)).reduce((sum, route) => sum + Number(route.totalAmount), 0).toString();
+  const evaluation = evaluateTreasuryPolicy(activePolicy, { totalAmount: input.totalAmount, approvalCount: 0, network: existing[0].network, dailyUsed });
+  if (!evaluation.allowed && evaluation.reasons.some((reason) => reason.includes("limit") || reason.includes("restricted") || reason.includes("exceeded"))) throw new Error(evaluation.reasons.join(" / "));
   const recipientIds = Array.from(new Set(input.recipientAmounts.map((item) => item.recipientId)));
   const owned = await db.select({ id: recipients.id }).from(recipients).where(and(eq(recipients.workspaceId, input.workspaceId), eq(recipients.status, "active")));
   const ownedIds = new Set(owned.map((row) => row.id));
@@ -384,13 +488,28 @@ export async function getPublicProof(slug: string) {
 
 export async function listWorkspaceAnalytics(workspaceId: number) {
   const db = await getDb();
-  if (!db) return { routes: 0, settled: 0, failed: 0, totalTransactions: 0, auditEvents: 0 };
-  const [routes, transactions, events] = await Promise.all([
+  if (!db) return { routes: 0, settled: 0, failed: 0, totalTransactions: 0, confirmedTransactions: 0, unknownTransactions: 0, proofs: 0, activeSchedules: 0, auditEvents: 0 };
+  const [routes, transactions, proofs, schedules, events] = await Promise.all([
     db.select().from(paymentRoutes).where(eq(paymentRoutes.workspaceId, workspaceId)),
     db.select({ tx: blockchainTransactions, route: paymentRoutes }).from(blockchainTransactions).innerJoin(paymentRoutes, eq(blockchainTransactions.routeId, paymentRoutes.id)).where(eq(paymentRoutes.workspaceId, workspaceId)),
+    db.select().from(shareableProofs).where(and(eq(shareableProofs.workspaceId, workspaceId), eq(shareableProofs.status, "active"))),
+    db.select().from(payrollSchedules).where(and(eq(payrollSchedules.workspaceId, workspaceId), eq(payrollSchedules.status, "active"))),
     db.select().from(auditEvents).where(eq(auditEvents.workspaceId, workspaceId)),
   ]);
-  return { routes: routes.length, settled: routes.filter((route) => route.status === "settled").length, failed: routes.filter((route) => route.status === "failed").length, totalTransactions: transactions.length, auditEvents: events.length };
+  return { routes: routes.length, settled: routes.filter((route) => route.status === "settled").length, failed: routes.filter((route) => route.status === "failed").length, totalTransactions: transactions.length, confirmedTransactions: transactions.filter(({ tx }) => tx.status === "confirmed").length, unknownTransactions: transactions.filter(({ tx }) => tx.status === "unknown").length, proofs: proofs.length, activeSchedules: schedules.length, auditEvents: events.length };
+}
+
+export async function listWorkspaceOperationsHealth(workspaceId: number) {
+  const db = await getDb();
+  if (!db) return { unresolvedReceipts: [], proofHealth: [] };
+  const [receipts, proofs] = await Promise.all([
+    db.select({ tx: blockchainTransactions, route: paymentRoutes }).from(blockchainTransactions).innerJoin(paymentRoutes, eq(blockchainTransactions.routeId, paymentRoutes.id)).where(eq(paymentRoutes.workspaceId, workspaceId)),
+    db.select({ proof: shareableProofs, route: paymentRoutes }).from(shareableProofs).innerJoin(paymentRoutes, eq(shareableProofs.routeId, paymentRoutes.id)).where(and(eq(shareableProofs.workspaceId, workspaceId), eq(shareableProofs.status, "active"))),
+  ]);
+  return {
+    unresolvedReceipts: receipts.filter(({ tx }) => ["submitted", "unknown"].includes(tx.status)).map(({ tx, route }) => ({ transactionHash: tx.transactionHash, status: tx.status, routeId: route.id, routeName: route.name, updatedAt: tx.submittedAt })),
+    proofHealth: proofs.map(({ proof, route }) => ({ slug: proof.slug, routeId: route.id, routeName: route.name, routeStatus: route.status, hasCommitment: Boolean(route.proofReference), createdAt: proof.createdAt })),
+  };
 }
 
 export async function exportWorkspaceAuditCsv(workspaceId: number) {

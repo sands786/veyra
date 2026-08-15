@@ -51,6 +51,7 @@ export const paymentRoutes = mysqlTable("paymentRoutes", {
   createdByUserId: int("createdByUserId").notNull(),
   name: varchar("name", { length: 160 }).notNull(),
   token: varchar("token", { length: 80 }).notNull(),
+  network: mysqlEnum("network", ["mainnet", "sepolia"]).notNull().default("mainnet"),
   totalAmount: varchar("totalAmount", { length: 80 }).notNull(),
   privacyMode: mysqlEnum("privacyMode", ["shielded", "public"]).notNull().default("shielded"),
   status: mysqlEnum("status", ["draft", "shielded", "routed", "settled", "failed", "cancelled"]).notNull().default("draft"),
@@ -64,6 +65,8 @@ export const routeRecipients = mysqlTable("routeRecipients", {
   routeId: int("routeId").notNull(),
   recipientId: int("recipientId").notNull(),
   amount: varchar("amount", { length: 80 }).notNull(),
+  fulfillmentStatus: mysqlEnum("fulfillmentStatus", ["pending", "claim_ready", "claimed", "paid"]).notNull().default("pending"),
+  fulfilledWalletAddress: varchar("fulfilledWalletAddress", { length: 80 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -104,6 +107,45 @@ export const shareableProofs = mysqlTable("shareableProofs", {
   createdByUserId: int("createdByUserId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   revokedAt: timestamp("revokedAt"),
+});
+
+export const treasuryBalanceSnapshots = mysqlTable("treasuryBalanceSnapshots", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  token: varchar("token", { length: 80 }).notNull(),
+  network: mysqlEnum("network", ["mainnet", "sepolia"]).notNull(),
+  availableBalance: varchar("availableBalance", { length: 80 }).notNull(),
+  source: varchar("source", { length: 40 }).notNull().default("wallet_read"),
+  capturedAt: timestamp("capturedAt").defaultNow().notNull(),
+});
+
+export const treasuryPolicies = mysqlTable("treasuryPolicies", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  createdByUserId: int("createdByUserId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  token: varchar("token", { length: 80 }).notNull(),
+  network: mysqlEnum("network", ["mainnet", "sepolia"]).notNull().default("mainnet"),
+  maxRouteAmount: varchar("maxRouteAmount", { length: 80 }).notNull(),
+  dailyLimit: varchar("dailyLimit", { length: 80 }).notNull(),
+  approvalThreshold: int("approvalThreshold").notNull().default(1),
+  status: mysqlEnum("status", ["active", "archived"]).notNull().default("active"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const claimLinks = mysqlTable("claimLinks", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  routeId: int("routeId").notNull(),
+  recipientId: int("recipientId").notNull(),
+  token: varchar("token", { length: 80 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  status: mysqlEnum("status", ["pending", "claimed", "revoked"]).notNull().default("pending"),
+  claimedAt: timestamp("claimedAt"),
+  claimedWalletAddress: varchar("claimedWalletAddress", { length: 80 }),
+  createdByUserId: int("createdByUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
 export const blockchainTransactions = mysqlTable("blockchainTransactions", {
@@ -147,6 +189,9 @@ export type WorkspaceMember = typeof workspaceMembers.$inferSelect;
 export type Recipient = typeof recipients.$inferSelect;
 export type PaymentRoute = typeof paymentRoutes.$inferSelect;
 export type RouteRecipient = typeof routeRecipients.$inferSelect;
+export type TreasuryBalanceSnapshot = typeof treasuryBalanceSnapshots.$inferSelect;
+export type TreasuryPolicy = typeof treasuryPolicies.$inferSelect;
+export type ClaimLink = typeof claimLinks.$inferSelect;
 export type BlockchainTransaction = typeof blockchainTransactions.$inferSelect;
 export type AuditEvent = typeof auditEvents.$inferSelect;
 export type PayrollSchedule = typeof payrollSchedules.$inferSelect;

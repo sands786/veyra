@@ -1,0 +1,2 @@
+ALTER TABLE `routeRecipients` ADD `fulfillmentStatus` enum('pending','claim_ready','claimed','paid') DEFAULT 'pending' NOT NULL;--> statement-breakpoint
+ALTER TABLE `routeRecipients` ADD `fulfilledWalletAddress` varchar(80);

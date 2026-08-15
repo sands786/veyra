@@ -36,6 +36,34 @@
       "when": 1786815121625,
       "tag": "0004_illegal_talkback",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1786815573574,
+      "tag": "0005_furry_cyclops",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1786815798068,
+      "tag": "0006_productive_echo",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1786815978920,
+      "tag": "0007_illegal_silk_fever",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1786816075836,
+      "tag": "0008_violet_tarantula",
+      "breakpoints": true
     }
   ]
 }

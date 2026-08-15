@@ -1,0 +1,1 @@
+ALTER TABLE `paymentRoutes` ADD `network` enum('mainnet','sepolia') DEFAULT 'mainnet' NOT NULL;
