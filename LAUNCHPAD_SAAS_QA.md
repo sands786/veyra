@@ -39,3 +39,7 @@ Named Demo actions now use local fail-first/retry-success controls: wallet error
 ## Documentation route QA — 2026-08-15
 
 The new `/docs` route was verified at desktop and mobile widths. Desktop presents a fixed chapter rail, teaser video, market-gap narrative, four product-surface cards, interactive privacy boundary simulation, Starknet execution flow, and Demo Mode checklist without overflow. Mobile collapses the content into a readable single-column flow; the video, simulation cards, execution-boundary panel, and guided-tour CTA remain accessible. The teaser is loaded from the lifecycle-safe `/manus-storage/` asset path. Verification completed with 40 passing Vitest tests, clean TypeScript, and a successful production build.
+
+## Video-led Documentation QA — 2026-08-15
+
+The Documentation route now embeds all eight standalone function videos from lifecycle-safe `/manus-storage/` assets. Each player has a dedicated title, duration, purpose explanation, and explicit production boundary. Desktop presents the videos in a two-column grid beneath the privacy model; mobile stacks each player and explanation into a single readable flow without horizontal overflow. The teaser remains at the top of the guide, while Starknet flow and Demo Mode remain available below the function-video section. Verification passes with 41 Vitest tests, clean TypeScript, and a successful production build.

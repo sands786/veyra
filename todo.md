@@ -229,3 +229,8 @@
 
 ## Standalone function videos
 - [x] Create separate clear-voice videos for Payroll, Operations, Treasury, Private Claims, Launchpad, Public Proof, Wallet/Execution Boundary, and Demo Mode error/retry behavior, with no music and dedicated visuals for each function.
+
+## Video-led Documentation expansion
+- [x] Upload all eight standalone function videos to lifecycle-safe project storage and embed them in the Documentation page.
+- [x] Add detailed explanations for Payroll, Operations, Treasury, Private Claims, Launchpad, Public Proof, Wallet/Execution Boundary, and Demo Mode Error + Retry beside each video.
+- [x] Add responsive video QA, focused documentation-contract tests, and update the project QA record.
