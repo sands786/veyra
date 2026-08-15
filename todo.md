@@ -220,3 +220,6 @@
 - [x] Add complete documentation content covering motivation, market gap, product surfaces, privacy boundaries, Starknet architecture, Demo Mode, and execution limitations.
 - [x] Add visual simulations for the payment route, privacy boundary, treasury governance, private claims, Launchpad milestones, proof publication, and Demo Mode flow.
 - [x] Add uploaded teaser media, responsive QA, focused tests, and documentation route verification.
+
+## Complete Demo Mode walkthrough film
+- [x] Create and deliver a complete intro-to-demo walkthrough film explaining every Demo Mode function, simulated state, failure/retry path, and production boundary.
