@@ -37,6 +37,36 @@ export function evaluateTreasuryPolicy(policy: PolicyEvaluation | undefined, inp
   return { policyFound: true, allowed: reasons.length === 0, reasons, maxRouteAmount: policy.maxRouteAmount, dailyLimit: policy.dailyLimit, approvalThreshold: policy.approvalThreshold, network: policy.network } as const;
 }
 
+export function isLaunchpadOperatorRole(role: string): boolean {
+  return role === "owner" || role === "admin" || role === "operator";
+}
+
+export function isLaunchpadAdminRole(role: string): boolean {
+  return role === "owner" || role === "admin";
+}
+
+export function canAdvanceLaunchpadProjectStatus(from: "draft" | "live" | "funded" | "closed", to: "draft" | "live" | "funded" | "closed"): boolean {
+  if (from === to) return true;
+  return (from === "draft" && to === "live") || (from === "live" && (to === "funded" || to === "closed")) || (from === "funded" && to === "closed");
+}
+
+export function canAdvanceLaunchpadMilestoneStatus(from: "planned" | "ready" | "released" | "blocked", to: "planned" | "ready" | "released" | "blocked"): boolean {
+  if (from === to) return true;
+  return (from === "planned" && (to === "ready" || to === "blocked")) || (from === "ready" && (to === "released" || to === "blocked")) || (from === "blocked" && to === "ready");
+}
+
+export function shouldReuseLaunchpadAllocation(existingCommitment: string | undefined, requestedCommitment: string): boolean {
+  return Boolean(existingCommitment) && existingCommitment === requestedCommitment;
+}
+
+export function isLaunchpadSlug(value: string): boolean {
+  return /^launch-[a-f0-9]{20}$/.test(value);
+}
+
+export function buildLaunchpadPublicSummary(project: { slug: string; name: string; description: string | null; token: string; network: "mainnet" | "sepolia"; targetAmount: string; raisedAmount: string; privacyMode: "shielded" | "public"; status: "draft" | "live" | "funded" | "closed"; fundingEndsAt: Date | null }, milestones: Array<{ id: number; name: string; sequence: number; releaseAmount: string; status: "planned" | "ready" | "released" | "blocked"; proofReference: string | null }>) {
+  return { ...project, milestones: milestones.map(({ id, name, sequence, releaseAmount, status, proofReference }) => ({ id, name, sequence, releaseAmount, status, proofReference })) };
+}
+
 export function normalizeAmountInput(value: string): string {
   return value.replace(/,/g, "").trim();
 }

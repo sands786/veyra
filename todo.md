@@ -130,3 +130,15 @@
 - [x] Diagnose the concrete runtime error shown in the claim-link workspace flow: comma-formatted amount values reached the strict treasury simulation validator; the existing route payload path was already normalizing commas.
 - [x] Fix the affected workspace error path by normalizing numeric inputs before treasury simulation, while preserving the existing route/wallet normalization and privacy/authorization boundaries.
 - [x] Add regression coverage and re-verify the claim flow visually and in production build.
+
+## Workspace information architecture refactor
+- [x] Keep the primary page focused on route creation, proof ledger, identity, and recent route status.
+- [x] Move Operations, Treasury Guardrails, Recipient Claims, and monitoring into dedicated sidebar-accessible views.
+- [x] Preserve mobile navigation, deep-linkable section targets, loading/error states, tests, and responsive spacing.
+
+## Privacy-focused Starknet Launchpad
+- [x] Define the launchpad product boundary: private project rooms, shielded allocations, milestone treasury releases, governance, claims, and public proof metadata.
+- [x] Add launchpad database models and workspace-scoped APIs with privacy-preserving authorization and state transitions.
+- [x] Add a dedicated Launchpad sidebar view without re-expanding the primary payroll page.
+- [x] Add tests, responsive visual verification, and documentation of what is implemented versus what still requires real Starknet contracts or wallet transactions.
+- [x] Add focused Launchpad tests for project/milestone contracts, allocation idempotency and privacy-safe summaries, and role authorization; rerun the full suite before checkpointing.

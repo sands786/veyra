@@ -148,6 +148,49 @@ export const claimLinks = mysqlTable("claimLinks", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+export const launchpadProjects = mysqlTable("launchpadProjects", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  createdByUserId: int("createdByUserId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  slug: varchar("slug", { length: 160 }).notNull().unique(),
+  description: text("description"),
+  token: varchar("token", { length: 80 }).notNull(),
+  network: mysqlEnum("network", ["mainnet", "sepolia"]).notNull().default("mainnet"),
+  targetAmount: varchar("targetAmount", { length: 80 }).notNull(),
+  raisedAmount: varchar("raisedAmount", { length: 80 }).notNull().default("0"),
+  privacyMode: mysqlEnum("privacyMode", ["shielded", "public"]).notNull().default("shielded"),
+  status: mysqlEnum("status", ["draft", "live", "funded", "closed"]).notNull().default("draft"),
+  fundingEndsAt: timestamp("fundingEndsAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const launchpadMilestones = mysqlTable("launchpadMilestones", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  sequence: int("sequence").notNull().default(1),
+  releaseAmount: varchar("releaseAmount", { length: 80 }).notNull(),
+  approvalThreshold: int("approvalThreshold").notNull().default(1),
+  status: mysqlEnum("status", ["planned", "ready", "released", "blocked"]).notNull().default("planned"),
+  proofReference: varchar("proofReference", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const launchpadAllocations = mysqlTable("launchpadAllocations", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  commitment: varchar("commitment", { length: 255 }).notNull().unique(),
+  encryptedReference: text("encryptedReference"),
+  allocationAmount: varchar("allocationAmount", { length: 80 }).notNull(),
+  status: mysqlEnum("status", ["reserved", "claimed", "revoked"]).notNull().default("reserved"),
+  claimedWalletAddress: varchar("claimedWalletAddress", { length: 80 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  claimedAt: timestamp("claimedAt"),
+});
+
 export const blockchainTransactions = mysqlTable("blockchainTransactions", {
   id: int("id").autoincrement().primaryKey(),
   routeId: int("routeId").notNull(),
@@ -192,6 +235,9 @@ export type RouteRecipient = typeof routeRecipients.$inferSelect;
 export type TreasuryBalanceSnapshot = typeof treasuryBalanceSnapshots.$inferSelect;
 export type TreasuryPolicy = typeof treasuryPolicies.$inferSelect;
 export type ClaimLink = typeof claimLinks.$inferSelect;
+export type LaunchpadProject = typeof launchpadProjects.$inferSelect;
+export type LaunchpadMilestone = typeof launchpadMilestones.$inferSelect;
+export type LaunchpadAllocation = typeof launchpadAllocations.$inferSelect;
 export type BlockchainTransaction = typeof blockchainTransactions.$inferSelect;
 export type AuditEvent = typeof auditEvents.$inferSelect;
 export type PayrollSchedule = typeof payrollSchedules.$inferSelect;

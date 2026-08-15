@@ -2,10 +2,13 @@ import { and, desc, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { RpcProvider } from "starknet";
-import { evaluateTreasuryPolicy } from "@shared/operations";
+import { buildLaunchpadPublicSummary, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, evaluateTreasuryPolicy, shouldReuseLaunchpadAllocation } from "@shared/operations";
 import {
   auditEvents,
   claimLinks,
+  launchpadAllocations,
+  launchpadMilestones,
+  launchpadProjects,
   treasuryBalanceSnapshots,
   blockchainTransactions,
   payrollSchedules,
@@ -512,6 +515,81 @@ export async function listWorkspaceOperationsHealth(workspaceId: number) {
   };
 }
 
+export async function createLaunchpadProject(input: { workspaceId: number; createdByUserId: number; name: string; description?: string; token: string; network: "mainnet" | "sepolia"; targetAmount: string; fundingEndsAt?: Date }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const slug = `launch-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
+  const inserted = await db.insert(launchpadProjects).values({ ...input, slug, privacyMode: "shielded", status: "draft" }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not create Launchpad project");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "launchpad_project", entityId: id, action: "created" });
+  const rows = await db.select().from(launchpadProjects).where(eq(launchpadProjects.id, id)).limit(1);
+  return rows[0];
+}
+export async function listWorkspaceLaunchpadProjects(workspaceId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const projects = await db.select().from(launchpadProjects).where(eq(launchpadProjects.workspaceId, workspaceId)).orderBy(desc(launchpadProjects.createdAt));
+  if (!projects.length) return [];
+  const hydrated = await Promise.all(projects.map(async (project) => ({ ...project, milestones: await db.select().from(launchpadMilestones).where(eq(launchpadMilestones.projectId, project.id)) })));
+  return hydrated;
+}
+export async function createLaunchpadMilestone(input: { workspaceId: number; createdByUserId: number; projectId: number; name: string; sequence: number; releaseAmount: string; approvalThreshold: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const project = await db.select({ id: launchpadProjects.id }).from(launchpadProjects).where(and(eq(launchpadProjects.id, input.projectId), eq(launchpadProjects.workspaceId, input.workspaceId))).limit(1);
+  if (!project[0]) throw new Error("Launchpad project not found in workspace");
+  const inserted = await db.insert(launchpadMilestones).values({ projectId: input.projectId, name: input.name, sequence: input.sequence, releaseAmount: input.releaseAmount, approvalThreshold: input.approvalThreshold }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not create Launchpad milestone");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "launchpad_milestone", entityId: id, action: "created" });
+  const rows = await db.select().from(launchpadMilestones).where(eq(launchpadMilestones.id, id)).limit(1);
+  return rows[0];
+}
+export async function createLaunchpadAllocation(input: { workspaceId: number; createdByUserId: number; projectId: number; commitment: string; encryptedReference?: string; allocationAmount: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const project = await db.select({ id: launchpadProjects.id }).from(launchpadProjects).where(and(eq(launchpadProjects.id, input.projectId), eq(launchpadProjects.workspaceId, input.workspaceId))).limit(1);
+  if (!project[0]) throw new Error("Launchpad project not found in workspace");
+  const existing = await db.select().from(launchpadAllocations).where(eq(launchpadAllocations.commitment, input.commitment)).limit(1);
+  if (existing[0] && shouldReuseLaunchpadAllocation(existing[0].commitment, input.commitment)) return existing[0];
+  const inserted = await db.insert(launchpadAllocations).values({ projectId: input.projectId, commitment: input.commitment, encryptedReference: input.encryptedReference, allocationAmount: input.allocationAmount }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not reserve Launchpad allocation");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "launchpad_allocation", entityId: id, action: "reserved" });
+  const rows = await db.select().from(launchpadAllocations).where(eq(launchpadAllocations.id, id)).limit(1);
+  return rows[0];
+}
+export async function updateLaunchpadProjectStatus(input: { workspaceId: number; actorUserId: number; projectId: number; status: "draft" | "live" | "funded" | "closed" }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const project = await db.select().from(launchpadProjects).where(and(eq(launchpadProjects.id, input.projectId), eq(launchpadProjects.workspaceId, input.workspaceId))).limit(1);
+  if (!project[0]) throw new Error("Launchpad project not found in workspace");
+  if (!canAdvanceLaunchpadProjectStatus(project[0].status, input.status)) throw new Error(`Invalid Launchpad project transition: ${project[0].status} -> ${input.status}`);
+  await db.update(launchpadProjects).set({ status: input.status }).where(eq(launchpadProjects.id, input.projectId));
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "launchpad_project", entityId: input.projectId, action: `status_${input.status}` });
+  const rows = await db.select().from(launchpadProjects).where(eq(launchpadProjects.id, input.projectId)).limit(1);
+  return rows[0];
+}
+export async function updateLaunchpadMilestoneStatus(input: { workspaceId: number; actorUserId: number; milestoneId: number; status: "planned" | "ready" | "released" | "blocked"; proofReference?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const rows = await db.select({ milestone: launchpadMilestones, project: launchpadProjects }).from(launchpadMilestones).innerJoin(launchpadProjects, eq(launchpadMilestones.projectId, launchpadProjects.id)).where(and(eq(launchpadMilestones.id, input.milestoneId), eq(launchpadProjects.workspaceId, input.workspaceId))).limit(1);
+  if (!rows[0]) throw new Error("Launchpad milestone not found in workspace");
+  if (!canAdvanceLaunchpadMilestoneStatus(rows[0].milestone.status, input.status)) throw new Error(`Invalid Launchpad milestone transition: ${rows[0].milestone.status} -> ${input.status}`);
+  await db.update(launchpadMilestones).set({ status: input.status, proofReference: input.proofReference }).where(eq(launchpadMilestones.id, input.milestoneId));
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "launchpad_milestone", entityId: input.milestoneId, action: `status_${input.status}` });
+  const updated = await db.select().from(launchpadMilestones).where(eq(launchpadMilestones.id, input.milestoneId)).limit(1);
+  return updated[0];
+}
+export async function getPublicLaunchpadProject(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const project = await db.select().from(launchpadProjects).where(eq(launchpadProjects.slug, slug)).limit(1);
+  if (!project[0]) return undefined;
+  const milestones = await db.select().from(launchpadMilestones).where(eq(launchpadMilestones.projectId, project[0].id));
+  return buildLaunchpadPublicSummary({ slug: project[0].slug, name: project[0].name, description: project[0].description, token: project[0].token, network: project[0].network, targetAmount: project[0].targetAmount, raisedAmount: project[0].raisedAmount, privacyMode: project[0].privacyMode, status: project[0].status, fundingEndsAt: project[0].fundingEndsAt }, milestones);
+}
 export async function exportWorkspaceAuditCsv(workspaceId: number) {
   const events = await listWorkspaceAuditEvents(workspaceId);
   const escape = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;

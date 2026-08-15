@@ -64,6 +64,13 @@
       "when": 1786816075836,
       "tag": "0008_violet_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1786817653491,
+      "tag": "0009_eager_mephistopheles",
+      "breakpoints": true
     }
   ]
 }

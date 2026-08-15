@@ -8,7 +8,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { parseWorkspaceId } from "./workspaceSelection";
 import { buildPayrollCron } from "@shared/operations";
 import { resolveWorkspaceSelection } from "./workspaceResolver";
-import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv } from "./db";
+import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv, createLaunchpadProject, listWorkspaceLaunchpadProjects, createLaunchpadMilestone, createLaunchpadAllocation, updateLaunchpadProjectStatus, updateLaunchpadMilestoneStatus, getPublicLaunchpadProject } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null; req?: { headers?: Record<string, string | string[] | undefined> } }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -97,6 +97,48 @@ export const appRouter = router({
       if (!['owner', 'admin'].includes(membership.memberRole)) throw new Error("Only owners and admins can create treasury policies");
       return createTreasuryPolicy({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
     }),
+  }),
+  launchpad: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const membership = await workspaceFor(ctx);
+      return listWorkspaceLaunchpadProjects(membership.workspace.id);
+    }),
+    createProject: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), description: z.string().trim().max(2000).optional(), token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]), targetAmount: amount, fundingEndsAt: z.coerce.date().optional() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can create Launchpad projects");
+      return createLaunchpadProject({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
+    }),
+    createMilestone: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), name: z.string().trim().min(2).max(160), sequence: z.number().int().positive().max(100), releaseAmount: amount, approvalThreshold: z.number().int().min(1).max(20) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can create milestones");
+      return createLaunchpadMilestone({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
+    }),
+    reserveAllocation: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), commitment: z.string().trim().min(16).max(255), encryptedReference: z.string().trim().max(4000).optional(), allocationAmount: amount })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can reserve allocations");
+      return createLaunchpadAllocation({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
+    }),
+    updateProjectStatus: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), status: z.enum(["draft", "live", "funded", "closed"]) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin"].includes(membership.memberRole)) throw new Error("Only owners and admins can change project status");
+      return updateLaunchpadProjectStatus({ workspaceId: membership.workspace.id, actorUserId: actorId, ...input });
+    }),
+    updateMilestoneStatus: protectedProcedure.input(z.object({ milestoneId: z.number().int().positive(), status: z.enum(["planned", "ready", "released", "blocked"]), proofReference: z.string().trim().max(255).optional() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can update milestones");
+      return updateLaunchpadMilestoneStatus({ workspaceId: membership.workspace.id, actorUserId: actorId, ...input });
+    }),
+    public: publicProcedure.input(z.object({ slug: z.string().trim().regex(/^launch-[a-f0-9]{20}$/) })).query(({ input }) => getPublicLaunchpadProject(input.slug)),
   }),
   claims: router({
     create: protectedProcedure.input(z.object({ routeId: z.number().int().positive(), recipientId: z.number().int().positive(), expiresAt: z.coerce.date() })).mutation(async ({ ctx, input }) => {
