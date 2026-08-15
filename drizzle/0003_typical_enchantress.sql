@@ -1,0 +1,1 @@
+CREATE INDEX `payrollSchedules_task_uid_idx` ON `payrollSchedules` (`scheduleCronTaskUid`);

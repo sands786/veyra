@@ -1,11 +1,14 @@
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
+import { parse as parseCookieHeader } from "cookie";
+import { createHeartbeatJob, updateHeartbeatJob } from "./_core/heartbeat";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { parseWorkspaceId } from "./workspaceSelection";
+import { buildPayrollCron } from "@shared/operations";
 import { resolveWorkspaceSelection } from "./workspaceResolver";
-import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient } from "./db";
+import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, exportWorkspaceAuditCsv } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null; req?: { headers?: Record<string, string | string[] | undefined> } }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -51,6 +54,13 @@ export const appRouter = router({
         listWorkspaceRoutes(membership.workspace.id),
       ]);
       return { workspace: membership.workspace, memberRole: membership.memberRole, recipients: recipientRows, routes: routeRows };
+    }),
+    setApprovalThreshold: protectedProcedure.input(z.object({ approvalThreshold: z.number().int().min(1).max(20) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!['owner', 'admin'].includes(membership.memberRole)) throw new Error("Only owners and admins can change approval thresholds");
+      return updateWorkspaceApprovalThreshold(membership.workspace.id, actorId, input.approvalThreshold);
     }),
     create: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160) })).mutation(async ({ ctx, input }) => {
       const actorId = ctx.user?.id;
@@ -152,6 +162,74 @@ export const appRouter = router({
       if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot confirm transactions");
       const verified = await verifyStarknetReceipt(input.transactionHash);
       return confirmBlockchainTransaction({ workspaceId: membership.workspace.id, actorUserId: actorId, transactionHash: input.transactionHash, status: verified.status });
+    }),
+  }),
+  schedules: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const membership = await workspaceFor(ctx);
+      return listWorkspaceSchedules(membership.workspace.id);
+    }),
+    create: protectedProcedure.input(z.object({ routeId: z.number().int().positive(), frequency: z.enum(["weekly", "biweekly", "monthly"]), timezone: z.string().trim().min(1).max(80), nextRunAt: z.coerce.date() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!['owner', 'admin', 'operator'].includes(membership.memberRole)) throw new Error("Only workspace operators can schedule routes");
+      const created = await createPayrollSchedule({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
+      if (created.scheduleCronTaskUid) return created;
+      const sessionToken = parseCookieHeader(ctx.req.headers.cookie ?? "")[COOKIE_NAME] ?? "";
+      const cron = buildPayrollCron(input.nextRunAt, input.frequency, input.timezone);
+      try {
+        const job = await createHeartbeatJob({ name: `veilpay-schedule-${created.id}`, cron, path: "/api/scheduled/payroll", payload: { scheduleId: created.id }, description: `VeilPay payroll trigger for schedule ${created.id}` }, sessionToken);
+        return setPayrollScheduleTaskUid(membership.workspace.id, created.id, job.taskUid);
+      } catch (error) {
+        await updatePayrollSchedule(membership.workspace.id, created.id, actorId, { frequency: input.frequency, timezone: input.timezone, nextRunAt: input.nextRunAt, status: "paused" });
+        throw error;
+      }
+    }),
+    update: protectedProcedure.input(z.object({ id: z.number().int().positive(), frequency: z.enum(["weekly", "biweekly", "monthly"]), timezone: z.string().trim().min(1).max(80), nextRunAt: z.coerce.date(), status: z.enum(["active", "paused", "completed"]) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!['owner', 'admin', 'operator'].includes(membership.memberRole)) throw new Error("Only workspace operators can update schedules");
+      const updated = await updatePayrollSchedule(membership.workspace.id, input.id, actorId, { frequency: input.frequency, timezone: input.timezone, nextRunAt: input.nextRunAt, status: input.status });
+      if (updated?.scheduleCronTaskUid) {
+        const sessionToken = parseCookieHeader(ctx.req.headers.cookie ?? "")[COOKIE_NAME] ?? "";
+        await updateHeartbeatJob(updated.scheduleCronTaskUid, { cron: buildPayrollCron(input.nextRunAt, input.frequency, input.timezone), enable: input.status === "active", description: `VeilPay payroll trigger for schedule ${updated.id}` }, sessionToken);
+      }
+      return updated;
+    }),
+  }),
+  approvals: router({
+    list: protectedProcedure.input(z.object({ routeId: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return listRouteApprovals(membership.workspace.id, input.routeId);
+    }),
+    decide: protectedProcedure.input(z.object({ routeId: z.number().int().positive(), status: z.enum(["approved", "rejected"]), comment: z.string().trim().max(500).optional() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!['owner', 'admin'].includes(membership.memberRole)) throw new Error("Only owners and admins can approve routes");
+      return upsertRouteApproval({ workspaceId: membership.workspace.id, routeId: input.routeId, approverUserId: actorId, status: input.status, comment: input.comment });
+    }),
+  }),
+  proofs: router({
+    create: protectedProcedure.input(z.object({ routeId: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!['owner', 'admin', 'operator'].includes(membership.memberRole)) throw new Error("Only workspace operators can publish proofs");
+      return createShareableProof({ workspaceId: membership.workspace.id, routeId: input.routeId, createdByUserId: actorId });
+    }),
+    public: publicProcedure.input(z.object({ slug: z.string().trim().regex(/^vp-[a-f0-9]{20}$/) })).query(({ input }) => getPublicProof(input.slug)),
+  }),
+  analytics: router({
+    summary: protectedProcedure.query(async ({ ctx }) => {
+      const membership = await workspaceFor(ctx);
+      return listWorkspaceAnalytics(membership.workspace.id);
+    }),
+    auditCsv: protectedProcedure.query(async ({ ctx }) => {
+      const membership = await workspaceFor(ctx);
+      return exportWorkspaceAuditCsv(membership.workspace.id);
     }),
   }),
 });

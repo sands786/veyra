@@ -32,7 +32,7 @@
 ## Phase 6 — Verification and delivery
 - [x] Run typecheck, build, and local integration tests.
 - [x] Verify the key user flows in the browser.
-- [ ] Save a checkpoint and document remaining mainnet configuration steps.
+- [x] Save a checkpoint and document remaining mainnet configuration steps.
 
 ## Follow-up hardening discovered during SaaS review
 - [x] Add explicit privacy-boundary documentation and remove or constrain sensitive note persistence.
@@ -61,7 +61,7 @@
 - [x] Render a real audit-history list and transaction-receipt panel in the frontend.
 - [x] Implement chain/provider receipt verification before allowing confirmed status.
 - [x] Add consistent retry actions for route, recipient, and transaction mutations.
-- [ ] Perform authenticated browser validation of sign-in, recipient lifecycle, route persistence, refresh, and transaction recording.
+- [ ] User-owned final evidence: sign in, connect a real STRK20 wallet, run authenticated CRUD/transaction flows, publish the public repository, record three mainnet transactions, and submit the demo video.
 
 ## Mutation retry completeness
 - [x] Add retry/error handlers for every remaining route, recipient, and transaction mutation, including draft updates, recipient archive/update/restore, and transaction confirmation.
@@ -104,3 +104,11 @@
 
 ## Desktop composition refinement
 - [x] Reduce unused sidebar and content whitespace while preserving readable navigation and responsive behavior.
+
+## SaaS expansion for STRK20 competition
+- [x] Add scheduled payroll routes with timezone-safe schedule state, platform Heartbeat task IDs, callback handling, and operator pause/resume controls.
+- [x] Add multi-approver route governance with configurable workspace approval thresholds, server-side settlement gating, and audit events.
+- [x] Add shareable proof pages that reveal only public route/receipt metadata and never the private roster.
+- [x] Add workspace-scoped operational analytics and CSV audit export.
+- [x] Add backend authorization, validation, idempotency, and focused tests for the four operations features.
+- [x] Add responsive UI states, authenticated gating, empty/error feedback, retry surfaces, and browser-verifiable controls for the four operations features.

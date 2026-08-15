@@ -1,0 +1,1 @@
+ALTER TABLE `workspaces` ADD `approvalThreshold` int DEFAULT 1 NOT NULL;

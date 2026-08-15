@@ -8,6 +8,34 @@
       "when": 1786738212631,
       "tag": "0000_stormy_lorna_dane",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786814696809,
+      "tag": "0001_neat_adam_warlock",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786815016079,
+      "tag": "0002_acoustic_lockjaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786815071388,
+      "tag": "0003_typical_enchantress",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1786815121625,
+      "tag": "0004_illegal_talkback",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE `payrollSchedules` ADD `scheduleCronTaskUid` varchar(65);

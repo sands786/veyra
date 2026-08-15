@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, index, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
@@ -20,6 +20,7 @@ export const workspaces = mysqlTable("workspaces", {
   ownerUserId: int("ownerUserId").notNull(),
   defaultToken: varchar("defaultToken", { length: 80 }).notNull().default("USDC"),
   network: mysqlEnum("network", ["mainnet", "sepolia"]).notNull().default("mainnet"),
+  approvalThreshold: int("approvalThreshold").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -66,6 +67,45 @@ export const routeRecipients = mysqlTable("routeRecipients", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+export const payrollSchedules = mysqlTable("payrollSchedules", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  routeId: int("routeId").notNull(),
+  createdByUserId: int("createdByUserId").notNull(),
+  frequency: mysqlEnum("frequency", ["weekly", "biweekly", "monthly"]).notNull(),
+  timezone: varchar("timezone", { length: 80 }).notNull().default("UTC"),
+  nextRunAt: timestamp("nextRunAt").notNull(),
+  status: mysqlEnum("status", ["active", "paused", "completed"]).notNull().default("active"),
+  scheduleCronTaskUid: varchar("scheduleCronTaskUid", { length: 65 }),
+  lastRunAt: timestamp("lastRunAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  taskUidIdx: index("payrollSchedules_task_uid_idx").on(table.scheduleCronTaskUid),
+}));
+
+export const routeApprovals = mysqlTable("routeApprovals", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  routeId: int("routeId").notNull(),
+  approverUserId: int("approverUserId").notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).notNull().default("pending"),
+  comment: text("comment"),
+  decidedAt: timestamp("decidedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const shareableProofs = mysqlTable("shareableProofs", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  routeId: int("routeId").notNull(),
+  slug: varchar("slug", { length: 120 }).notNull().unique(),
+  status: mysqlEnum("status", ["active", "revoked"]).notNull().default("active"),
+  createdByUserId: int("createdByUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  revokedAt: timestamp("revokedAt"),
+});
+
 export const blockchainTransactions = mysqlTable("blockchainTransactions", {
   id: int("id").autoincrement().primaryKey(),
   routeId: int("routeId").notNull(),
@@ -109,3 +149,6 @@ export type PaymentRoute = typeof paymentRoutes.$inferSelect;
 export type RouteRecipient = typeof routeRecipients.$inferSelect;
 export type BlockchainTransaction = typeof blockchainTransactions.$inferSelect;
 export type AuditEvent = typeof auditEvents.$inferSelect;
+export type PayrollSchedule = typeof payrollSchedules.$inferSelect;
+export type RouteApproval = typeof routeApprovals.$inferSelect;
+export type ShareableProof = typeof shareableProofs.$inferSelect;

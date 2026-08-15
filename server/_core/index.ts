@@ -7,6 +7,9 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { sdk } from "./sdk";
+import { getPayrollScheduleByTaskUid, markPayrollScheduleTriggered } from "../db";
+import { nextPayrollRunAt } from "@shared/operations";
 import { serveStatic, setupVite } from "./vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -36,6 +39,34 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  app.post("/api/scheduled/payroll", async (req, res) => {
+    try {
+      const user = await sdk.authenticateRequest(req);
+      if (!user.isCron || !user.taskUid) {
+        res.status(403).json({ error: "cron-only" });
+        return;
+      }
+      const schedule = await getPayrollScheduleByTaskUid(user.taskUid);
+      if (!schedule) {
+        res.json({ ok: true, skipped: "orphan" });
+        return;
+      }
+      if (schedule.status !== "active") {
+        res.json({ ok: true, skipped: schedule.status });
+        return;
+      }
+      const now = new Date();
+      if (schedule.nextRunAt > now) {
+        res.json({ ok: true, skipped: "not-due", nextRunAt: schedule.nextRunAt });
+        return;
+      }
+      const nextRunAt = nextPayrollRunAt(schedule.nextRunAt, schedule.frequency);
+      await markPayrollScheduleTriggered(schedule.id, nextRunAt);
+      res.json({ ok: true, scheduleId: schedule.id, nextRunAt, action: "wallet_authorization_required" });
+    } catch (error) {
+      res.status(500).json({ error: String(error), context: { url: req.originalUrl }, timestamp: new Date().toISOString() });
+    }
+  });
   // tRPC API
   app.use(
     "/api/trpc",

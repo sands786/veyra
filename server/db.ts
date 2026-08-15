@@ -1,9 +1,13 @@
 import { and, desc, eq } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { RpcProvider } from "starknet";
 import {
   auditEvents,
   blockchainTransactions,
+  payrollSchedules,
+  routeApprovals,
+  shareableProofs,
   InsertUser,
   paymentRoutes,
   recipients,
@@ -92,6 +96,15 @@ export async function getWorkspaceForUser(userId: number) {
   return rows[0];
 }
 
+export async function updateWorkspaceApprovalThreshold(workspaceId: number, actorUserId: number, approvalThreshold: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  await db.update(workspaces).set({ approvalThreshold }).where(eq(workspaces.id, workspaceId));
+  await db.insert(auditEvents).values({ workspaceId, actorUserId, entityType: "workspace", entityId: workspaceId, action: "approval_threshold_updated", metadata: JSON.stringify({ approvalThreshold }) });
+  const rows = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
+  return rows[0];
+}
+
 export async function listWorkspaceRecipients(workspaceId: number) {
   const db = await getDb();
   if (!db) return [];
@@ -163,6 +176,12 @@ export async function transitionPaymentRoute(workspaceId: number, routeId: numbe
   if (!db) throw new Error("Database is not configured");
   const ownedRoute = await db.select({ id: paymentRoutes.id }).from(paymentRoutes).where(and(eq(paymentRoutes.id, routeId), eq(paymentRoutes.workspaceId, workspaceId))).limit(1);
   if (!ownedRoute[0]) throw new Error("Route not found in workspace");
+  if (status === "settled") {
+    const workspace = await db.select({ approvalThreshold: workspaces.approvalThreshold }).from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
+    const approved = await db.select({ id: routeApprovals.id }).from(routeApprovals).where(and(eq(routeApprovals.workspaceId, workspaceId), eq(routeApprovals.routeId, routeId), eq(routeApprovals.status, "approved")));
+    const threshold = workspace[0]?.approvalThreshold ?? 1;
+    if (approved.length < threshold) throw new Error(`Route requires ${threshold} approval(s) before settlement`);
+  }
   await db.update(paymentRoutes).set({ status }).where(and(eq(paymentRoutes.id, routeId), eq(paymentRoutes.workspaceId, workspaceId)));
   await db.insert(auditEvents).values({ workspaceId, actorUserId, entityType: "payment_route", entityId: routeId, action: `status_${status}` });
   const rows = await db.select().from(paymentRoutes).where(and(eq(paymentRoutes.id, routeId), eq(paymentRoutes.workspaceId, workspaceId))).limit(1);
@@ -259,4 +278,123 @@ export async function getWorkspaceByIdForUser(userId: number, workspaceId: numbe
     .where(and(eq(workspaceMembers.userId, userId), eq(workspaceMembers.workspaceId, workspaceId)))
     .limit(1);
   return rows[0];
+}
+
+
+export async function createPayrollSchedule(input: { workspaceId: number; routeId: number; createdByUserId: number; frequency: "weekly" | "biweekly" | "monthly"; timezone: string; nextRunAt: Date }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const route = await db.select({ id: paymentRoutes.id }).from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
+  if (!route[0]) throw new Error("Route not found in workspace");
+  const existing = await db.select().from(payrollSchedules).where(and(eq(payrollSchedules.workspaceId, input.workspaceId), eq(payrollSchedules.routeId, input.routeId), eq(payrollSchedules.frequency, input.frequency), eq(payrollSchedules.nextRunAt, input.nextRunAt), eq(payrollSchedules.status, "active"))).limit(1);
+  if (existing[0]) return existing[0];
+  const inserted = await db.insert(payrollSchedules).values({ ...input, status: "active" }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not create payroll schedule");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "schedule", entityId: id, action: "created" });
+  const rows = await db.select().from(payrollSchedules).where(eq(payrollSchedules.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function listWorkspaceSchedules(workspaceId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(payrollSchedules).where(eq(payrollSchedules.workspaceId, workspaceId)).orderBy(desc(payrollSchedules.nextRunAt));
+}
+
+export async function setPayrollScheduleTaskUid(workspaceId: number, scheduleId: number, taskUid: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  await db.update(payrollSchedules).set({ scheduleCronTaskUid: taskUid }).where(and(eq(payrollSchedules.id, scheduleId), eq(payrollSchedules.workspaceId, workspaceId)));
+  const rows = await db.select().from(payrollSchedules).where(and(eq(payrollSchedules.id, scheduleId), eq(payrollSchedules.workspaceId, workspaceId))).limit(1);
+  return rows[0];
+}
+
+export async function getPayrollScheduleByTaskUid(taskUid: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(payrollSchedules).where(eq(payrollSchedules.scheduleCronTaskUid, taskUid)).limit(1);
+  return rows[0];
+}
+
+export async function markPayrollScheduleTriggered(scheduleId: number, nextRunAt: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  await db.update(payrollSchedules).set({ lastRunAt: new Date(), nextRunAt }).where(and(eq(payrollSchedules.id, scheduleId), eq(payrollSchedules.status, "active")));
+  return { success: true } as const;
+}
+
+export async function updatePayrollSchedule(workspaceId: number, scheduleId: number, actorUserId: number, input: { frequency: "weekly" | "biweekly" | "monthly"; timezone: string; nextRunAt: Date; status: "active" | "paused" | "completed" }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const existing = await db.select({ id: payrollSchedules.id }).from(payrollSchedules).where(and(eq(payrollSchedules.id, scheduleId), eq(payrollSchedules.workspaceId, workspaceId))).limit(1);
+  if (!existing[0]) throw new Error("Schedule not found in workspace");
+  await db.update(payrollSchedules).set(input).where(and(eq(payrollSchedules.id, scheduleId), eq(payrollSchedules.workspaceId, workspaceId)));
+  await db.insert(auditEvents).values({ workspaceId, actorUserId, entityType: "schedule", entityId: scheduleId, action: `status_${input.status}` });
+  const rows = await db.select().from(payrollSchedules).where(eq(payrollSchedules.id, scheduleId)).limit(1);
+  return rows[0];
+}
+
+export async function listRouteApprovals(workspaceId: number, routeId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const route = await db.select({ id: paymentRoutes.id }).from(paymentRoutes).where(and(eq(paymentRoutes.id, routeId), eq(paymentRoutes.workspaceId, workspaceId))).limit(1);
+  if (!route[0]) throw new Error("Route not found in workspace");
+  return db.select().from(routeApprovals).where(and(eq(routeApprovals.workspaceId, workspaceId), eq(routeApprovals.routeId, routeId))).orderBy(desc(routeApprovals.createdAt));
+}
+
+export async function upsertRouteApproval(input: { workspaceId: number; routeId: number; approverUserId: number; status: "approved" | "rejected"; comment?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const route = await db.select({ id: paymentRoutes.id }).from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
+  if (!route[0]) throw new Error("Route not found in workspace");
+  const existing = await db.select({ id: routeApprovals.id }).from(routeApprovals).where(and(eq(routeApprovals.workspaceId, input.workspaceId), eq(routeApprovals.routeId, input.routeId), eq(routeApprovals.approverUserId, input.approverUserId))).limit(1);
+  if (existing[0]) {
+    await db.update(routeApprovals).set({ status: input.status, comment: input.comment, decidedAt: new Date() }).where(eq(routeApprovals.id, existing[0].id));
+  } else {
+    await db.insert(routeApprovals).values({ ...input, decidedAt: new Date() });
+  }
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.approverUserId, entityType: "route_approval", entityId: input.routeId, action: input.status });
+  const rows = await db.select().from(routeApprovals).where(and(eq(routeApprovals.workspaceId, input.workspaceId), eq(routeApprovals.routeId, input.routeId), eq(routeApprovals.approverUserId, input.approverUserId))).limit(1);
+  return rows[0];
+}
+
+export async function createShareableProof(input: { workspaceId: number; routeId: number; createdByUserId: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const route = await db.select({ id: paymentRoutes.id, proofReference: paymentRoutes.proofReference, status: paymentRoutes.status, token: paymentRoutes.token, totalAmount: paymentRoutes.totalAmount, name: paymentRoutes.name, createdAt: paymentRoutes.createdAt }).from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
+  if (!route[0]) throw new Error("Route not found in workspace");
+  const existing = await db.select().from(shareableProofs).where(and(eq(shareableProofs.workspaceId, input.workspaceId), eq(shareableProofs.routeId, input.routeId), eq(shareableProofs.status, "active"))).limit(1);
+  if (existing[0]) return { slug: existing[0].slug, route: route[0] };
+  const slug = `vp-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
+  const inserted = await db.insert(shareableProofs).values({ ...input, slug }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not create proof link");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "proof", entityId: id, action: "created" });
+  return { slug, route: route[0] };
+}
+
+export async function getPublicProof(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select({ proof: shareableProofs, route: paymentRoutes }).from(shareableProofs).innerJoin(paymentRoutes, eq(shareableProofs.routeId, paymentRoutes.id)).where(and(eq(shareableProofs.slug, slug), eq(shareableProofs.status, "active"))).limit(1);
+  if (!rows[0]) return undefined;
+  return { slug: rows[0].proof.slug, status: rows[0].route.status, name: rows[0].route.name, token: rows[0].route.token, totalAmount: rows[0].route.totalAmount, proofReference: rows[0].route.proofReference, createdAt: rows[0].route.createdAt };
+}
+
+export async function listWorkspaceAnalytics(workspaceId: number) {
+  const db = await getDb();
+  if (!db) return { routes: 0, settled: 0, failed: 0, totalTransactions: 0, auditEvents: 0 };
+  const [routes, transactions, events] = await Promise.all([
+    db.select().from(paymentRoutes).where(eq(paymentRoutes.workspaceId, workspaceId)),
+    db.select({ tx: blockchainTransactions, route: paymentRoutes }).from(blockchainTransactions).innerJoin(paymentRoutes, eq(blockchainTransactions.routeId, paymentRoutes.id)).where(eq(paymentRoutes.workspaceId, workspaceId)),
+    db.select().from(auditEvents).where(eq(auditEvents.workspaceId, workspaceId)),
+  ]);
+  return { routes: routes.length, settled: routes.filter((route) => route.status === "settled").length, failed: routes.filter((route) => route.status === "failed").length, totalTransactions: transactions.length, auditEvents: events.length };
+}
+
+export async function exportWorkspaceAuditCsv(workspaceId: number) {
+  const events = await listWorkspaceAuditEvents(workspaceId);
+  const escape = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+  return ["id,entityType,entityId,action,createdAt", ...events.map((event) => [event.id, event.entityType, event.entityId, event.action, event.createdAt.toISOString()].map(escape).join(","))].join("\n");
 }
