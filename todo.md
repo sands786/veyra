@@ -214,3 +214,9 @@
 
 ## Audio-enhanced teaser
 - [x] Add a restrained cinematic electronic music bed to the Coming Soon teaser and deliver a validated final video with audio.
+
+## Documentation section
+- [x] Add a first-class Documentation sidebar entry and route with the Coming Soon teaser video at the top.
+- [x] Add complete documentation content covering motivation, market gap, product surfaces, privacy boundaries, Starknet architecture, Demo Mode, and execution limitations.
+- [x] Add visual simulations for the payment route, privacy boundary, treasury governance, private claims, Launchpad milestones, proof publication, and Demo Mode flow.
+- [x] Add uploaded teaser media, responsive QA, focused tests, and documentation route verification.

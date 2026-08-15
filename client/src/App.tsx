@@ -11,6 +11,7 @@ import Launchpad from "./pages/Launchpad";
 import Proof from "./pages/Proof";
 import Claim from "./pages/Claim";
 import DemoMode from "./pages/DemoMode";
+import Documentation from "./pages/Documentation";
 
 function DemoModeIndicator() {
   const { isDemoMode, exitDemo } = useDemoMode();
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/launchpad" component={Launchpad} />
       <Route path="/demo" component={DemoMode} />
+      <Route path="/docs" component={Documentation} />
       <Route path="/proof/:slug" component={Proof} />
       <Route path="/claim/:token" component={Claim} />
       <Route path="/404" component={NotFound} />

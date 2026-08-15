@@ -35,3 +35,7 @@ Desktop and mobile previews were rechecked after the expanded workflow pass. The
 The Demo Mode now exposes explicit route-level boundary chrome: Home labels Demo Mode and links to the tour, Launchpad shows the demo boundary and an in-page exit-to-tour action, while Claim and Proof include the boundary in their public headers. The shared floating indicator remains available as a global exit/open-tour control.
 
 Named Demo actions now use local fail-first/retry-success controls: wallet error path, schedule/governance action, treasury dry-run, private claim redemption, aggregate proof publication, and Launchpad milestone release. The payroll surface additionally maintains deterministic recipient CRUD, route status, and receipt state. Desktop and mobile previews remain responsive; 38 tests pass, TypeScript is clean, and the production build completes with only the existing bundle-size advisory.
+
+## Documentation route QA — 2026-08-15
+
+The new `/docs` route was verified at desktop and mobile widths. Desktop presents a fixed chapter rail, teaser video, market-gap narrative, four product-surface cards, interactive privacy boundary simulation, Starknet execution flow, and Demo Mode checklist without overflow. Mobile collapses the content into a readable single-column flow; the video, simulation cards, execution-boundary panel, and guided-tour CTA remain accessible. The teaser is loaded from the lifecycle-safe `/manus-storage/` asset path. Verification completed with 40 passing Vitest tests, clean TypeScript, and a successful production build.
