@@ -11,3 +11,9 @@ The Launchpad control room was verified again at desktop and mobile widths after
 The implementation now includes persisted project operating metadata, workspace-scoped lifecycle/readiness/release APIs, a workspace-scoped allocation status query that projects only commitment/status metadata, explicit allocation loading/empty/retry states, and focused readiness/release/allocation validation tests. The UI continues to state that wallet signing and final Starknet settlement are separate execution steps. Automated verification passes with 32 tests, clean TypeScript checking, and a successful production build.
 
 Remaining product gap: the current Launchpad surface still needs a dedicated portfolio list/detail activity/proof workspace and consistent retry surfaces for every project-operations/readiness/activity/release query before it should be described as feature-complete.
+
+## Portfolio and Project Signals QA
+
+The latest pass adds a visible workspace project portfolio selector and a selected-project signal grid covering operating profile, readiness, release queue, activity, and public proof reference. Each signal query has a local retry path plus a combined retry action. Desktop and 375px mobile previews retain the intended Copper Veil hierarchy and show no horizontal overflow in the first viewport.
+
+The final code verification now passes 35 tests, TypeScript, and the production build. The only remaining TODO is user-owned STRK20/mainnet evidence: authenticated wallet execution, three mainnet transactions, public repository publication, and demo-video submission.

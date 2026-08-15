@@ -127,7 +127,8 @@ export const appRouter = router({
     }),
     allocations: protectedProcedure.input(z.object({ projectId: z.number().int().positive() })).query(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
-      return listLaunchpadAllocations(membership.workspace.id, input.projectId);
+      const rows = await listLaunchpadAllocations(membership.workspace.id, input.projectId);
+      return rows.map(({ id, commitment, allocationAmount, status, createdAt, claimedAt }) => ({ id, commitment, allocationAmount, status, createdAt, claimedAt }));
     }),
     activity: protectedProcedure.input(z.object({ projectId: z.number().int().positive() })).query(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);

@@ -163,14 +163,17 @@
 ## Launchpad production SaaS upgrade
 - [x] Audit and document the current Launchpad gaps versus a production SaaS: onboarding, project portfolio, contributor operations, release readiness, activity/audit, and real execution boundaries.
 - [x] Add persisted project operating metadata and workspace-scoped operational APIs for project lifecycle, readiness, contributor allocation status, and release operations.
-- [ ] Add a real project portfolio and project-detail workspace with actionable status, activity, milestone, allocation, and proof surfaces.
+- [x] Add a real project portfolio and project-detail workspace with actionable status, activity, milestone, allocation, and proof surfaces.
 - [x] Add production-oriented validation, permission states, loading/error/empty states, tests, and documentation distinguishing persisted SaaS behavior from pending wallet/onchain execution.
 
 ## Launchpad SaaS evidence gaps
 - [x] Add a workspace-scoped Launchpad allocations query exposing privacy-safe allocation statuses for operators and render it in the control room.
-- [ ] Add explicit Launchpad query error/retry UI for portfolio, project operations, readiness, activity, and release-request surfaces.
+- [x] Add explicit Launchpad query error/retry UI for portfolio, project operations, readiness, activity, and release-request surfaces.
 - [x] Add focused tests for Launchpad project-ops/release-request permissions, readiness/release failure paths, and allocation-status retrieval.
 
 ## Launchpad backend test evidence gaps
-- [ ] Add router-level tests proving project-ops and release-request procedures reject unauthorized member roles.
-- [ ] Add a focused test for workspace-scoped Launchpad allocation retrieval and privacy-safe projection.
+- [x] Add router-level tests proving project-ops and release-request procedures reject unauthorized member roles.
+- [x] Add a focused test for workspace-scoped Launchpad allocation retrieval and privacy-safe projection.
+
+## Launchpad privacy projection evidence
+- [x] Assert through the Launchpad allocation procedure that encrypted references and claimed wallet addresses are excluded while workspace scoping is preserved.
