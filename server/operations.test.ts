@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPayrollCron, evaluateTreasuryPolicy, isClaimToken, isPublicProofSlug, nextPayrollRunAt } from "@shared/operations";
+import { buildPayrollCron, evaluateTreasuryPolicy, isClaimToken, isPublicProofSlug, nextPayrollRunAt, normalizeAmountInput } from "@shared/operations";
 
 describe("operations primitives", () => {
   it("builds weekly Heartbeat cron expressions in UTC", () => {
@@ -28,6 +28,11 @@ describe("operations primitives", () => {
     expect(allowed.allowed).toBe(true);
     const wrongNetwork = evaluateTreasuryPolicy({ maxRouteAmount: "5000", dailyLimit: "10000", approvalThreshold: 1, network: "sepolia" }, { totalAmount: "100", approvalCount: 1, network: "mainnet", dailyUsed: "0" });
     expect(wrongNetwork.allowed).toBe(false);
+  });
+
+  it("normalizes comma-formatted UI amounts before strict validation", () => {
+    expect(normalizeAmountInput("2,840")).toBe("2840");
+    expect(normalizeAmountInput("  12,345.67  ")).toBe("12345.67");
   });
 
   it("accepts only structurally valid private claim tokens", () => {

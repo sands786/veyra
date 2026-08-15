@@ -125,3 +125,8 @@
 - [x] Enforce policy network constraints in dry-run and route-creation guardrails.
 - [x] Connect recipient claim redemption to route-recipient fulfillment state and payout readiness.
 - [x] Add concrete proof-health and unresolved-receipt monitoring views, not only aggregate counters.
+
+## Claim-link error repair
+- [x] Diagnose the concrete runtime error shown in the claim-link workspace flow: comma-formatted amount values reached the strict treasury simulation validator; the existing route payload path was already normalizing commas.
+- [x] Fix the affected workspace error path by normalizing numeric inputs before treasury simulation, while preserving the existing route/wallet normalization and privacy/authorization boundaries.
+- [x] Add regression coverage and re-verify the claim flow visually and in production build.

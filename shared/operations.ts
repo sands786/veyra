@@ -37,6 +37,10 @@ export function evaluateTreasuryPolicy(policy: PolicyEvaluation | undefined, inp
   return { policyFound: true, allowed: reasons.length === 0, reasons, maxRouteAmount: policy.maxRouteAmount, dailyLimit: policy.dailyLimit, approvalThreshold: policy.approvalThreshold, network: policy.network } as const;
 }
 
+export function normalizeAmountInput(value: string): string {
+  return value.replace(/,/g, "").trim();
+}
+
 export function isClaimToken(value: string): boolean {
   return /^claim-[a-f0-9]{32}$/.test(value);
 }

@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { connectVeilWallet, explorerUrl, submitShieldedRoute, type VeilWallet } from "@/lib/strk20";
+import { normalizeAmountInput } from "@shared/operations";
 
 const stages = [
   { label: "DRAFT", note: "Recipients and amounts stay in your workspace." },
@@ -100,6 +101,7 @@ export default function Home() {
   const [tokenSymbol, setTokenSymbol] = useState("USDC");
   const [selectedRecipientIds, setSelectedRecipientIds] = useState<number[]>([]);
   const [amount, setAmount] = useState("2,840");
+  const normalizedAmount = normalizeAmountInput(amount);
   const [stage, setStage] = useState(1);
   const [connected, setConnected] = useState(false);
   const [wallet, setWallet] = useState<VeilWallet>();
@@ -118,7 +120,7 @@ export default function Home() {
   const [policyDaily, setPolicyDaily] = useState("15000");
   const [claimToken, setClaimToken] = useState<string | null>(null);
   const [treasuryBalance, setTreasuryBalance] = useState("");
-  const policySimulationQuery = trpc.treasury.simulate.useQuery({ token: tokenSymbol, totalAmount: amount, approvalCount: Math.max(0, Number(approvalThreshold) || 0) }, { enabled: isAuthenticated && Boolean(amount), retry: false });
+  const policySimulationQuery = trpc.treasury.simulate.useQuery({ token: tokenSymbol, totalAmount: normalizedAmount, approvalCount: Math.max(0, Number(approvalThreshold) || 0), network: "mainnet" }, { enabled: isAuthenticated && /^\d+(\.\d{1,18})?$/.test(normalizedAmount), retry: false });
 
   const stageCopy = useMemo(() => stages[stage], [stage]);
 
@@ -158,7 +160,7 @@ export default function Home() {
     let savedRoute: { id: number } | undefined;
     if (stage === 1) {
       try {
-        const routeInput = { name: routeName.trim() || "Untitled private route", token: tokenSymbol, totalAmount: amount.replace(/,/g, ""), recipientAmounts: activeRecipientIds.map((recipientId) => ({ recipientId, amount: amount.replace(/,/g, "") })) };
+        const routeInput = { name: routeName.trim() || "Untitled private route", token: tokenSymbol, totalAmount: normalizedAmount, recipientAmounts: activeRecipientIds.map((recipientId) => ({ recipientId, amount: normalizedAmount })) };
         savedRoute = editingRouteId ? await updateRouteMutation.mutateAsync({ id: editingRouteId, ...routeInput }) : await createRouteMutation.mutateAsync(routeInput);
         setEditingRouteId(null);
       } catch (error) {
@@ -168,7 +170,7 @@ export default function Home() {
     }
     if (wallet?.strk20InvokeTransaction && stage === 1) {
       try {
-        const amountSmallestUnit = BigInt(amount.replace(/,/g, "") || "0") * BigInt("1000000");
+        const amountSmallestUnit = BigInt(normalizedAmount || "0") * BigInt("1000000");
         const tx = await submitShieldedRoute(wallet, amountSmallestUnit);
         if (savedRoute?.id && tx.transaction_hash) {
           await recordTransactionMutation.mutateAsync({ routeId: savedRoute.id, network: wallet.chainId === "0x534e5f4d41494e" ? "mainnet" : "sepolia", transactionHash: tx.transaction_hash, status: "submitted", explorerUrl: explorerUrl(tx.transaction_hash, wallet.chainId) });
