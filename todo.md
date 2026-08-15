@@ -202,3 +202,9 @@
 - [x] Add visible Demo Mode route chrome on Home regardless of auth state, plus an explicit in-page Demo exit control inside Launchpad.
 - [x] Wire action-specific simulated failures and retries directly into wallet connect, treasury dry-run, claim redemption, proof publication, governance decision, and Launchpad release buttons.
 - [x] Add focused tests proving route-boundary visibility and named Demo action failure/recovery transitions.
+
+## Product walkthrough video
+- [x] Create and deliver a polished VeilPay Demo Mode walkthrough video covering Payroll, Operations, Treasury, Claims, Launchpad, and Proof, with the simulation-only boundary clearly narrated.
+
+## Product teaser video
+- [x] Create and deliver a short VeilPay teaser video with a strong privacy-payment hook, Starknet positioning, and a clear product call to action.
