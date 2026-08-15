@@ -208,3 +208,6 @@
 
 ## Product teaser video
 - [x] Create and deliver a short VeilPay teaser video with a strong privacy-payment hook, Starknet positioning, and a clear product call to action.
+
+## Coming Soon typographic teaser
+- [x] Create and deliver a complete Coming Soon teaser film with a typographic intro, cinematic product reveal, privacy/Starknet message, and final VeilPay call to action.
