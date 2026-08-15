@@ -4,7 +4,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { prepareRouteEdit } from "@/lib/routeEdit";
-import { ArrowUpRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronRight, CircleHelp, Copy, Download, EyeOff, Fingerprint, Link2, LockKeyhole, Menu, Shield, Sparkles, UserCheck, WalletCards, X } from "lucide-react";
+import { ArrowUpRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronRight, CircleHelp, Copy, Download, EyeOff, Fingerprint, Link2, LockKeyhole, Menu, PlayCircle, Shield, Sparkles, UserCheck, WalletCards, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { connectVeilWallet, explorerUrl, submitShieldedRoute, type VeilWallet } from "@/lib/strk20";
 import { canCreateRecipientClaim, canScheduleRoute, isValidStarknetAddress, isWalletActionLocked, normalizeAmountInput } from "@shared/operations";
 import { copyText } from "@/lib/clipboard";
+import { useDemoMode } from "@/contexts/DemoModeContext";
 
 const stages = [
   { label: "DRAFT", note: "Recipients and amounts stay in your workspace." },
@@ -35,6 +36,7 @@ export default function Home() {
   // startLogin() during render (no href={startLogin()}) — it mints a one-time
   // nonce cookie and must run only at the moment of navigation.
   const { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<number | null>(() => {
     if (typeof window === "undefined") return null;
@@ -256,7 +258,7 @@ export default function Home() {
             <button onClick={() => goToSection("routes")} className={`nav-item ${activeSection === "routes" ? "nav-item-active" : ""}`}><WalletCards size={16} /> Payment routes <span className="ml-auto font-mono text-[10px]">{isAuthenticated ? String(liveRoutes.length).padStart(2, "0") : "03"}</span></button>
             <button onClick={() => goToSection("ledger")} className={`nav-item ${activeSection === "ledger" ? "nav-item-active" : ""}`}><Shield size={16} /> Proof ledger</button>
             <button onClick={() => goToSection("identity")} className={`nav-item ${activeSection === "identity" ? "nav-item-active" : ""}`}><Fingerprint size={16} /> Identity keys</button>
-            <button onClick={() => goToOperations("overview")} className={`nav-item ${activeSection === "operations" && operationsView === "overview" ? "nav-item-active" : ""}`}><BarChart3 size={16} /> Operations</button><button onClick={() => goToOperations("treasury")} className={`nav-item pl-10 text-[11px] ${activeSection === "operations" && operationsView === "treasury" ? "nav-item-active" : ""}`}><LockKeyhole size={14} /> Treasury</button><button onClick={() => goToOperations("claims")} className={`nav-item pl-10 text-[11px] ${activeSection === "operations" && operationsView === "claims" ? "nav-item-active" : ""}`}><Link2 size={14} /> Claims</button><button onClick={() => { window.location.href = "/launchpad"; }} className="nav-item"><Sparkles size={16} /> Launchpad</button>
+            <button onClick={() => goToOperations("overview")} className={`nav-item ${activeSection === "operations" && operationsView === "overview" ? "nav-item-active" : ""}`}><BarChart3 size={16} /> Operations</button><button onClick={() => goToOperations("treasury")} className={`nav-item pl-10 text-[11px] ${activeSection === "operations" && operationsView === "treasury" ? "nav-item-active" : ""}`}><LockKeyhole size={14} /> Treasury</button><button onClick={() => goToOperations("claims")} className={`nav-item pl-10 text-[11px] ${activeSection === "operations" && operationsView === "claims" ? "nav-item-active" : ""}`}><Link2 size={14} /> Claims</button><button onClick={() => { window.location.href = "/launchpad"; }} className="nav-item"><Sparkles size={16} /> Launchpad</button><button onClick={() => { window.location.href = "/demo"; }} className="nav-item"><PlayCircle size={16} /> Demo mode</button>
           </div>
 
           <div className="mt-auto rounded-[16px] border border-white/10 bg-[#1D1E1B] p-4">
@@ -273,9 +275,9 @@ export default function Home() {
               <button onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu" className="rounded-lg border border-white/10 p-2">{mobileOpen ? <X size={18} /> : <Menu size={18} />}</button>
               <span className="font-display text-lg font-bold tracking-[-0.04em]">VeilPay</span>
             </div>
-            <div className="hidden font-mono text-[10px] tracking-[0.16em] text-[#918B81] lg:block">PRIVATE ROUTES / 2026.08</div>
+            <div className="hidden font-mono text-[10px] tracking-[0.16em] text-[#918B81] lg:block">PRIVATE ROUTES / 2026.08 {isDemoMode ? "/ DEMO MODE" : ""}</div>{isDemoMode && <button onClick={() => { window.location.href = "/demo"; }} className="font-mono text-[9px] tracking-[0.1em] text-[#F0563A]">OPEN DEMO TOUR</button>}
             <div className="flex items-center gap-3">
-              {isAuthenticated ? <label className="hidden items-center gap-2 font-mono text-[10px] tracking-[0.12em] text-[#918B81] sm:flex">WORKSPACE / <select aria-label="Active workspace" value={activeWorkspaceId ?? ""} onChange={(event) => switchWorkspace(event.target.value)} className="max-w-[150px] bg-transparent text-[#F3EEE5] outline-none"><option value="" disabled>{user?.name ?? "ACTIVE"}</option>{(workspaceListQuery.data ?? []).map((membership) => <option key={membership.workspace.id} value={membership.workspace.id}>{membership.workspace.name}</option>)}</select></label> : <span className="hidden font-mono text-[10px] tracking-[0.12em] text-[#918B81] sm:block">{loading ? "CHECKING SESSION" : "PUBLIC PREVIEW / SIGN IN TO SAVE"}</span>}
+              {isAuthenticated ? <label className="hidden items-center gap-2 font-mono text-[10px] tracking-[0.12em] text-[#918B81] sm:flex">WORKSPACE / <select aria-label="Active workspace" value={activeWorkspaceId ?? ""} onChange={(event) => switchWorkspace(event.target.value)} className="max-w-[150px] bg-transparent text-[#F3EEE5] outline-none"><option value="" disabled>{user?.name ?? "ACTIVE"}</option>{(workspaceListQuery.data ?? []).map((membership) => <option key={membership.workspace.id} value={membership.workspace.id}>{membership.workspace.name}</option>)}</select></label> : <span className="hidden font-mono text-[10px] tracking-[0.12em] text-[#918B81] sm:block">{isDemoMode ? "DEMO MODE / SIMULATED ONLY" : loading ? "CHECKING SESSION" : "PUBLIC PREVIEW / SIGN IN TO SAVE"}</span>}
               {!isAuthenticated ? <Button onClick={startLogin} className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10">SIGN IN</Button> : <Button onClick={() => void logout()} className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10">SIGN OUT</Button>}
               <Button disabled={isWalletActionLocked(walletConnecting)} onClick={handleWalletConnect} className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]">{walletConnecting ? "CONNECTING…" : connected ? (walletAddress ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}` : "DEMO CONNECTED") : "CONNECT WALLET"}</Button>
             </div>

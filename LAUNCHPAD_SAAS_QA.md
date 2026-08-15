@@ -17,3 +17,21 @@ Remaining product gap: the current Launchpad surface still needs a dedicated por
 The latest pass adds a visible workspace project portfolio selector and a selected-project signal grid covering operating profile, readiness, release queue, activity, and public proof reference. Each signal query has a local retry path plus a combined retry action. Desktop and 375px mobile previews retain the intended Copper Veil hierarchy and show no horizontal overflow in the first viewport.
 
 The final code verification now passes 35 tests, TypeScript, and the production build. The only remaining TODO is user-owned STRK20/mainnet evidence: authenticated wallet execution, three mainnet transactions, public repository publication, and demo-video submission.
+
+## Demo Mode QA
+
+Demo Mode is available from the Home workspace navigation at `/demo`. It presents six deterministic local surfaces: payroll, operations, treasury, private claims, Launchpad governance, and aggregate proof publication. The demo wallet, route simulation, schedule controls, policy dry-run, claim redemption, milestone release, and proof publication update only local state and append to the simulation ledger. The interface explicitly states that no production mutation, private-key storage, or real Starknet transaction occurs.
+
+Desktop and 375px mobile previews were checked. The guided tour maintains the Copper Veil visual hierarchy, the tabbed workflow is readable, the simulation-only label remains prominent, and the first viewport has no horizontal overflow. The current verification baseline remains 35 passing tests with clean TypeScript and production build; Demo Mode test coverage and persistence hardening remain the next implementation step.
+
+## Demo Mode completeness QA
+
+The Demo Mode is now app-wide through `DemoModeProvider`, with a persisted local mode marker and explicit exit behavior. The guided workspace covers payroll, recipient addition, route editing and status transition, transaction receipt confirmation, operations scheduling/governance/monitoring, treasury dry-run, private claim redemption, Launchpad project selection/readiness/shielded allocation/milestone release, wallet simulation, and aggregate proof publication. A visible `SIMULATE ERROR` control exposes a deterministic error banner with `RETRY`, and `RESET` restores the full local session.
+
+Desktop and mobile previews were rechecked after the expanded workflow pass. The six-surface tab workspace remains legible, payroll controls wrap into a usable grid, the simulation-only boundary stays prominent, and no horizontal overflow appears in the first mobile viewport. Verification passes with 37 tests, clean TypeScript, and a production build.
+
+## Final Demo Mode action QA
+
+The Demo Mode now exposes explicit route-level boundary chrome: Home labels Demo Mode and links to the tour, Launchpad shows the demo boundary and an in-page exit-to-tour action, while Claim and Proof include the boundary in their public headers. The shared floating indicator remains available as a global exit/open-tour control.
+
+Named Demo actions now use local fail-first/retry-success controls: wallet error path, schedule/governance action, treasury dry-run, private claim redemption, aggregate proof publication, and Launchpad milestone release. The payroll surface additionally maintains deterministic recipient CRUD, route status, and receipt state. Desktop and mobile previews remain responsive; 38 tests pass, TypeScript is clean, and the production build completes with only the existing bundle-size advisory.

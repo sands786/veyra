@@ -5,10 +5,18 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { DemoModeProvider, useDemoMode } from "./contexts/DemoModeContext";
 import Home from "./pages/Home";
 import Launchpad from "./pages/Launchpad";
 import Proof from "./pages/Proof";
 import Claim from "./pages/Claim";
+import DemoMode from "./pages/DemoMode";
+
+function DemoModeIndicator() {
+  const { isDemoMode, exitDemo } = useDemoMode();
+  if (!isDemoMode) return null;
+  return <div className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-[#F0563A]/40 bg-[#201815]/95 px-4 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] shadow-2xl backdrop-blur"><span>DEMO MODE / SIMULATED ONLY</span><button onClick={() => { window.location.href = "/demo"; }} className="underline">OPEN TOUR</button><button onClick={() => { exitDemo(); window.location.reload(); }} className="text-[#CFC7BC]">EXIT</button></div>;
+}
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -16,6 +24,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/launchpad" component={Launchpad} />
+      <Route path="/demo" component={DemoMode} />
       <Route path="/proof/:slug" component={Proof} />
       <Route path="/claim/:token" component={Claim} />
       <Route path="/404" component={NotFound} />
@@ -28,10 +37,13 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster theme="dark" position="bottom-right" />
-          <Router />
-        </TooltipProvider>
+        <DemoModeProvider>
+          <TooltipProvider>
+            <Toaster theme="dark" position="bottom-right" />
+            <DemoModeIndicator />
+            <Router />
+          </TooltipProvider>
+        </DemoModeProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

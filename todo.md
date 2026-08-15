@@ -177,3 +177,28 @@
 
 ## Launchpad privacy projection evidence
 - [x] Assert through the Launchpad allocation procedure that encrypted references and claimed wallet addresses are excluded while workspace scoping is preserved.
+
+## Demo Mode expansion
+- [x] Add a clearly labeled, persisted Demo Mode switch with deterministic local workspace data and an exit path back to production mode.
+- [x] Make every primary VeilPay and Launchpad interaction demonstrable in Demo Mode without calling production mutations or claiming real onchain execution.
+- [x] Add Demo Mode loading, success, error, reset, wallet, claim, proof, governance, treasury, and Launchpad release feedback states.
+- [x] Add focused Demo Mode tests, responsive visual QA, and documentation that separates simulated activity from authenticated/onchain evidence.
+
+## Demo Mode completeness gaps
+- [x] Make the persisted Demo Mode marker app-wide so Home, Launchpad, Claim, Proof, wallet, and operations surfaces can read the same mode boundary.
+- [x] Expand the demo workspace with recipient CRUD, route editing/status transitions, transaction/receipt confirmation, and deeper Launchpad operations.
+- [x] Add explicit simulated error and retry states for wallet, treasury, claims, proof publication, governance, and release actions.
+
+## Demo Mode evidence hardening
+- [x] Wire the shared Demo Mode context into Home, Launchpad, Claim, and Proof so each route visibly reflects the same boundary and exit behavior.
+- [x] Replace toast-only demo controls with deterministic local recipient CRUD, route status/edit, and receipt state updates rendered in the workspace.
+- [x] Add per-surface simulated failure and retry handlers for wallet, treasury, claims, proof, governance, and Launchpad release actions.
+
+## Demo Mode final evidence correction
+- [x] Add explicit Demo Mode boundary UI and exit behavior inside Launchpad, and consistent visible route-level chrome in Home, Claim, and Proof.
+- [x] Add action-level simulated failure and retry flows for demo wallet connection, treasury dry-run, claim redemption, proof publication, governance decisions, and Launchpad release actions.
+
+## Demo Mode final action evidence
+- [x] Add visible Demo Mode route chrome on Home regardless of auth state, plus an explicit in-page Demo exit control inside Launchpad.
+- [x] Wire action-specific simulated failures and retries directly into wallet connect, treasury dry-run, claim redemption, proof publication, governance decision, and Launchpad release buttons.
+- [x] Add focused tests proving route-boundary visibility and named Demo action failure/recovery transitions.
