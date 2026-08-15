@@ -45,6 +45,38 @@ export function isLaunchpadAdminRole(role: string): boolean {
   return role === "owner" || role === "admin";
 }
 
+export type LaunchpadTab = "overview" | "milestones" | "allocations";
+
+export function getLaunchpadInitialTab(): LaunchpadTab {
+  return "overview";
+}
+
+export function resolveLaunchpadPanel(tab: LaunchpadTab, hasProject: boolean): "empty" | LaunchpadTab {
+  return hasProject ? tab : "empty";
+}
+
+export function resolveLaunchpadEmptyState(hasProject: boolean, milestoneCount: number): "create-project" | "add-milestone" | "ready" {
+  if (!hasProject) return "create-project";
+  if (milestoneCount === 0) return "add-milestone";
+  return "ready";
+}
+
+export function nextLaunchpadProjectStatus(status: "draft" | "live" | "funded" | "closed"): "live" | "funded" | "closed" | null {
+  return status === "draft" ? "live" : status === "live" ? "funded" : status === "funded" ? "closed" : null;
+}
+
+export function launchpadProjectActionLabel(status: "draft" | "live" | "funded" | "closed"): string {
+  return status === "draft" ? "OPEN ROOM" : status === "live" ? "MARK FUNDED" : status === "funded" ? "CLOSE ROUND" : "ROUND CLOSED";
+}
+
+export function canSubmitLaunchpadProject(name: string, targetAmount: string): boolean {
+  return name.trim().length >= 2 && /^\d+(\.\d{1,18})?$/.test(targetAmount.trim());
+}
+
+export function canSubmitLaunchpadAllocation(commitment: string, amount: string): boolean {
+  return commitment.trim().length >= 16 && /^\d+(\.\d{1,18})?$/.test(amount.trim());
+}
+
 export function canAdvanceLaunchpadProjectStatus(from: "draft" | "live" | "funded" | "closed", to: "draft" | "live" | "funded" | "closed"): boolean {
   if (from === to) return true;
   return (from === "draft" && to === "live") || (from === "live" && (to === "funded" || to === "closed")) || (from === "funded" && to === "closed");

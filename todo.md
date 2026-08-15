@@ -142,3 +142,11 @@
 - [x] Add a dedicated Launchpad sidebar view without re-expanding the primary payroll page.
 - [x] Add tests, responsive visual verification, and documentation of what is implemented versus what still requires real Starknet contracts or wallet transactions.
 - [x] Add focused Launchpad tests for project/milestone contracts, allocation idempotency and privacy-safe summaries, and role authorization; rerun the full suite before checkpointing.
+
+## Launchpad product polish
+- [x] Replace the form-first Launchpad layout with a command-center hierarchy: overview, project status, milestone releases, and privacy signals.
+- [x] Improve project, milestone, and allocation interactions with clearer validation, actionable empty states, and safer state transitions.
+- [x] Refine the Copper Veil visual treatment with premium hierarchy, stronger cards, status accents, and responsive composition.
+- [x] Add Launchpad polish regression coverage, production verification, and desktop/mobile visual QA.
+- [x] Add polish-specific pure workflow tests for status progression, tab/view state, empty-state behavior, and disabled validation conditions; rerun the full suite before checkpointing.
+- [x] Add deterministic Launchpad view-state helpers for default tab selection, visible panel resolution, and no-project/no-milestone empty states; test them and rerun the full suite before checkpointing.

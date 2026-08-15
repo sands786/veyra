@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLaunchpadPublicSummary, buildPayrollCron, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, evaluateTreasuryPolicy, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, nextPayrollRunAt, normalizeAmountInput, shouldReuseLaunchpadAllocation } from "@shared/operations";
+import { buildLaunchpadPublicSummary, buildPayrollCron, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canSubmitLaunchpadAllocation, canSubmitLaunchpadProject, evaluateTreasuryPolicy, getLaunchpadInitialTab, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, launchpadProjectActionLabel, nextLaunchpadProjectStatus, nextPayrollRunAt, normalizeAmountInput, resolveLaunchpadEmptyState, resolveLaunchpadPanel, shouldReuseLaunchpadAllocation } from "@shared/operations";
 
 describe("operations primitives", () => {
   it("builds weekly Heartbeat cron expressions in UTC", () => {
@@ -52,6 +52,28 @@ describe("operations primitives", () => {
     expect(shouldReuseLaunchpadAllocation("cm-abc123", "cm-abc123")).toBe(true);
     expect(shouldReuseLaunchpadAllocation("cm-abc123", "cm-def456")).toBe(false);
     expect(shouldReuseLaunchpadAllocation(undefined, "cm-abc123")).toBe(false);
+  });
+
+  it("covers the polished Launchpad action and validation states", () => {
+    expect(nextLaunchpadProjectStatus("draft")).toBe("live");
+    expect(nextLaunchpadProjectStatus("live")).toBe("funded");
+    expect(nextLaunchpadProjectStatus("closed")).toBeNull();
+    expect(launchpadProjectActionLabel("draft")).toBe("OPEN ROOM");
+    expect(launchpadProjectActionLabel("funded")).toBe("CLOSE ROUND");
+    expect(canSubmitLaunchpadProject(" ", "250000")).toBe(false);
+    expect(canSubmitLaunchpadProject("Private round", "2,500")).toBe(false);
+    expect(canSubmitLaunchpadProject("Private round", "2500")).toBe(true);
+    expect(canSubmitLaunchpadAllocation("short", "2500")).toBe(false);
+    expect(canSubmitLaunchpadAllocation("cm-0123456789abcdef", "2500")).toBe(true);
+  });
+
+  it("resolves polished Launchpad tabs and empty states deterministically", () => {
+    expect(getLaunchpadInitialTab()).toBe("overview");
+    expect(resolveLaunchpadPanel("milestones", false)).toBe("empty");
+    expect(resolveLaunchpadPanel("allocations", true)).toBe("allocations");
+    expect(resolveLaunchpadEmptyState(false, 0)).toBe("create-project");
+    expect(resolveLaunchpadEmptyState(true, 0)).toBe("add-milestone");
+    expect(resolveLaunchpadEmptyState(true, 2)).toBe("ready");
   });
 
   it("keeps allocation data out of public Launchpad summaries", () => {
