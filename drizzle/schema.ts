@@ -179,6 +179,38 @@ export const launchpadMilestones = mysqlTable("launchpadMilestones", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+export const launchpadProjectOps = mysqlTable("launchpadProjectOps", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull().unique(),
+  ownerLabel: varchar("ownerLabel", { length: 160 }).notNull(),
+  roundType: mysqlEnum("roundType", ["community", "strategic", "treasury", "grant"]).notNull().default("community"),
+  stage: mysqlEnum("stage", ["planning", "review", "live", "closeout"]).notNull().default("planning"),
+  riskLevel: mysqlEnum("riskLevel", ["low", "medium", "high"]).notNull().default("medium"),
+  operationalNotes: text("operationalNotes"),
+  readinessOverride: mysqlEnum("readinessOverride", ["none", "blocked", "ready"]).notNull().default("none"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  projectIdx: index("launchpadProjectOps_project_idx").on(table.projectId),
+}));
+
+export const launchpadReleaseRequests = mysqlTable("launchpadReleaseRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  milestoneId: int("milestoneId").notNull(),
+  requestedByUserId: int("requestedByUserId").notNull(),
+  requestedAmount: varchar("requestedAmount", { length: 80 }).notNull(),
+  reason: varchar("reason", { length: 500 }).notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "settled"]).notNull().default("pending"),
+  decidedByUserId: int("decidedByUserId"),
+  decidedAt: timestamp("decidedAt"),
+  proofReference: varchar("proofReference", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  projectIdx: index("launchpadReleaseRequests_project_idx").on(table.projectId),
+  milestoneIdx: index("launchpadReleaseRequests_milestone_idx").on(table.milestoneId),
+  statusIdx: index("launchpadReleaseRequests_status_idx").on(table.status),
+}));
+
 export const launchpadAllocations = mysqlTable("launchpadAllocations", {
   id: int("id").autoincrement().primaryKey(),
   projectId: int("projectId").notNull(),

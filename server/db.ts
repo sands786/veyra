@@ -2,13 +2,15 @@ import { and, desc, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { RpcProvider } from "starknet";
-import { buildLaunchpadPublicSummary, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, evaluateTreasuryPolicy, shouldReuseLaunchpadAllocation } from "@shared/operations";
+import { buildLaunchpadPublicSummary, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, evaluateTreasuryPolicy, shouldReuseLaunchpadAllocation, summarizeLaunchpadReadiness } from "@shared/operations";
 import {
   auditEvents,
   claimLinks,
   launchpadAllocations,
   launchpadMilestones,
   launchpadProjects,
+  launchpadProjectOps,
+  launchpadReleaseRequests,
   treasuryBalanceSnapshots,
   blockchainTransactions,
   payrollSchedules,
@@ -522,10 +524,99 @@ export async function createLaunchpadProject(input: { workspaceId: number; creat
   const inserted = await db.insert(launchpadProjects).values({ ...input, slug, privacyMode: "shielded", status: "draft" }).$returningId();
   const id = inserted[0]?.id;
   if (!id) throw new Error("Could not create Launchpad project");
+  await db.insert(launchpadProjectOps).values({ projectId: id, ownerLabel: input.name, roundType: "community", stage: "planning", riskLevel: "medium", readinessOverride: "none" });
   await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "launchpad_project", entityId: id, action: "created" });
   const rows = await db.select().from(launchpadProjects).where(eq(launchpadProjects.id, id)).limit(1);
   return rows[0];
 }
+
+export async function getLaunchpadProjectOps(workspaceId: number, projectId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const rows = await db.select({ ops: launchpadProjectOps, project: launchpadProjects }).from(launchpadProjectOps).innerJoin(launchpadProjects, eq(launchpadProjectOps.projectId, launchpadProjects.id)).where(and(eq(launchpadProjectOps.projectId, projectId), eq(launchpadProjects.workspaceId, workspaceId))).limit(1);
+  return rows[0]?.ops;
+}
+
+export async function updateLaunchpadProjectOps(input: { workspaceId: number; actorUserId: number; projectId: number; ownerLabel: string; roundType: "community" | "strategic" | "treasury" | "grant"; stage: "planning" | "review" | "live" | "closeout"; riskLevel: "low" | "medium" | "high"; operationalNotes?: string; readinessOverride: "none" | "blocked" | "ready" }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const project = await db.select({ id: launchpadProjects.id }).from(launchpadProjects).where(and(eq(launchpadProjects.id, input.projectId), eq(launchpadProjects.workspaceId, input.workspaceId))).limit(1);
+  if (!project[0]) throw new Error("Launchpad project not found in workspace");
+  await db.update(launchpadProjectOps).set({ ownerLabel: input.ownerLabel, roundType: input.roundType, stage: input.stage, riskLevel: input.riskLevel, operationalNotes: input.operationalNotes, readinessOverride: input.readinessOverride }).where(eq(launchpadProjectOps.projectId, input.projectId));
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "launchpad_project_ops", entityId: input.projectId, action: "updated" });
+  return getLaunchpadProjectOps(input.workspaceId, input.projectId);
+}
+
+export async function getLaunchpadReadiness(workspaceId: number, projectId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const projectRows = await db.select().from(launchpadProjects).where(and(eq(launchpadProjects.id, projectId), eq(launchpadProjects.workspaceId, workspaceId))).limit(1);
+  if (!projectRows[0]) throw new Error("Launchpad project not found in workspace");
+  const [opsRows, milestones, allocations, releases] = await Promise.all([
+    db.select().from(launchpadProjectOps).where(eq(launchpadProjectOps.projectId, projectId)).limit(1),
+    db.select().from(launchpadMilestones).where(eq(launchpadMilestones.projectId, projectId)),
+    db.select().from(launchpadAllocations).where(eq(launchpadAllocations.projectId, projectId)),
+    db.select().from(launchpadReleaseRequests).where(eq(launchpadReleaseRequests.projectId, projectId)),
+  ]);
+  const ops = opsRows[0];
+  const checks = [
+    { key: "metadata", label: "Operating metadata configured", passed: Boolean(ops?.ownerLabel && ops.operationalNotes) },
+    { key: "milestones", label: "Release plan has milestones", passed: milestones.length > 0 },
+    { key: "allocations", label: "Private allocation register initialized", passed: allocations.length > 0 },
+    { key: "releases", label: "No unresolved release request", passed: !releases.some((release) => release.status === "pending") },
+    { key: "project", label: "Project lifecycle is open", passed: projectRows[0].status !== "closed" },
+  ];
+  return summarizeLaunchpadReadiness(checks, ops?.readinessOverride ?? "none");
+}
+
+export async function listLaunchpadActivity(workspaceId: number, projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const project = await db.select({ id: launchpadProjects.id }).from(launchpadProjects).where(and(eq(launchpadProjects.id, projectId), eq(launchpadProjects.workspaceId, workspaceId))).limit(1);
+  if (!project[0]) throw new Error("Launchpad project not found in workspace");
+  const [projectEvents, milestoneEvents, allocationEvents, releaseEvents, opsEvents] = await Promise.all([
+    db.select().from(auditEvents).where(and(eq(auditEvents.workspaceId, workspaceId), eq(auditEvents.entityType, "launchpad_project"), eq(auditEvents.entityId, projectId))),
+    db.select({ event: auditEvents }).from(auditEvents).innerJoin(launchpadMilestones, eq(auditEvents.entityId, launchpadMilestones.id)).where(and(eq(auditEvents.workspaceId, workspaceId), eq(auditEvents.entityType, "launchpad_milestone"), eq(launchpadMilestones.projectId, projectId))),
+    db.select({ event: auditEvents }).from(auditEvents).innerJoin(launchpadAllocations, eq(auditEvents.entityId, launchpadAllocations.id)).where(and(eq(auditEvents.workspaceId, workspaceId), eq(auditEvents.entityType, "launchpad_allocation"), eq(launchpadAllocations.projectId, projectId))),
+    db.select({ event: auditEvents }).from(auditEvents).innerJoin(launchpadReleaseRequests, eq(auditEvents.entityId, launchpadReleaseRequests.id)).where(and(eq(auditEvents.workspaceId, workspaceId), eq(auditEvents.entityType, "launchpad_release"), eq(launchpadReleaseRequests.projectId, projectId))),
+    db.select().from(auditEvents).where(and(eq(auditEvents.workspaceId, workspaceId), eq(auditEvents.entityType, "launchpad_project_ops"), eq(auditEvents.entityId, projectId))),
+  ]);
+  return [...projectEvents, ...milestoneEvents.map(({ event }) => event), ...allocationEvents.map(({ event }) => event), ...releaseEvents.map(({ event }) => event), ...opsEvents].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 40);
+}
+
+export async function listLaunchpadReleaseRequests(workspaceId: number, projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ release: launchpadReleaseRequests, milestone: launchpadMilestones, project: launchpadProjects }).from(launchpadReleaseRequests).innerJoin(launchpadMilestones, eq(launchpadReleaseRequests.milestoneId, launchpadMilestones.id)).innerJoin(launchpadProjects, eq(launchpadReleaseRequests.projectId, launchpadProjects.id)).where(and(eq(launchpadReleaseRequests.projectId, projectId), eq(launchpadProjects.workspaceId, workspaceId))).orderBy(desc(launchpadReleaseRequests.createdAt));
+  return rows.map(({ release, milestone }) => ({ ...release, milestoneName: milestone.name }));
+}
+
+export async function createLaunchpadReleaseRequest(input: { workspaceId: number; actorUserId: number; projectId: number; milestoneId: number; requestedAmount: string; reason: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const rows = await db.select({ milestone: launchpadMilestones, project: launchpadProjects }).from(launchpadMilestones).innerJoin(launchpadProjects, eq(launchpadMilestones.projectId, launchpadProjects.id)).where(and(eq(launchpadMilestones.id, input.milestoneId), eq(launchpadProjects.id, input.projectId), eq(launchpadProjects.workspaceId, input.workspaceId))).limit(1);
+  if (!rows[0]) throw new Error("Milestone not found in project workspace");
+  const existing = await db.select().from(launchpadReleaseRequests).where(and(eq(launchpadReleaseRequests.projectId, input.projectId), eq(launchpadReleaseRequests.milestoneId, input.milestoneId), eq(launchpadReleaseRequests.status, "pending"))).limit(1);
+  if (existing[0]) return existing[0];
+  const inserted = await db.insert(launchpadReleaseRequests).values({ projectId: input.projectId, milestoneId: input.milestoneId, requestedByUserId: input.actorUserId, requestedAmount: input.requestedAmount, reason: input.reason, status: "pending" }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not create release request");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "launchpad_release", entityId: id, action: "requested" });
+  const release = await db.select().from(launchpadReleaseRequests).where(eq(launchpadReleaseRequests.id, id)).limit(1);
+  return release[0];
+}
+
+export async function decideLaunchpadReleaseRequest(input: { workspaceId: number; actorUserId: number; requestId: number; status: "approved" | "rejected" | "settled"; proofReference?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const rows = await db.select({ release: launchpadReleaseRequests, project: launchpadProjects }).from(launchpadReleaseRequests).innerJoin(launchpadProjects, eq(launchpadReleaseRequests.projectId, launchpadProjects.id)).where(and(eq(launchpadReleaseRequests.id, input.requestId), eq(launchpadProjects.workspaceId, input.workspaceId))).limit(1);
+  if (!rows[0]) throw new Error("Release request not found in workspace");
+  await db.update(launchpadReleaseRequests).set({ status: input.status, decidedByUserId: input.actorUserId, decidedAt: new Date(), proofReference: input.proofReference }).where(eq(launchpadReleaseRequests.id, input.requestId));
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "launchpad_release", entityId: input.requestId, action: input.status });
+  const release = await db.select().from(launchpadReleaseRequests).where(eq(launchpadReleaseRequests.id, input.requestId)).limit(1);
+  return release[0];
+}
+
 export async function listWorkspaceLaunchpadProjects(workspaceId: number) {
   const db = await getDb();
   if (!db) return [];
@@ -546,6 +637,13 @@ export async function createLaunchpadMilestone(input: { workspaceId: number; cre
   const rows = await db.select().from(launchpadMilestones).where(eq(launchpadMilestones.id, id)).limit(1);
   return rows[0];
 }
+export async function listLaunchpadAllocations(workspaceId: number, projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ allocation: launchpadAllocations }).from(launchpadAllocations).innerJoin(launchpadProjects, eq(launchpadAllocations.projectId, launchpadProjects.id)).where(and(eq(launchpadAllocations.projectId, projectId), eq(launchpadProjects.workspaceId, workspaceId))).orderBy(desc(launchpadAllocations.createdAt));
+  return rows.map(({ allocation }) => ({ id: allocation.id, commitment: allocation.commitment, allocationAmount: allocation.allocationAmount, status: allocation.status, createdAt: allocation.createdAt, claimedAt: allocation.claimedAt }));
+}
+
 export async function createLaunchpadAllocation(input: { workspaceId: number; createdByUserId: number; projectId: number; commitment: string; encryptedReference?: string; allocationAmount: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");

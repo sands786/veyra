@@ -8,7 +8,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { parseWorkspaceId } from "./workspaceSelection";
 import { buildPayrollCron } from "@shared/operations";
 import { resolveWorkspaceSelection } from "./workspaceResolver";
-import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv, createLaunchpadProject, listWorkspaceLaunchpadProjects, createLaunchpadMilestone, createLaunchpadAllocation, updateLaunchpadProjectStatus, updateLaunchpadMilestoneStatus, getPublicLaunchpadProject } from "./db";
+import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv, createLaunchpadProject, listWorkspaceLaunchpadProjects, createLaunchpadMilestone, createLaunchpadAllocation, updateLaunchpadProjectStatus, updateLaunchpadMilestoneStatus, getPublicLaunchpadProject, getLaunchpadProjectOps, updateLaunchpadProjectOps, getLaunchpadReadiness, listLaunchpadActivity, listLaunchpadAllocations, listLaunchpadReleaseRequests, createLaunchpadReleaseRequest, decideLaunchpadReleaseRequest } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null; req?: { headers?: Record<string, string | string[] | undefined> } }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -109,6 +109,47 @@ export const appRouter = router({
       if (!actorId) throw new Error("Authentication required");
       if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can create Launchpad projects");
       return createLaunchpadProject({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
+    }),
+    projectOps: protectedProcedure.input(z.object({ projectId: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return getLaunchpadProjectOps(membership.workspace.id, input.projectId);
+    }),
+    readiness: protectedProcedure.input(z.object({ projectId: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return getLaunchpadReadiness(membership.workspace.id, input.projectId);
+    }),
+    updateProjectOps: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), ownerLabel: z.string().trim().min(2).max(160), roundType: z.enum(["community", "strategic", "treasury", "grant"]), stage: z.enum(["planning", "review", "live", "closeout"]), riskLevel: z.enum(["low", "medium", "high"]), operationalNotes: z.string().trim().max(2000).optional(), readinessOverride: z.enum(["none", "blocked", "ready"]) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can update project operations");
+      return updateLaunchpadProjectOps({ workspaceId: membership.workspace.id, actorUserId: actorId, ...input });
+    }),
+    allocations: protectedProcedure.input(z.object({ projectId: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return listLaunchpadAllocations(membership.workspace.id, input.projectId);
+    }),
+    activity: protectedProcedure.input(z.object({ projectId: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return listLaunchpadActivity(membership.workspace.id, input.projectId);
+    }),
+    releaseRequests: protectedProcedure.input(z.object({ projectId: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return listLaunchpadReleaseRequests(membership.workspace.id, input.projectId);
+    }),
+    requestRelease: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), milestoneId: z.number().int().positive(), requestedAmount: amount, reason: z.string().trim().min(8).max(500) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can request releases");
+      return createLaunchpadReleaseRequest({ workspaceId: membership.workspace.id, actorUserId: actorId, ...input });
+    }),
+    decideRelease: protectedProcedure.input(z.object({ requestId: z.number().int().positive(), status: z.enum(["approved", "rejected", "settled"]), proofReference: z.string().trim().max(255).optional() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin"].includes(membership.memberRole)) throw new Error("Only owners and admins can decide release requests");
+      return decideLaunchpadReleaseRequest({ workspaceId: membership.workspace.id, actorUserId: actorId, ...input });
     }),
     createMilestone: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), name: z.string().trim().min(2).max(160), sequence: z.number().int().positive().max(100), releaseAmount: amount, approvalThreshold: z.number().int().min(1).max(20) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);

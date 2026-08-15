@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLaunchpadPublicSummary, buildPayrollCron, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canCreateRecipientClaim, canScheduleRoute, canSubmitLaunchpadAllocation, canSubmitLaunchpadProject, evaluateTreasuryPolicy, getLaunchpadInitialTab, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, isValidStarknetAddress, isWalletActionLocked, launchpadProjectActionLabel, nextLaunchpadProjectStatus, nextPayrollRunAt, normalizeAmountInput, resolveLaunchpadEmptyState, resolveLaunchpadPanel, shouldReuseLaunchpadAllocation } from "@shared/operations";
+import { buildLaunchpadPublicSummary, buildPayrollCron, canDecideLaunchpadRelease, canRequestLaunchpadRelease, summarizeLaunchpadReadiness, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canCreateRecipientClaim, canScheduleRoute, canSubmitLaunchpadAllocation, canSubmitLaunchpadProject, evaluateTreasuryPolicy, getLaunchpadInitialTab, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, isValidStarknetAddress, isWalletActionLocked, launchpadProjectActionLabel, nextLaunchpadProjectStatus, nextPayrollRunAt, normalizeAmountInput, resolveLaunchpadEmptyState, resolveLaunchpadPanel, shouldReuseLaunchpadAllocation } from "@shared/operations";
 
 describe("operations primitives", () => {
   it("builds weekly Heartbeat cron expressions in UTC", () => {
@@ -95,6 +95,18 @@ describe("operations primitives", () => {
     expect(resolveLaunchpadEmptyState(true, 2)).toBe("ready");
   });
 
+  it("computes production Launchpad readiness and release gating deterministically", () => {
+    const checks = [{ key: "metadata", label: "Metadata", passed: true }, { key: "milestones", label: "Milestones", passed: true }, { key: "allocations", label: "Allocations", passed: false }];
+    expect(summarizeLaunchpadReadiness(checks, "ready").score).toBe(67);
+    expect(summarizeLaunchpadReadiness(checks, "ready").ready).toBe(false);
+    expect(summarizeLaunchpadReadiness(checks, "blocked").ready).toBe(false);
+    expect(canRequestLaunchpadRelease("live", "ready", false, "75000", "Beta evidence is attached")).toBe(true);
+    expect(canRequestLaunchpadRelease("live", "planned", false, "75000", "Beta evidence is attached")).toBe(false);
+    expect(canRequestLaunchpadRelease("closed", "ready", false, "75000", "Beta evidence is attached")).toBe(false);
+    expect(canDecideLaunchpadRelease("pending")).toBe(true);
+    expect(canDecideLaunchpadRelease("approved")).toBe(false);
+  });
+
   it("keeps allocation data out of public Launchpad summaries", () => {
     const summary = buildLaunchpadPublicSummary({ slug: "launch-0123456789abcdef0123", name: "Private round", description: "Milestone room", token: "USDC", network: "mainnet", targetAmount: "1000", raisedAmount: "0", privacyMode: "shielded", status: "live", fundingEndsAt: null }, [{ id: 1, name: "Beta", sequence: 1, releaseAmount: "500", status: "planned", proofReference: null }]);
     expect(summary.milestones).toHaveLength(1);
@@ -117,5 +129,19 @@ describe("operations primitives", () => {
     expect(isPublicProofSlug("vp-0123456789abcdef0123")).toBe(true);
     expect(isPublicProofSlug("vp-0123456789abcdef01234")).toBe(false);
     expect(isPublicProofSlug("VP-0123456789ABCDEF0123")).toBe(false);
+  });
+});
+
+
+describe("Launchpad SaaS failure boundaries", () => {
+  it("blocks release requests when readiness or project state is unsafe", () => {
+    expect(canRequestLaunchpadRelease("live", "blocked", false, "1000", "Evidence is attached")).toBe(false);
+    expect(canRequestLaunchpadRelease("live", "ready", true, "1000", "Evidence is attached")).toBe(false);
+  });
+
+  it("rejects malformed or empty private allocation commitments", () => {
+    expect(canSubmitLaunchpadAllocation("", "1000")).toBe(false);
+    expect(canSubmitLaunchpadAllocation("cm-short", "1000")).toBe(false);
+    expect(canSubmitLaunchpadAllocation("cm-0123456789abcdef", "1000")).toBe(true);
   });
 });

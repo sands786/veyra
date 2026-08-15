@@ -45,7 +45,22 @@ export function isLaunchpadAdminRole(role: string): boolean {
   return role === "owner" || role === "admin";
 }
 
-export type LaunchpadTab = "overview" | "milestones" | "allocations";
+export type LaunchpadTab = "overview" | "milestones" | "allocations" | "operations";
+
+export type LaunchpadReadinessCheck = { key: string; label: string; passed: boolean };
+
+export function summarizeLaunchpadReadiness(checks: LaunchpadReadinessCheck[], override: "none" | "blocked" | "ready" = "none") {
+  const score = checks.length ? Math.round((checks.filter((check) => check.passed).length / checks.length) * 100) : 0;
+  return { score, ready: override !== "blocked" && override === "ready" && checks.every((check) => check.passed), checks, override } as const;
+}
+
+export function canRequestLaunchpadRelease(projectStatus: "draft" | "live" | "funded" | "closed", milestoneStatus: "planned" | "ready" | "released" | "blocked", pendingRequest: boolean, amount: string, reason: string): boolean {
+  return projectStatus !== "closed" && milestoneStatus === "ready" && !pendingRequest && /^\d+(\.\d{1,18})?$/.test(amount.trim()) && reason.trim().length >= 8;
+}
+
+export function canDecideLaunchpadRelease(status: "pending" | "approved" | "rejected" | "settled"): boolean {
+  return status === "pending";
+}
 
 export function getLaunchpadInitialTab(): LaunchpadTab {
   return "overview";
