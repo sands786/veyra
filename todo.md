@@ -226,3 +226,6 @@
 
 ## Corrected detailed voiceover walkthrough
 - [x] Rebuild the Demo Mode walkthrough as a 2+ minute video with dedicated visuals for every surface, no music bed, and clear loud voiceover explaining each workflow, simulation state, failure/retry path, and production boundary.
+
+## Standalone function videos
+- [x] Create separate clear-voice videos for Payroll, Operations, Treasury, Private Claims, Launchpad, Public Proof, Wallet/Execution Boundary, and Demo Mode error/retry behavior, with no music and dedicated visuals for each function.
