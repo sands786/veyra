@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLaunchpadPublicSummary, buildPayrollCron, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canSubmitLaunchpadAllocation, canSubmitLaunchpadProject, evaluateTreasuryPolicy, getLaunchpadInitialTab, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, launchpadProjectActionLabel, nextLaunchpadProjectStatus, nextPayrollRunAt, normalizeAmountInput, resolveLaunchpadEmptyState, resolveLaunchpadPanel, shouldReuseLaunchpadAllocation } from "@shared/operations";
+import { buildLaunchpadPublicSummary, buildPayrollCron, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canCreateRecipientClaim, canScheduleRoute, canSubmitLaunchpadAllocation, canSubmitLaunchpadProject, evaluateTreasuryPolicy, getLaunchpadInitialTab, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, isValidStarknetAddress, isWalletActionLocked, launchpadProjectActionLabel, nextLaunchpadProjectStatus, nextPayrollRunAt, normalizeAmountInput, resolveLaunchpadEmptyState, resolveLaunchpadPanel, shouldReuseLaunchpadAllocation } from "@shared/operations";
 
 describe("operations primitives", () => {
   it("builds weekly Heartbeat cron expressions in UTC", () => {
@@ -65,6 +65,25 @@ describe("operations primitives", () => {
     expect(canSubmitLaunchpadProject("Private round", "2500")).toBe(true);
     expect(canSubmitLaunchpadAllocation("short", "2500")).toBe(false);
     expect(canSubmitLaunchpadAllocation("cm-0123456789abcdef", "2500")).toBe(true);
+  });
+
+  it("enforces explicit selection and pending locks for audited actions", () => {
+    expect(canScheduleRoute(null, false)).toBe(false);
+    expect(canScheduleRoute(12, false)).toBe(true);
+    expect(canScheduleRoute(12, true)).toBe(false);
+    expect(canCreateRecipientClaim(12, [], false)).toBe(false);
+    expect(canCreateRecipientClaim(12, [44], false)).toBe(true);
+    expect(canCreateRecipientClaim(12, [44, 45], false)).toBe(false);
+    expect(canCreateRecipientClaim(12, [44], true)).toBe(false);
+    expect(isWalletActionLocked(true)).toBe(true);
+    expect(isWalletActionLocked(false)).toBe(false);
+  });
+
+  it("shares the strict Starknet address contract across wallet actions", () => {
+    expect(isValidStarknetAddress("0x1234abcd")).toBe(true);
+    expect(isValidStarknetAddress(" 0x1234abcd ")).toBe(true);
+    expect(isValidStarknetAddress("not-a-wallet")).toBe(false);
+    expect(isValidStarknetAddress("0x")).toBe(false);
   });
 
   it("resolves polished Launchpad tabs and empty states deterministically", () => {

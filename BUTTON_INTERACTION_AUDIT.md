@@ -1,0 +1,7 @@
+# VeilPay button interaction audit
+
+The audit covered the primary workspace, Operations, Launchpad, Claim, navigation, wallet, export, proof, route, recipient, schedule, governance, treasury, and recovery controls.
+
+The highest-risk issues were corrected. Scheduling now requires an explicitly selected route rather than silently choosing the first live route. Recipient claims now require exactly one selected recipient and an explicitly selected route. Route submission is guarded against duplicate saves, transaction-recording races, and invalid authenticated amounts. Wallet connection buttons are disabled during an in-flight connection. Recipient creation/editing, approval thresholds, treasury policies, balance snapshots, and public Claim redemption now disable on invalid inputs before invoking tRPC. Archive/restore and schedule pause/resume controls disable while their mutations are pending. Proof and Launchpad room-reference clipboard actions now report permission failures honestly instead of always showing success.
+
+The shared Starknet address validator is used by recipient and Claim controls and covered by regression tests. Verification passed with 26 tests, clean TypeScript checking, and a clean production build. The existing Vite bundle-size advisory remains non-blocking. Real wallet prompts, browser clipboard permissions, and mainnet transactions still require user-owned authenticated testing.

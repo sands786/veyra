@@ -150,3 +150,12 @@
 - [x] Add Launchpad polish regression coverage, production verification, and desktop/mobile visual QA.
 - [x] Add polish-specific pure workflow tests for status progression, tab/view state, empty-state behavior, and disabled validation conditions; rerun the full suite before checkpointing.
 - [x] Add deterministic Launchpad view-state helpers for default tab selection, visible panel resolution, and no-project/no-milestone empty states; test them and rerun the full suite before checkpointing.
+
+## Full interaction audit
+- [x] Inventory every button and interactive control across Home, Launchpad, Claim, Proof, navigation, and wallet surfaces.
+- [x] Fix dead, misleading, duplicate, or unsafe handlers and add consistent pending, disabled, success, and error feedback.
+- [x] Add interaction-contract regression tests and verify primary controls at desktop and mobile widths.
+- [x] Centralize clipboard success/failure handling for proof links, claim links, and Launchpad references.
+- [x] Add focused interaction-contract tests for explicit route selection, single-recipient claim gating, wallet pending lock, and clipboard success/failure behavior.
+- [x] Re-run typecheck, full Vitest suite, production build, and desktop/mobile QA before final checkpoint.
+- [x] Refactor Launchpad room-reference copy to use the shared clipboard helper, then rerun typecheck/tests/build and responsive QA.

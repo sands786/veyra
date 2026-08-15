@@ -99,6 +99,23 @@ export function buildLaunchpadPublicSummary(project: { slug: string; name: strin
   return { ...project, milestones: milestones.map(({ id, name, sequence, releaseAmount, status, proofReference }) => ({ id, name, sequence, releaseAmount, status, proofReference })) };
 }
 
+export function canScheduleRoute(routeId: number | null, pending: boolean): boolean {
+  return routeId !== null && routeId > 0 && !pending;
+}
+
+export function canCreateRecipientClaim(routeId: number | null, recipientIds: number[], pending: boolean): boolean {
+  return routeId !== null && routeId > 0 && recipientIds.length === 1 && recipientIds[0] > 0 && !pending;
+}
+
+export function isWalletActionLocked(pending: boolean): boolean {
+  return pending;
+}
+
+export function isValidStarknetAddress(value: string): boolean {
+  const normalized = value.trim();
+  return normalized.length >= 4 && normalized.length <= 100 && /^0x[0-9a-fA-F]+$/.test(normalized);
+}
+
 export function normalizeAmountInput(value: string): string {
   return value.replace(/,/g, "").trim();
 }
