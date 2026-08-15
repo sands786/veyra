@@ -211,3 +211,6 @@
 
 ## Coming Soon typographic teaser
 - [x] Create and deliver a complete Coming Soon teaser film with a typographic intro, cinematic product reveal, privacy/Starknet message, and final VeilPay call to action.
+
+## Audio-enhanced teaser
+- [x] Add a restrained cinematic electronic music bed to the Coming Soon teaser and deliver a validated final video with audio.
