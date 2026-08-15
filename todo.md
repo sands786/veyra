@@ -234,3 +234,8 @@
 - [x] Upload all eight standalone function videos to lifecycle-safe project storage and embed them in the Documentation page.
 - [x] Add detailed explanations for Payroll, Operations, Treasury, Private Claims, Launchpad, Public Proof, Wallet/Execution Boundary, and Demo Mode Error + Retry beside each video.
 - [x] Add responsive video QA, focused documentation-contract tests, and update the project QA record.
+
+## Reference-matched explanatory videos
+- [x] Analyze the attached reference’s pacing, screen-led explanation, annotation, narration, and section structure.
+- [x] Replace all eight standalone Documentation videos with reference-matched step-by-step VeilPay walkthroughs using dedicated UI sequences and explanatory callouts.
+- [x] Upload replacement assets, update Documentation metadata/tests, and verify desktop/mobile playback and layout.

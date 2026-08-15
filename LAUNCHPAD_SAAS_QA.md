@@ -43,3 +43,7 @@ The new `/docs` route was verified at desktop and mobile widths. Desktop present
 ## Video-led Documentation QA — 2026-08-15
 
 The Documentation route now embeds all eight standalone function videos from lifecycle-safe `/manus-storage/` assets. Each player has a dedicated title, duration, purpose explanation, and explicit production boundary. Desktop presents the videos in a two-column grid beneath the privacy model; mobile stacks each player and explanation into a single readable flow without horizontal overflow. The teaser remains at the top of the guide, while Starknet flow and Demo Mode remain available below the function-video section. Verification passes with 41 Vitest tests, clean TypeScript, and a successful production build.
+
+## Reference-matched video replacement QA — 2026-08-15
+
+The attached Walrus Drop reference was analyzed as a high-density, screen-led product walkthrough: eight rapid chapters, declarative narration, dark UI mockups, glowing focus boxes, bottom-left chapter headers, contextual labels, and a persistent Demo Mode safety boundary. VeilPay’s eight Documentation videos were rebuilt with that structure using dedicated Kore narration, animated cyan focus boxes, chapter captions, and no music. The replacement assets are uploaded under lifecycle-safe `/manus-storage/` paths and are now the active Documentation sources. Desktop and mobile `/docs` previews show the full two-column/stacked player layout without overflow. The 41-test suite, TypeScript check, and production build pass.
