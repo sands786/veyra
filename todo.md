@@ -223,3 +223,6 @@
 
 ## Complete Demo Mode walkthrough film
 - [x] Create and deliver a complete intro-to-demo walkthrough film explaining every Demo Mode function, simulated state, failure/retry path, and production boundary.
+
+## Corrected detailed voiceover walkthrough
+- [x] Rebuild the Demo Mode walkthrough as a 2+ minute video with dedicated visuals for every surface, no music bed, and clear loud voiceover explaining each workflow, simulation state, failure/retry path, and production boundary.
