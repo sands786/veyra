@@ -247,3 +247,5 @@
 - [x] Add testnet transaction status, receipt, and evidence boundaries without claiming mainnet proof
 - [x] Add a one-click reproducible testnet round-trip/reconciliation demo with UNKNOWN outcome handling and transcript export
 - [x] Add tests, documentation, and responsive verification for the testnet and reconciliation flows
+
+- [x] Make the Mainnet/Testnet selector more prominent and verify safe network switching behavior
