@@ -345,7 +345,7 @@ export async function confirmBlockchainTransaction(input: { workspaceId: number;
   return updated[0];
 }
 
-export async function updatePaymentRoute(input: { workspaceId: number; routeId: number; actorUserId: number; name: string; token: string; totalAmount: string; recipientAmounts: Array<{ recipientId: number; amount: string }> }) {
+export async function updatePaymentRoute(input: { workspaceId: number; routeId: number; actorUserId: number; name: string; token: string; network: "mainnet" | "sepolia"; totalAmount: string; recipientAmounts: Array<{ recipientId: number; amount: string }> }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
   const existing = await db.select().from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
@@ -355,14 +355,14 @@ export async function updatePaymentRoute(input: { workspaceId: number; routeId: 
   const start = new Date();
   start.setUTCHours(0, 0, 0, 0);
   const todayRoutes = await db.select().from(paymentRoutes).where(eq(paymentRoutes.workspaceId, input.workspaceId));
-  const dailyUsed = todayRoutes.filter((route) => route.id !== input.routeId && route.token === input.token && route.network === existing[0].network && route.createdAt >= start && !["failed", "cancelled"].includes(route.status)).reduce((sum, route) => sum + Number(route.totalAmount), 0).toString();
-  const evaluation = evaluateTreasuryPolicy(activePolicy, { totalAmount: input.totalAmount, approvalCount: 0, network: existing[0].network, dailyUsed });
+  const dailyUsed = todayRoutes.filter((route) => route.id !== input.routeId && route.token === input.token && route.network === input.network && route.createdAt >= start && !["failed", "cancelled"].includes(route.status)).reduce((sum, route) => sum + Number(route.totalAmount), 0).toString();
+  const evaluation = evaluateTreasuryPolicy(activePolicy, { totalAmount: input.totalAmount, approvalCount: 0, network: input.network, dailyUsed });
   if (!evaluation.allowed && evaluation.reasons.some((reason) => reason.includes("limit") || reason.includes("restricted") || reason.includes("exceeded"))) throw new Error(evaluation.reasons.join(" / "));
   const recipientIds = Array.from(new Set(input.recipientAmounts.map((item) => item.recipientId)));
   const owned = await db.select({ id: recipients.id }).from(recipients).where(and(eq(recipients.workspaceId, input.workspaceId), eq(recipients.status, "active")));
   const ownedIds = new Set(owned.map((row) => row.id));
   if (!recipientIds.length || recipientIds.some((id) => !ownedIds.has(id))) throw new Error("All selected recipients must be active workspace recipients");
-  await db.update(paymentRoutes).set({ name: input.name, token: input.token, totalAmount: input.totalAmount }).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId)));
+  await db.update(paymentRoutes).set({ name: input.name, token: input.token, network: input.network, totalAmount: input.totalAmount }).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId)));
   await db.delete(routeRecipients).where(eq(routeRecipients.routeId, input.routeId));
   await db.insert(routeRecipients).values(input.recipientAmounts.map((item) => ({ routeId: input.routeId, recipientId: item.recipientId, amount: item.amount })));
   await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "payment_route", entityId: input.routeId, action: "updated" });

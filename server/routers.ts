@@ -248,7 +248,7 @@ export const appRouter = router({
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
       if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot edit payment routes");
-      return updatePaymentRoute({ workspaceId: membership.workspace.id, routeId: input.id, actorUserId: actorId, name: input.name, token: input.token, totalAmount: input.totalAmount, recipientAmounts: input.recipientAmounts });
+      return updatePaymentRoute({ workspaceId: membership.workspace.id, routeId: input.id, actorUserId: actorId, name: input.name, token: input.token, network: input.network, totalAmount: input.totalAmount, recipientAmounts: input.recipientAmounts });
     }),
     transition: protectedProcedure.input(z.object({ id: z.number().int().positive(), status: z.enum(["draft", "shielded", "routed", "settled", "failed", "cancelled"]) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);

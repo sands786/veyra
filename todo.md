@@ -239,3 +239,11 @@
 - [x] Analyze the attached reference’s pacing, screen-led explanation, annotation, narration, and section structure.
 - [x] Replace all eight standalone Documentation videos with reference-matched step-by-step VeilPay walkthroughs using dedicated UI sequences and explanatory callouts.
 - [x] Upload replacement assets, update Documentation metadata/tests, and verify desktop/mobile playback and layout.
+
+- [x] Update VeilPay deployment narrative and pitch deck to cover both Starknet testnet verification and mainnet execution, with explicit evidence boundaries
+- [x] Validate and document the testnet/mainnet readiness checklist without claiming transactions that have not been completed
+
+- [x] Implement a clearly labeled Starknet testnet network path in VeilPay with mainnet separation
+- [x] Add testnet transaction status, receipt, and evidence boundaries without claiming mainnet proof
+- [x] Add a one-click reproducible testnet round-trip/reconciliation demo with UNKNOWN outcome handling and transcript export
+- [x] Add tests, documentation, and responsive verification for the testnet and reconciliation flows

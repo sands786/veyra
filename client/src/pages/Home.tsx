@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { connectVeilWallet, explorerUrl, submitShieldedRoute, type VeilWallet } from "@/lib/strk20";
+import { connectVeilWallet, explorerUrl, networkFromChainId, networkLabel, submitShieldedRoute, type VeilNetwork, type VeilWallet } from "@/lib/strk20";
 import { canCreateRecipientClaim, canScheduleRoute, isValidStarknetAddress, isWalletActionLocked, normalizeAmountInput } from "@shared/operations";
 import { copyText } from "@/lib/clipboard";
 import { useDemoMode } from "@/contexts/DemoModeContext";
@@ -37,6 +37,10 @@ export default function Home() {
   // nonce cookie and must run only at the moment of navigation.
   const { user, loading, error, isAuthenticated, logout } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const [selectedNetwork, setSelectedNetwork] = useState<VeilNetwork>(() => {
+    if (typeof window === "undefined") return "sepolia";
+    return window.localStorage.getItem("veilpay-network") === "mainnet" ? "mainnet" : "sepolia";
+  });
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<number | null>(() => {
     if (typeof window === "undefined") return null;
@@ -111,6 +115,7 @@ export default function Home() {
   const [walletConnecting, setWalletConnecting] = useState(false);
   const [wallet, setWallet] = useState<VeilWallet>();
   const [walletAddress, setWalletAddress] = useState("");
+  const walletNetwork = networkFromChainId(wallet?.chainId);
   const [copied, setCopied] = useState(false);
   const [recipientName, setRecipientName] = useState("");
   const [recipientWallet, setRecipientWallet] = useState("");
@@ -125,7 +130,7 @@ export default function Home() {
   const [policyDaily, setPolicyDaily] = useState("15000");
   const [claimToken, setClaimToken] = useState<string | null>(null);
   const [treasuryBalance, setTreasuryBalance] = useState("");
-  const policySimulationQuery = trpc.treasury.simulate.useQuery({ token: tokenSymbol, totalAmount: normalizedAmount, approvalCount: Math.max(0, Number(approvalThreshold) || 0), network: "mainnet" }, { enabled: isAuthenticated && /^\d+(\.\d{1,18})?$/.test(normalizedAmount), retry: false });
+  const policySimulationQuery = trpc.treasury.simulate.useQuery({ token: tokenSymbol, totalAmount: normalizedAmount, approvalCount: Math.max(0, Number(approvalThreshold) || 0), network: selectedNetwork }, { enabled: isAuthenticated && /^\d+(\.\d{1,18})?$/.test(normalizedAmount), retry: false });
 
   const stageCopy = useMemo(() => stages[stage], [stage]);
 
@@ -141,7 +146,8 @@ export default function Home() {
       setWallet(result.wallet);
       setWalletAddress(result.address ?? "");
       setConnected(true);
-      toast("Wallet connected.", { description: "Live STRK20 actions are now available through your wallet." });
+      const detectedNetwork = result.network;
+      toast("Wallet connected.", { description: detectedNetwork ? `${networkLabel(detectedNetwork)} detected. ${detectedNetwork === "sepolia" ? "Testnet verification is active." : "Production execution is active."}` : "Select a network before signing." });
     } catch (error) {
       toast("Wallet connection was cancelled.", { description: String(error).slice(0, 120) });
     } finally {
@@ -169,7 +175,7 @@ export default function Home() {
     let savedRoute: { id: number } | undefined;
     if (stage === 1) {
       try {
-        const routeInput = { name: routeName.trim() || "Untitled private route", token: tokenSymbol, totalAmount: normalizedAmount, recipientAmounts: activeRecipientIds.map((recipientId) => ({ recipientId, amount: normalizedAmount })) };
+        const routeInput = { name: routeName.trim() || "Untitled private route", token: tokenSymbol, network: selectedNetwork, totalAmount: normalizedAmount, recipientAmounts: activeRecipientIds.map((recipientId) => ({ recipientId, amount: normalizedAmount })) };
         savedRoute = editingRouteId ? await updateRouteMutation.mutateAsync({ id: editingRouteId, ...routeInput }) : await createRouteMutation.mutateAsync(routeInput);
         setEditingRouteId(null);
       } catch (error) {
@@ -180,12 +186,12 @@ export default function Home() {
     if (wallet?.strk20InvokeTransaction && stage === 1) {
       try {
         const amountSmallestUnit = BigInt(normalizedAmount || "0") * BigInt("1000000");
-        const tx = await submitShieldedRoute(wallet, amountSmallestUnit);
+        const tx = await submitShieldedRoute(wallet, amountSmallestUnit, selectedNetwork);
         if (savedRoute?.id && tx.transaction_hash) {
-          await recordTransactionMutation.mutateAsync({ routeId: savedRoute.id, network: wallet.chainId === "0x534e5f4d41494e" ? "mainnet" : "sepolia", transactionHash: tx.transaction_hash, status: "submitted", explorerUrl: explorerUrl(tx.transaction_hash, wallet.chainId) });
+          await recordTransactionMutation.mutateAsync({ routeId: savedRoute.id, network: selectedNetwork, transactionHash: tx.transaction_hash, status: "submitted", explorerUrl: explorerUrl(tx.transaction_hash, selectedNetwork) });
         }
         setStage(2);
-        toast("Private route submitted.", { description: tx.transaction_hash ? `View on Voyager: ${explorerUrl(tx.transaction_hash, wallet.chainId)}` : "Waiting for confirmation." });
+        toast("Private route submitted.", { description: tx.transaction_hash ? `${networkLabel(selectedNetwork)} · View on Voyager: ${explorerUrl(tx.transaction_hash, selectedNetwork)}` : "Waiting for confirmation." });
         return;
       } catch (error) {
         toast("STRK20 action was not submitted.", { description: String(error).slice(0, 140) });
@@ -194,6 +200,15 @@ export default function Home() {
     }
     setStage((current) => Math.min(current + 1, stages.length - 1));
     toast(stage >= 2 ? "Proof card prepared." : "Demo route created.", { description: "The public chain sees a commitment, not your recipient roster." });
+  }
+
+  function changeNetwork(network: VeilNetwork) {
+    setSelectedNetwork(network);
+    window.localStorage.setItem("veilpay-network", network);
+    setConnected(false);
+    setWallet(undefined);
+    setWalletAddress("");
+    toast(`${networkLabel(network)} selected.`, { description: network === "sepolia" ? "Use testnet for safe verification; it does not count as mainnet evidence." : "Mainnet actions require deliberate wallet approval and real funds." });
   }
 
   function viewContracts() {
@@ -263,8 +278,8 @@ export default function Home() {
 
           <div className="mt-auto rounded-[16px] border border-white/10 bg-[#1D1E1B] p-4">
             <div className="flex items-center justify-between"><span className="font-mono text-[9px] tracking-[0.16em] text-[#918B81]">NETWORK</span><span className="h-2 w-2 rounded-full bg-[#70D49D] shadow-[0_0_12px_#70D49D]" /></div>
-            <div className="mt-3 font-display text-[15px]">Starknet mainnet</div>
-            <div className="mt-1 text-[12px] leading-5 text-[#918B81]">STRK20 adapter ready for wallet connection.</div>
+            <select aria-label="Starknet network" value={selectedNetwork} onChange={(event) => changeNetwork(event.target.value as VeilNetwork)} className="mt-3 w-full bg-transparent font-display text-[15px] text-[#F3EEE5] outline-none"><option value="sepolia">Starknet Sepolia</option><option value="mainnet">Starknet mainnet</option></select>
+            <div className="mt-1 text-[12px] leading-5 text-[#918B81]">{selectedNetwork === "sepolia" ? "Safe testnet verification path. No mainnet evidence." : "Production path. Wallet approval required."}</div>
             <button onClick={viewContracts} className="mt-4 flex items-center gap-1 font-mono text-[10px] tracking-[0.12em] text-[#F0563A] hover:text-[#FF7257]">VIEW CONTRACTS <ArrowUpRight size={12} /></button>
           </div>
         </aside>
@@ -279,7 +294,7 @@ export default function Home() {
             <div className="flex items-center gap-3">
               {isAuthenticated ? <label className="hidden items-center gap-2 font-mono text-[10px] tracking-[0.12em] text-[#918B81] sm:flex">WORKSPACE / <select aria-label="Active workspace" value={activeWorkspaceId ?? ""} onChange={(event) => switchWorkspace(event.target.value)} className="max-w-[150px] bg-transparent text-[#F3EEE5] outline-none"><option value="" disabled>{user?.name ?? "ACTIVE"}</option>{(workspaceListQuery.data ?? []).map((membership) => <option key={membership.workspace.id} value={membership.workspace.id}>{membership.workspace.name}</option>)}</select></label> : <span className="hidden font-mono text-[10px] tracking-[0.12em] text-[#918B81] sm:block">{isDemoMode ? "DEMO MODE / SIMULATED ONLY" : loading ? "CHECKING SESSION" : "PUBLIC PREVIEW / SIGN IN TO SAVE"}</span>}
               {!isAuthenticated ? <Button onClick={startLogin} className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10">SIGN IN</Button> : <Button onClick={() => void logout()} className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10">SIGN OUT</Button>}
-              <Button disabled={isWalletActionLocked(walletConnecting)} onClick={handleWalletConnect} className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]">{walletConnecting ? "CONNECTING…" : connected ? (walletAddress ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}` : "DEMO CONNECTED") : "CONNECT WALLET"}</Button>
+              <div className="hidden items-center gap-2 font-mono text-[9px] tracking-[0.1em] text-[#918B81] md:flex"><span className={selectedNetwork === "sepolia" ? "text-[#70D49D]" : "text-[#F0563A]"}>●</span>{selectedNetwork === "sepolia" ? "SEPOLIA / TESTNET" : "MAINNET / PRODUCTION"}</div><Button disabled={isWalletActionLocked(walletConnecting)} onClick={handleWalletConnect} className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]">{walletConnecting ? "CONNECTING…" : connected ? (walletAddress ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}` : "DEMO CONNECTED") : "CONNECT WALLET"}</Button>
             </div>
           </header>
 

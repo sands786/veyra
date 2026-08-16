@@ -45,3 +45,19 @@ The project is **not described as a winner or as mainnet-complete** until the mi
 [4]: https://strk20-by-example.org/starknet-wallet-api/overview "Official Starknet Wallet API documentation"
 [5]: https://strk20-by-example.org/helpers/privacy-invoke "Official anonymizer contract documentation"
 [6]: https://strk20-by-example.org/sdk/getting-started "Official Privacy SDK documentation"
+
+## Testnet implementation update — 2026-08-16
+
+VeilPay now exposes a first-class Starknet Sepolia path in the workspace. The selected network is persisted locally, visibly labeled, and threaded through route creation, draft editing, treasury simulation, wallet signing, transaction persistence, and Voyager explorer links. Switching networks clears the connected wallet state so a wallet cannot be reused silently across environments.
+
+The `/demo` route now includes a reproducible testnet evidence panel with a clearly labeled `WRITE → WAIT → READ → INTEGRITY` sequence, transcript export, deterministic timeout-to-`UNKNOWN` simulation, and idempotent reconciliation demonstration. This panel is a local evidence rehearsal and does not claim a real testnet transaction unless a user connects a wallet and approves an actual transaction from the main workspace.
+
+The production boundary remains explicit:
+
+| Environment | Purpose | Evidence status |
+|---|---|---|
+| Demo Mode | Local deterministic rehearsal, error/retry, transcript shape, and reconciliation UX | Simulation only; never a chain transaction |
+| Starknet Sepolia | Safe wallet, STRK20 adapter, receipt, and integration verification | Testnet evidence; does not satisfy mainnet requirements |
+| Starknet mainnet | Production wallet execution and hackathon proof | Requires user-approved transactions touching the live STRK20 pool |
+
+Verification after this implementation: **43 Vitest tests pass, TypeScript passes, and the production build succeeds**. The remaining mainnet evidence is still user-owned and must not be fabricated or inferred from Demo Mode or Sepolia activity.
