@@ -249,3 +249,7 @@
 - [x] Add tests, documentation, and responsive verification for the testnet and reconciliation flows
 
 - [x] Make the Mainnet/Testnet selector more prominent and verify safe network switching behavior
+
+- [x] Optimize query refetch behavior and perceived loading smoothness
+- [x] Improve mobile/header interaction density and reduce unnecessary visual motion
+- [x] Verify final smoothness pass with tests, build, and responsive screenshots

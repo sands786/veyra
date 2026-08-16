@@ -56,8 +56,8 @@
 }
 
 * { border-color: var(--border); }
-html { scroll-behavior: smooth; }
-body { margin: 0; background: #111210; color: #f3eee5; font-family: "Space Grotesk", sans-serif; }
+html { scroll-behavior: smooth; overscroll-behavior-y: contain; }
+body { margin: 0; background: #111210; color: #f3eee5; font-family: "Space Grotesk", sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 button, input { font: inherit; }
 button { transition: transform 160ms cubic-bezier(.23,1,.32,1), background-color 160ms ease, color 160ms ease, border-color 160ms ease; }
 button:active { transform: scale(.97); }
