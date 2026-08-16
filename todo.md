@@ -253,3 +253,5 @@
 - [x] Optimize query refetch behavior and perceived loading smoothness
 - [x] Improve mobile/header interaction density and reduce unnecessary visual motion
 - [x] Verify final smoothness pass with tests, build, and responsive screenshots
+
+- [x] Simplify the top header by removing unnecessary labels and reducing control density
