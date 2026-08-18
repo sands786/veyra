@@ -261,7 +261,7 @@ export default function Home() {
       <div className="relative z-10 flex min-h-screen">
         <aside className="hidden w-[204px] shrink-0 border-r border-[#163B4A]/70 bg-[#111210]/95 px-5 py-6 lg:flex lg:flex-col">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-[#70D49D]/35 bg-[#163B4A] shadow-[0_0_28px_rgba(112,212,157,.16)]"><img src="/manus-storage/veyra-legacy-mark_7dac94a7.png" alt="Veyra legacy privacy mark" className="h-8 w-8 object-contain" /></div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-[#70D49D]/35 bg-[#163B4A] shadow-[0_0_28px_rgba(112,212,157,.16)]"><img src="/manus-storage/veyra-starknet-mark_de44c357.png" alt="Veyra legacy privacy mark" className="h-8 w-8 object-contain" /></div>
             <div>
               <div className="font-display text-[17px] font-bold tracking-[-0.04em]">Veyra</div>
               <div className="font-mono text-[9px] tracking-[0.18em] text-[#AEB8BE]">STRK20 / PRIVATE</div>

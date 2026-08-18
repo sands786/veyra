@@ -286,3 +286,6 @@
 - [x] Make the Veyra palette more prominent across navigation, controls, cards, and product surfaces
 - [x] Create and integrate a distinctive legacy-grade Veyra logo mark and wordmark
 - [x] Verify logo legibility, contrast, responsive rendering, tests, and production build
+
+- [x] Refine the Veyra emblem into a clean Starknet-inspired shield mark with transparent background
+- [x] Integrate the revised logo asset into the app and verify mark legibility across sizes
