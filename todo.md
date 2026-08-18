@@ -317,3 +317,5 @@
 - [x] Generate a tested Cairo payroll settlement contract, ABI output, and user-operated Sepolia deployment package
 
 - [x] Add Change wallet and Sign out wallet actions, detected Starknet wallet selection, and provider-supported QR/deep-link connection handling
+
+- [x] Blend the privacy-state illustration into its existing panel while preserving current text layout and hierarchy
