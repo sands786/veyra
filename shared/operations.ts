@@ -150,3 +150,51 @@ export function normalizeAmountInput(value: string): string {
 export function isClaimToken(value: string): boolean {
   return /^claim-[a-f0-9]{32}$/.test(value);
 }
+
+
+export type PrivateMarketStatus = "draft" | "scheduled" | "live" | "reveal" | "settled" | "paused" | "closed";
+export type PrivateMarketOrderKind = "sealed_bid" | "rfq";
+export type PrivateDisclosureScope = "none" | "aggregate" | "counterparty" | "auditor";
+
+export function canAdvancePrivateMarketStatus(from: PrivateMarketStatus, to: PrivateMarketStatus): boolean {
+  if (from === to) return true;
+  const transitions: Record<PrivateMarketStatus, PrivateMarketStatus[]> = {
+    draft: ["scheduled", "live", "paused", "closed"], scheduled: ["live", "paused", "closed"], live: ["reveal", "paused", "closed"], reveal: ["settled", "paused", "closed"], settled: ["closed"], paused: ["scheduled", "live", "closed"], closed: [],
+  };
+  return transitions[from].includes(to);
+}
+
+export function marketActionLabel(status: PrivateMarketStatus): string {
+  return status === "draft" ? "SCHEDULE MARKET" : status === "scheduled" ? "OPEN MARKET" : status === "live" ? "START REVEAL" : status === "reveal" ? "SETTLE ALLOCATIONS" : status === "settled" ? "ARCHIVE MARKET" : status === "paused" ? "RESUME MARKET" : "MARKET CLOSED";
+}
+
+export function evaluatePrivateMarketRisk(input: { bidAmount: string; targetAmount: string; currentCommitted: string; maxBidAmount?: string; maxConcentrationPct?: number; participantCommitted?: string }): { allowed: boolean; reasons: string[]; utilizationPct: number; concentrationPct: number } {
+  const bid = Number(input.bidAmount); const target = Number(input.targetAmount); const committed = Number(input.currentCommitted); const participant = Number(input.participantCommitted ?? input.bidAmount);
+  const utilizationPct = target > 0 ? Math.min(999, ((committed + bid) / target) * 100) : 0; const concentrationPct = committed + bid > 0 ? (participant / (committed + bid)) * 100 : 0; const reasons: string[] = [];
+  if (!Number.isFinite(bid) || bid <= 0) reasons.push("Bid must be greater than zero");
+  if (input.maxBidAmount && bid > Number(input.maxBidAmount)) reasons.push(`Bid exceeds the configured cap of ${input.maxBidAmount}`);
+  if (input.maxConcentrationPct !== undefined && concentrationPct > input.maxConcentrationPct) reasons.push(`Concentration exceeds ${input.maxConcentrationPct}%`);
+  return { allowed: reasons.length === 0, reasons, utilizationPct: Number(utilizationPct.toFixed(2)), concentrationPct: Number(concentrationPct.toFixed(2)) };
+}
+
+
+export function comparePrivateMarketQuotes(quotes: Array<{ id: string; price: string; feeBps: number; expiresAt: Date | string }>, now = new Date()) {
+  return quotes.filter((quote) => new Date(quote.expiresAt).getTime() > now.getTime()).map((quote) => ({ ...quote, allInPrice: Number(quote.price) * (1 + quote.feeBps / 10000) })).sort((left, right) => left.allInPrice - right.allInPrice);
+}
+
+export function buildPrivateMarketPortfolio(input: { commitments: Array<{ amount: string; status: "committed" | "revealed" | "accepted" | "rejected" }>; settledValue: string; currentValue: string }) {
+  const committed = input.commitments.filter((item) => item.status !== "rejected").reduce((sum, item) => sum + Number(item.amount), 0);
+  const settled = Number(input.settledValue); const current = Number(input.currentValue);
+  return { committedAmount: committed.toFixed(18).replace(/0+$/, "").replace(/\.$/, ""), settledAmount: settled.toString(), currentValue: current.toString(), pnl: (current - settled).toString(), openCommitments: input.commitments.filter((item) => item.status === "committed" || item.status === "revealed").length };
+}
+
+export function canPublishPrivateDisclosure(scope: PrivateDisclosureScope, settlementConfirmed: boolean): boolean {
+  return scope !== "none" && settlementConfirmed;
+}
+
+export function privateDisclosureFields(scope: PrivateDisclosureScope): string[] {
+  if (scope === "aggregate") return ["market_status", "aggregate_volume", "participant_count", "clearing_price"];
+  if (scope === "counterparty") return ["market_status", "aggregate_volume", "participant_count", "clearing_price", "counterparty_allocation"];
+  if (scope === "auditor") return ["market_status", "aggregate_volume", "participant_count", "clearing_price", "settlement_receipt", "policy_attestation"];
+  return [];
+}

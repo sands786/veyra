@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLaunchpadPublicSummary, buildPayrollCron, canDecideLaunchpadRelease, canRequestLaunchpadRelease, summarizeLaunchpadReadiness, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canCreateRecipientClaim, canScheduleRoute, canSubmitLaunchpadAllocation, canSubmitLaunchpadProject, canPublishShareableProof, canReuseLaunchpadAllocation, evaluateTreasuryPolicy, getLaunchpadInitialTab, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, isValidStarknetAddress, isWalletActionLocked, launchpadProjectActionLabel, nextLaunchpadProjectStatus, nextPayrollRunAt, normalizeAmountInput, resolveLaunchpadEmptyState, resolveLaunchpadPanel, shouldReuseLaunchpadAllocation, canReusePrivateMarketBid } from "@shared/operations";
+import { buildLaunchpadPublicSummary, buildPayrollCron, buildPrivateMarketPortfolio, canAdvancePrivateMarketStatus, canDecideLaunchpadRelease, canRequestLaunchpadRelease, canPublishPrivateDisclosure, comparePrivateMarketQuotes, evaluatePrivateMarketRisk, summarizeLaunchpadReadiness, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canCreateRecipientClaim, canScheduleRoute, canSubmitLaunchpadAllocation, canSubmitLaunchpadProject, canPublishShareableProof, canReuseLaunchpadAllocation, evaluateTreasuryPolicy, getLaunchpadInitialTab, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, isValidStarknetAddress, isWalletActionLocked, launchpadProjectActionLabel, nextLaunchpadProjectStatus, nextPayrollRunAt, normalizeAmountInput, privateDisclosureFields, resolveLaunchpadEmptyState, resolveLaunchpadPanel, shouldReuseLaunchpadAllocation, canReusePrivateMarketBid } from "@shared/operations";
 
 describe("operations primitives", () => {
   it("builds weekly Heartbeat cron expressions in UTC", () => {
@@ -18,6 +18,33 @@ describe("operations primitives", () => {
 
   it("uses the requested timezone when constructing cron fields", () => {
     expect(buildPayrollCron(new Date("2026-08-15T09:07:00.000Z"), "weekly", "America/Los_Angeles")).toBe("0 7 2 * * 6");
+  });
+
+  it("enforces private market lifecycle transitions and labels", () => {
+    expect(canAdvancePrivateMarketStatus("draft", "scheduled")).toBe(true);
+    expect(canAdvancePrivateMarketStatus("live", "settled")).toBe(false);
+    expect(canAdvancePrivateMarketStatus("reveal", "settled")).toBe(true);
+  });
+
+  it("evaluates market risk caps and concentration", () => {
+    const blocked = evaluatePrivateMarketRisk({ bidAmount: "700", targetAmount: "10000", currentCommitted: "1000", maxBidAmount: "500", maxConcentrationPct: 25, participantCommitted: "700" });
+    expect(blocked.allowed).toBe(false);
+    expect(blocked.reasons).toContain("Bid exceeds the configured cap of 500");
+  });
+
+  it("compares live RFQ quotes by all-in price", () => {
+    const quotes = comparePrivateMarketQuotes([{ id: "a", price: "1.02", feeBps: 20, expiresAt: "2026-08-20T00:00:00Z" }, { id: "b", price: "1.01", feeBps: 40, expiresAt: "2026-08-20T00:00:00Z" }], new Date("2026-08-19T00:00:00Z"));
+    expect(quotes[0]?.id).toBe("b");
+  });
+
+  it("builds a private portfolio summary without exposing bidder identity", () => {
+    expect(buildPrivateMarketPortfolio({ commitments: [{ amount: "250", status: "committed" }, { amount: "100", status: "rejected" }], settledValue: "200", currentValue: "240" })).toMatchObject({ committedAmount: "250", openCommitments: 1, pnl: "40" });
+  });
+
+  it("gates selective disclosures on confirmed settlement", () => {
+    expect(canPublishPrivateDisclosure("aggregate", false)).toBe(false);
+    expect(canPublishPrivateDisclosure("aggregate", true)).toBe(true);
+    expect(privateDisclosureFields("aggregate")).not.toContain("bidder_identity");
   });
 
   it("evaluates treasury policy limits and approval requirements", () => {

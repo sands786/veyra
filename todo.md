@@ -319,3 +319,6 @@
 - [x] Add Change wallet and Sign out wallet actions, detected Starknet wallet selection, and provider-supported QR/deep-link connection handling
 
 - [x] Blend the privacy-state illustration into its existing panel while preserving current text layout and hierarchy
+
+- [x] Benchmark competitor capability patterns and add authenticated Private Markets insights, operator control room, portfolio/risk summaries, and Private Primitives disclosure studio
+- [ ] Continue the competitor-grade expansion with persisted RFQ/quote workflows, market reveal/settlement lifecycle, richer portfolio history, configurable risk limits, alerts, exports, and contract-backed settlement for every new surface

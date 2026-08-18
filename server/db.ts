@@ -787,3 +787,25 @@ export async function exportWorkspaceAuditCsv(workspaceId: number) {
   const escape = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
   return ["id,entityType,entityId,action,createdAt", ...events.map((event) => [event.id, event.entityType, event.entityId, event.action, event.createdAt.toISOString()].map(escape).join(","))].join("\n");
 }
+
+
+export async function getPrivateMarketInsights(workspaceId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return { markets: [], portfolio: { committedAmount: "0", openCommitments: 0, settledAmount: "0", currentValue: "0", pnl: "0" }, risk: { activeMarkets: 0, openCommitments: 0, maxUtilizationPct: 0, attention: [] as string[] }, disclosure: { allowedScopes: ["aggregate" as const], privateFields: ["bidder_identity", "raw_bid_amount", "encrypted_terms"] } };
+  const markets = await db.select().from(privateMarkets).where(eq(privateMarkets.workspaceId, workspaceId)).orderBy(desc(privateMarkets.updatedAt));
+  const marketIds = markets.map((market) => market.id);
+  const allBids = marketIds.length ? await db.select().from(privateMarketBids).where(eq(privateMarketBids.bidderUserId, userId)) : [];
+  const visibleBids = allBids.filter((bid) => marketIds.includes(bid.marketId));
+  const committed = visibleBids.filter((bid) => bid.status !== "rejected").reduce((sum, bid) => sum + Number(bid.bidAmount), 0);
+  const openCommitments = visibleBids.filter((bid) => bid.status === "committed" || bid.status === "revealed").length;
+  const maxUtilizationPct = markets.reduce((max, market) => Math.max(max, Number(market.targetAmount) > 0 ? (Number(market.publicVolume) / Number(market.targetAmount)) * 100 : 0), 0);
+  const attention: string[] = [];
+  if (markets.some((market) => market.status === "live" && market.bidDeadline && market.bidDeadline.getTime() < Date.now())) attention.push("One or more live bid windows require operator review");
+  if (maxUtilizationPct > 90) attention.push("A market is approaching its target allocation");
+  return {
+    markets: markets.map(({ createdByUserId: _createdByUserId, ...market }) => ({ ...market, utilizationPct: Number(market.targetAmount) > 0 ? Number(((Number(market.publicVolume) / Number(market.targetAmount)) * 100).toFixed(2)) : 0, lifecycleAction: market.status === "draft" ? "SCHEDULE MARKET" : market.status === "live" ? "START REVEAL" : market.status === "closed" ? "ARCHIVED" : "REVIEW MARKET" })),
+    portfolio: { committedAmount: committed.toString(), openCommitments, settledAmount: "0", currentValue: "0", pnl: "0" },
+    risk: { activeMarkets: markets.filter((market) => market.status === "live").length, openCommitments, maxUtilizationPct: Number(maxUtilizationPct.toFixed(2)), attention },
+    disclosure: { allowedScopes: ["aggregate" as const], privateFields: ["bidder_identity", "raw_bid_amount", "encrypted_terms"] },
+  };
+}
