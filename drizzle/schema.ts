@@ -253,6 +253,32 @@ export const privateMarketBids = mysqlTable("privateMarketBids", {
   revealedAt: timestamp("revealedAt"),
 }, (table) => ({ marketIdx: index("privateMarketBids_market_idx").on(table.marketId), bidderIdx: index("privateMarketBids_bidder_idx").on(table.bidderUserId) }));
 
+export const privateMarketQuotes = mysqlTable("privateMarketQuotes", {
+  id: int("id").autoincrement().primaryKey(),
+  marketId: int("marketId").notNull(),
+  providerLabel: varchar("providerLabel", { length: 160 }).notNull(),
+  price: varchar("price", { length: 80 }).notNull(),
+  feeBps: int("feeBps").notNull().default(0),
+  capacity: varchar("capacity", { length: 80 }).notNull(),
+  status: mysqlEnum("status", ["open", "accepted", "expired", "rejected"]).notNull().default("open"),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdByUserId: int("createdByUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({ marketIdx: index("privateMarketQuotes_market_idx").on(table.marketId), statusIdx: index("privateMarketQuotes_status_idx").on(table.status) }));
+
+export const privateMarketRiskPolicies = mysqlTable("privateMarketRiskPolicies", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  marketId: int("marketId"),
+  maxBidAmount: varchar("maxBidAmount", { length: 80 }).notNull(),
+  maxConcentrationPct: int("maxConcentrationPct").notNull().default(25),
+  approvalThreshold: int("approvalThreshold").notNull().default(1),
+  status: mysqlEnum("status", ["active", "archived"]).notNull().default("active"),
+  createdByUserId: int("createdByUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({ workspaceIdx: index("privateMarketRiskPolicies_workspace_idx").on(table.workspaceId), marketIdx: index("privateMarketRiskPolicies_market_idx").on(table.marketId) }));
+
 export const blockchainTransactions = mysqlTable("blockchainTransactions", {
   id: int("id").autoincrement().primaryKey(),
   routeId: int("routeId").notNull(),

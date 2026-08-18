@@ -21,6 +21,8 @@ import {
   paymentRoutes,
   privateMarkets,
   privateMarketBids,
+  privateMarketQuotes,
+  privateMarketRiskPolicies,
   recipients,
   routeRecipients,
   users,
@@ -808,4 +810,90 @@ export async function getPrivateMarketInsights(workspaceId: number, userId: numb
     risk: { activeMarkets: markets.filter((market) => market.status === "live").length, openCommitments, maxUtilizationPct: Number(maxUtilizationPct.toFixed(2)), attention },
     disclosure: { allowedScopes: ["aggregate" as const], privateFields: ["bidder_identity", "raw_bid_amount", "encrypted_terms"] },
   };
+}
+
+
+export async function listPrivateMarketQuotes(workspaceId: number, marketId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const market = await db.select({ id: privateMarkets.id }).from(privateMarkets).where(and(eq(privateMarkets.id, marketId), eq(privateMarkets.workspaceId, workspaceId))).limit(1);
+  if (!market[0]) throw new Error("Private market not found in workspace");
+  const rows = await db.select().from(privateMarketQuotes).where(eq(privateMarketQuotes.marketId, marketId)).orderBy(desc(privateMarketQuotes.createdAt));
+  return rows.map(({ createdByUserId: _createdByUserId, ...quote }) => quote);
+}
+
+export async function createPrivateMarketQuote(input: { workspaceId: number; marketId: number; createdByUserId: number; providerLabel: string; price: string; feeBps: number; capacity: string; expiresAt: Date }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const market = await db.select().from(privateMarkets).where(and(eq(privateMarkets.id, input.marketId), eq(privateMarkets.workspaceId, input.workspaceId))).limit(1);
+  if (!market[0]) throw new Error("Private market not found in workspace");
+  if (market[0].status === "closed") throw new Error("Cannot quote a closed market");
+  if (input.expiresAt.getTime() <= Date.now()) throw new Error("Quote expiry must be in the future");
+  const inserted = await db.insert(privateMarketQuotes).values({ marketId: input.marketId, createdByUserId: input.createdByUserId, providerLabel: input.providerLabel, price: input.price, feeBps: input.feeBps, capacity: input.capacity, expiresAt: input.expiresAt, status: "open" }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not create RFQ quote");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "private_market_quote", entityId: id, action: "created" });
+  const rows = await db.select().from(privateMarketQuotes).where(eq(privateMarketQuotes.id, id)).limit(1);
+  if (!rows[0]) throw new Error("Could not load RFQ quote");
+  const { createdByUserId: _createdByUserId, ...quote } = rows[0];
+  return quote;
+}
+
+export async function getPrivateMarketRiskPolicy(workspaceId: number, marketId: number | undefined) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(privateMarketRiskPolicies).where(and(eq(privateMarketRiskPolicies.workspaceId, workspaceId), marketId === undefined ? eq(privateMarketRiskPolicies.status, "active") : eq(privateMarketRiskPolicies.marketId, marketId), eq(privateMarketRiskPolicies.status, "active"))).orderBy(desc(privateMarketRiskPolicies.updatedAt)).limit(1);
+  return rows[0] ? { ...rows[0], createdByUserId: undefined } : null;
+}
+
+export async function upsertPrivateMarketRiskPolicy(input: { workspaceId: number; marketId?: number; createdByUserId: number; maxBidAmount: string; maxConcentrationPct: number; approvalThreshold: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  if (input.maxConcentrationPct < 1 || input.maxConcentrationPct > 100) throw new Error("Concentration must be between 1 and 100 percent");
+  if (input.approvalThreshold < 1 || input.approvalThreshold > 10) throw new Error("Approval threshold must be between 1 and 10");
+  if (input.marketId !== undefined) {
+    const market = await db.select({ id: privateMarkets.id }).from(privateMarkets).where(and(eq(privateMarkets.id, input.marketId), eq(privateMarkets.workspaceId, input.workspaceId))).limit(1);
+    if (!market[0]) throw new Error("Private market not found in workspace");
+  }
+  const inserted = await db.insert(privateMarketRiskPolicies).values({ workspaceId: input.workspaceId, marketId: input.marketId, createdByUserId: input.createdByUserId, maxBidAmount: input.maxBidAmount, maxConcentrationPct: input.maxConcentrationPct, approvalThreshold: input.approvalThreshold, status: "active" }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not persist risk policy");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "private_market_risk_policy", entityId: id, action: "created" });
+  const rows = await db.select().from(privateMarketRiskPolicies).where(eq(privateMarketRiskPolicies.id, id)).limit(1);
+  return rows[0] ? { ...rows[0], createdByUserId: undefined } : null;
+}
+
+
+export async function updatePrivateMarketQuoteStatus(input: { workspaceId: number; quoteId: number; actorUserId: number; status: "accepted" | "expired" | "rejected" }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const rows = await db.select({ quote: privateMarketQuotes, market: privateMarkets }).from(privateMarketQuotes).innerJoin(privateMarkets, eq(privateMarketQuotes.marketId, privateMarkets.id)).where(and(eq(privateMarketQuotes.id, input.quoteId), eq(privateMarkets.workspaceId, input.workspaceId))).limit(1);
+  const existing = rows[0];
+  if (!existing) throw new Error("RFQ quote not found in workspace");
+  if (existing.quote.status !== "open") throw new Error("Only open RFQ quotes can change status");
+  await db.update(privateMarketQuotes).set({ status: input.status }).where(eq(privateMarketQuotes.id, input.quoteId));
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "private_market_quote", entityId: input.quoteId, action: input.status });
+  const updated = await db.select().from(privateMarketQuotes).where(eq(privateMarketQuotes.id, input.quoteId)).limit(1);
+  if (!updated[0]) throw new Error("Could not load updated RFQ quote");
+  const { createdByUserId: _createdByUserId, ...quote } = updated[0];
+  return quote;
+}
+
+
+export async function exportPrivateMarketBook(workspaceId: number, marketId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const market = await db.select({ name: privateMarkets.name, network: privateMarkets.network, token: privateMarkets.token }).from(privateMarkets).where(and(eq(privateMarkets.id, marketId), eq(privateMarkets.workspaceId, workspaceId))).limit(1);
+  if (!market[0]) throw new Error("Private market not found in workspace");
+  const quotes = await db.select({ providerLabel: privateMarketQuotes.providerLabel, price: privateMarketQuotes.price, feeBps: privateMarketQuotes.feeBps, capacity: privateMarketQuotes.capacity, status: privateMarketQuotes.status, expiresAt: privateMarketQuotes.expiresAt, createdAt: privateMarketQuotes.createdAt }).from(privateMarketQuotes).where(eq(privateMarketQuotes.marketId, marketId)).orderBy(desc(privateMarketQuotes.createdAt));
+  const escape = (value: string) => `"${value.replaceAll('"', '""')}"`;
+  const rows = [
+    ["market", market[0].name],
+    ["network", market[0].network],
+    ["token", market[0].token],
+    [],
+    ["provider_label", "price", "fee_bps", "capacity", "status", "expires_at", "created_at"],
+    ...quotes.map((quote) => [quote.providerLabel, quote.price, String(quote.feeBps), quote.capacity, quote.status, quote.expiresAt.toISOString(), quote.createdAt.toISOString()]),
+  ];
+  return rows.map((row) => row.map((cell) => escape(String(cell ?? ""))).join(",")).join("\n");
 }

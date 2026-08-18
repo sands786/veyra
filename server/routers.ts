@@ -8,7 +8,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { parseWorkspaceId } from "./workspaceSelection";
 import { buildPayrollCron } from "@shared/operations";
 import { resolveWorkspaceSelection } from "./workspaceResolver";
-import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyWorkspaceStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv, createLaunchpadProject, listWorkspaceLaunchpadProjects, createLaunchpadMilestone, listPrivateMarkets, getPrivateMarketInsights, createPrivateMarket, updatePrivateMarketStatus, commitPrivateMarketBid, createLaunchpadAllocation, updateLaunchpadProjectStatus, updateLaunchpadMilestoneStatus, getPublicLaunchpadProject, getLaunchpadProjectOps, updateLaunchpadProjectOps, getLaunchpadReadiness, listLaunchpadActivity, listLaunchpadAllocations, listLaunchpadReleaseRequests, createLaunchpadReleaseRequest, decideLaunchpadReleaseRequest } from "./db";
+import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyWorkspaceStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv, createLaunchpadProject, listWorkspaceLaunchpadProjects, createLaunchpadMilestone, listPrivateMarkets, getPrivateMarketInsights, listPrivateMarketQuotes, createPrivateMarketQuote, updatePrivateMarketQuoteStatus, getPrivateMarketRiskPolicy, upsertPrivateMarketRiskPolicy, exportPrivateMarketBook, createPrivateMarket, updatePrivateMarketStatus, commitPrivateMarketBid, createLaunchpadAllocation, updateLaunchpadProjectStatus, updateLaunchpadMilestoneStatus, getPublicLaunchpadProject, getLaunchpadProjectOps, updateLaunchpadProjectOps, getLaunchpadReadiness, listLaunchpadActivity, listLaunchpadAllocations, listLaunchpadReleaseRequests, createLaunchpadReleaseRequest, decideLaunchpadReleaseRequest } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null; req?: { headers?: Record<string, string | string[] | undefined> } }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -349,6 +349,39 @@ export const appRouter = router({
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
       return getPrivateMarketInsights(membership.workspace.id, actorId);
+    }),
+    quotes: protectedProcedure.input(z.object({ marketId: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return listPrivateMarketQuotes(membership.workspace.id, input.marketId);
+    }),
+    riskPolicy: protectedProcedure.input(z.object({ marketId: z.number().int().positive().optional() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return getPrivateMarketRiskPolicy(membership.workspace.id, input.marketId);
+    }),
+    createQuote: protectedProcedure.input(z.object({ marketId: z.number().int().positive(), providerLabel: z.string().trim().min(2).max(160), price: amount, feeBps: z.number().int().min(0).max(10000), capacity: amount, expiresAt: z.coerce.date() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can create RFQ quotes");
+      return createPrivateMarketQuote({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
+    }),
+    upsertRiskPolicy: protectedProcedure.input(z.object({ marketId: z.number().int().positive().optional(), maxBidAmount: amount, maxConcentrationPct: z.number().int().min(1).max(100), approvalThreshold: z.number().int().min(1).max(10) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin"].includes(membership.memberRole)) throw new Error("Only workspace owners and admins can change risk policy");
+      return upsertPrivateMarketRiskPolicy({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
+    }),
+    updateQuoteStatus: protectedProcedure.input(z.object({ quoteId: z.number().int().positive(), status: z.enum(["accepted", "expired", "rejected"]) })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can update RFQ quotes");
+      return updatePrivateMarketQuoteStatus({ workspaceId: membership.workspace.id, actorUserId: actorId, ...input });
+    }),
+    exportBook: protectedProcedure.input(z.object({ marketId: z.number().int().positive() })).query(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      return exportPrivateMarketBook(membership.workspace.id, input.marketId);
     }),
     list: protectedProcedure.query(async ({ ctx }) => {
       const membership = await workspaceFor(ctx);
