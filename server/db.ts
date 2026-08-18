@@ -2,7 +2,7 @@ import { and, desc, eq, inArray, isNull, lt, or } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { RpcProvider } from "starknet";
-import { buildLaunchpadPublicSummary, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canPublishShareableProof, canReuseLaunchpadAllocation, canReusePrivateMarketBid, evaluateTreasuryPolicy, shouldReuseLaunchpadAllocation, summarizeLaunchpadReadiness } from "@shared/operations";
+import { buildLaunchpadPublicSummary, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canAdvancePrivateMarketStatus, canPublishShareableProof, canReuseLaunchpadAllocation, canReusePrivateMarketBid, evaluateTreasuryPolicy, shouldReuseLaunchpadAllocation, summarizeLaunchpadReadiness } from "@shared/operations";
 import {
   auditEvents,
   claimLinks,
@@ -595,11 +595,16 @@ export async function createPrivateMarket(input: { workspaceId: number; createdB
   return rows[0];
 }
 
-export async function updatePrivateMarketStatus(input: { workspaceId: number; actorUserId: number; marketId: number; status: "draft" | "live" | "closed" }) {
+export async function updatePrivateMarketStatus(input: { workspaceId: number; actorUserId: number; marketId: number; status: "draft" | "scheduled" | "live" | "reveal" | "settled" | "paused" | "closed" }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
   const market = await db.select().from(privateMarkets).where(and(eq(privateMarkets.id, input.marketId), eq(privateMarkets.workspaceId, input.workspaceId))).limit(1);
   if (!market[0]) throw new Error("Private market not found in workspace");
+  if (!canAdvancePrivateMarketStatus(market[0].status, input.status)) throw new Error(`Invalid private market transition: ${market[0].status} -> ${input.status}`);
+  if (input.status === "settled") {
+    const acceptedBids = await db.select({ id: privateMarketBids.id }).from(privateMarketBids).where(and(eq(privateMarketBids.marketId, input.marketId), eq(privateMarketBids.status, "accepted")));
+    if (!acceptedBids.length) throw new Error("Cannot mark a market settled before an accepted allocation exists");
+  }
   await db.update(privateMarkets).set({ status: input.status }).where(eq(privateMarkets.id, input.marketId));
   await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "private_market", entityId: input.marketId, action: `status_${input.status}` });
   const rows = await db.select().from(privateMarkets).where(eq(privateMarkets.id, input.marketId)).limit(1);

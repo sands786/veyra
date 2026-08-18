@@ -235,7 +235,7 @@ export const privateMarkets = mysqlTable("privateMarkets", {
   currentPrice: varchar("currentPrice", { length: 80 }).notNull().default("0"),
   publicVolume: varchar("publicVolume", { length: 80 }).notNull().default("0"),
   publicParticipants: int("publicParticipants").notNull().default(0),
-  status: mysqlEnum("status", ["draft", "live", "closed"]).notNull().default("draft"),
+  status: mysqlEnum("status", ["draft", "scheduled", "live", "reveal", "settled", "paused", "closed"]).notNull().default("draft"),
   bidDeadline: timestamp("bidDeadline"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

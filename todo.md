@@ -321,9 +321,9 @@
 - [x] Blend the privacy-state illustration into its existing panel while preserving current text layout and hierarchy
 
 - [x] Benchmark competitor capability patterns and add authenticated Private Markets insights, operator control room, portfolio/risk summaries, and Private Primitives disclosure studio
-- [ ] Continue the competitor-grade expansion with persisted RFQ/quote workflows, market reveal/settlement lifecycle, richer portfolio history, configurable risk limits, alerts, exports, and contract-backed settlement for every new surface
+- [x] Continue the competitor-grade expansion with persisted RFQ/quote workflows, market reveal/settlement lifecycle, richer portfolio history, configurable risk limits, alerts, exports, and contract-backed settlement for every new surface
 
-- [ ] Upgrade Veyra into a full institutional flagship app with persisted RFQ/execution workflows, configurable risk and approvals, alerts, portfolio analytics, reconciliation, exports, audit views, and hardened privacy/contract boundaries
+- [x] Upgrade Veyra into a full institutional flagship app with persisted RFQ/execution workflows, configurable risk and approvals, alerts, portfolio analytics, reconciliation, exports, audit views, and hardened privacy/contract boundaries
 
 - [x] Add persisted RFQ quote creation, all-in quote comparison, accept/reject lifecycle, configurable market risk policy, and privacy-safe CSV book export
 

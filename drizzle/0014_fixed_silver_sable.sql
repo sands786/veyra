@@ -1,0 +1,1 @@
+ALTER TABLE `privateMarkets` MODIFY COLUMN `status` enum('draft','scheduled','live','reveal','settled','paused','closed') NOT NULL DEFAULT 'draft';

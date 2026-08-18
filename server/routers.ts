@@ -403,7 +403,7 @@ export const appRouter = router({
       if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Only workspace operators can create private markets");
       return createPrivateMarket({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
     }),
-    updateStatus: protectedProcedure.input(z.object({ marketId: z.number().int().positive(), status: z.enum(["draft", "live", "closed"]) })).mutation(async ({ ctx, input }) => {
+    updateStatus: protectedProcedure.input(z.object({ marketId: z.number().int().positive(), status: z.enum(["draft", "scheduled", "live", "reveal", "settled", "paused", "closed"]) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
