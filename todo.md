@@ -297,3 +297,5 @@
 - [x] Remove the baked white square from the Veyra logo so it floats naturally on the dark sidebar
 
 - [x] Improve Veyra font pairing, text scale, contrast, and line-height across core surfaces
+
+- [x] Refine affected panel labels, statuses, metadata, and card typography for stronger contrast and easier scanning
