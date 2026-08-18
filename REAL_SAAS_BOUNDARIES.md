@@ -1,6 +1,6 @@
-# VeilPay real SaaS boundary
+# Veyra real SaaS boundary
 
-VeilPay’s production workspace is full-stack. Authenticated workspace access, role checks, database persistence, tRPC procedures, audit events, route creation, recipient management, approvals, schedules, treasury policies, claims, public proofs, Launchpad projects, milestones, release requests, allocation commitments, and network-aware transaction records are implemented as real server-backed workflows.
+Veyra’s production workspace is full-stack. Authenticated workspace access, role checks, database persistence, tRPC procedures, audit events, route creation, recipient management, approvals, schedules, treasury policies, claims, public proofs, Launchpad projects, milestones, release requests, allocation commitments, and network-aware transaction records are implemented as real server-backed workflows.
 
 The `/private-primitives` workspace now uses the existing authenticated backend procedures rather than local-only action state. Private payment requests call `claims.create` and persist expiring claim links. Selective proof summaries call `proofs.create` and expose the existing privacy-safe public proof route. Milestone release actions call `launchpad.updateMilestoneStatus` and refresh persisted project state.
 

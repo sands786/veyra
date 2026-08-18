@@ -28,6 +28,12 @@ export type OnchainAction = {
   recipient?: string;
 };
 
+export type StarknetContractCall = {
+  contractAddress: string;
+  entrypoint: string;
+  calldata: string[];
+};
+
 export type ShieldedRouteIntent = {
   network: VeilNetwork;
   token: string;
@@ -40,6 +46,7 @@ export type VeilWallet = {
   address?: string;
   chainId?: string;
   strk20InvokeTransaction?: (actions: OnchainAction[]) => Promise<{ transaction_hash: string }>;
+  execute?: (calls: StarknetContractCall[]) => Promise<{ transaction_hash: string }>;
   strk20Balances?: (tokens: string[]) => Promise<unknown>;
   enable?: () => Promise<unknown>;
 };
@@ -91,6 +98,17 @@ export function buildShieldedRouteActions(intent: ShieldedRouteIntent): OnchainA
     { type: "deposit", token: intent.token, amount },
     ...(intent.recipient ? [{ type: "transfer" as const, token: intent.token, amount, recipient: intent.recipient }] : []),
   ];
+}
+
+export function buildPayrollRegistryCreateCall(contractAddress: string, token: string, amountSmallestUnit: bigint, recipientCommitment: string): StarknetContractCall {
+  if (!/^0x[0-9a-fA-F]+$/.test(contractAddress)) throw new Error("Payroll registry contract address is invalid.");
+  if (!/^0x[0-9a-fA-F]+$/.test(token)) throw new Error("Payroll token address is invalid.");
+  if (amountSmallestUnit <= BigInt(0)) throw new Error("Payroll registry amount must be greater than zero.");
+  if (!recipientCommitment.trim()) throw new Error("Recipient commitment is required.");
+  const lowMask = (BigInt(1) << BigInt(128)) - BigInt(1);
+  const low = amountSmallestUnit & lowMask;
+  const high = amountSmallestUnit >> BigInt(128);
+  return { contractAddress, entrypoint: "create_route", calldata: [token, num.toHex(low), num.toHex(high), recipientCommitment] };
 }
 
 export function onchainCapability(wallet: VeilWallet | undefined, network: VeilNetwork) {

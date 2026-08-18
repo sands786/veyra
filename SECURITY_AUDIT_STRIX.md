@@ -1,6 +1,6 @@
-# VeilPay Security and Quality Audit
+# Veyra Security and Quality Audit
 
-**Audit basis.** This review used the open-source Strix repository as a methodology reference for scope control, authorization-aware analysis, reproducible local checks, and explicit separation between evidence and inference [1]. The review was performed against VeilPay source code and local verification only. No unauthorized third-party target was probed.
+**Audit basis.** This review used the open-source Strix repository as a methodology reference for scope control, authorization-aware analysis, reproducible local checks, and explicit separation between evidence and inference [1]. The review was performed against Veyra source code and local verification only. No unauthorized third-party target was probed.
 
 ## Scope and verification
 

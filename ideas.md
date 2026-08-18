@@ -1,4 +1,4 @@
-# VeilPay Private Sprint — Design and Product Direction
+# Veyra Private Sprint — Design and Product Direction
 
 ## Three stylistic approaches
 
@@ -44,7 +44,7 @@ Use 160–220ms transitions for hover and state changes. Payment notes slide alo
 Use Space Grotesk for display headlines and IBM Plex Mono for evidence labels, transaction IDs, and small metadata. Body copy uses a readable system sans stack. Headlines are compact and occasionally break across lines to create editorial tension; labels use uppercase, 0.12em tracking, and never compete with the main action.
 
 ### Brand Essence
-VeilPay is a private payroll and split-payment workspace for teams that need to move Starknet assets without exposing every recipient and amount in public transaction history. Personality: **measured, protective, exact**.
+Veyra is a private payroll and split-payment workspace for teams that need to move Starknet assets without exposing every recipient and amount in public transaction history. Personality: **measured, protective, exact**.
 
 ### Brand Voice
 Headlines are direct and quietly confident. CTAs describe an action and its privacy outcome. Microcopy states what is public versus shielded.
@@ -61,6 +61,6 @@ The mark is a folded geometric veil forming a compact V-shaped shield with an iv
 
 ## Product concept for the STRK20 Private Sprint
 
-VeilPay is a demo-first private payroll and split-payment app. A user creates a payment intent, chooses a recipient set, previews which fields are shielded, and produces a shareable proof card. The interface includes a STRK20 integration surface with explicit shielded-balance, private-transfer, and mainnet-transaction placeholders wired to a real adapter boundary. The frontend is honest about what is connected: local demo mode is clearly labeled until the user supplies a wallet and deployed contract addresses.
+Veyra is a demo-first private payroll and split-payment app. A user creates a payment intent, chooses a recipient set, previews which fields are shielded, and produces a shareable proof card. The interface includes a STRK20 integration surface with explicit shielded-balance, private-transfer, and mainnet-transaction placeholders wired to a real adapter boundary. The frontend is honest about what is connected: local demo mode is clearly labeled until the user supplies a wallet and deployed contract addresses.
 
 The strongest hackathon differentiators are the privacy-state explanation, proof-oriented payment receipts, and a workflow designed for recurring teams rather than a generic token transfer screen. The submission package will include a README, `strk20.json` metadata file, and a public-repo-ready integration boundary.

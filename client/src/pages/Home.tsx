@@ -11,10 +11,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { connectVeilWallet, explorerUrl, networkFromChainId, networkLabel, onchainCapability, submitShieldedRoute, type VeilNetwork, type VeilWallet } from "@/lib/strk20";
+import { buildPayrollRegistryCreateCall, connectVeilWallet, explorerUrl, networkFromChainId, networkLabel, onchainCapability, submitShieldedRoute, STRK_TOKEN, type VeilNetwork, type VeilWallet } from "@/lib/strk20";
+import { protocolContracts } from "@/lib/onchainConfig";
 import { canCreateRecipientClaim, canScheduleRoute, isValidStarknetAddress, isWalletActionLocked, normalizeAmountInput } from "@shared/operations";
 import { copyText } from "@/lib/clipboard";
 import { useDemoMode } from "@/contexts/DemoModeContext";
+
+async function buildRecipientCommitment(recipientIds: number[], amount: string, routeName: string): Promise<string> {
+  const payload = `${routeName.trim()}|${amount}|${[...recipientIds].sort((a, b) => a - b).join(",")}`;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(payload));
+  const bytes = Array.from(new Uint8Array(digest));
+  return `0x${bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("").slice(0, 62)}`;
+}
 
 const stages = [
   { label: "DRAFT", note: "Recipients and amounts stay in your workspace." },
@@ -193,8 +201,22 @@ export default function Home() {
       try {
         const amountSmallestUnit = BigInt(normalizedAmount || "0") * BigInt("1000000");
         const tx = await submitShieldedRoute(wallet, amountSmallestUnit, selectedNetwork);
-        if (savedRoute?.id && tx.transaction_hash) {
-          await recordTransactionMutation.mutateAsync({ routeId: savedRoute.id, network: selectedNetwork, transactionHash: tx.transaction_hash, status: "submitted", explorerUrl: explorerUrl(tx.transaction_hash, selectedNetwork) });
+        const transactionHashes = tx.transaction_hash ? [tx.transaction_hash] : [];
+        const payrollRegistry = protocolContracts(selectedNetwork).payroll;
+        if (payrollRegistry && wallet.execute) {
+          try {
+            const commitment = await buildRecipientCommitment(activeRecipientIds, normalizedAmount, routeName);
+            const registryCall = buildPayrollRegistryCreateCall(payrollRegistry.address, STRK_TOKEN, amountSmallestUnit, commitment);
+            const registryTx = await wallet.execute([registryCall]);
+            if (registryTx.transaction_hash) transactionHashes.push(registryTx.transaction_hash);
+          } catch (error) {
+            toast("Private transfer submitted; registry receipt is still pending.", { description: String(error).slice(0, 140) });
+          }
+        }
+        if (savedRoute?.id) {
+          for (const transactionHash of transactionHashes) {
+            await recordTransactionMutation.mutateAsync({ routeId: savedRoute.id, network: selectedNetwork, transactionHash, status: "submitted", explorerUrl: explorerUrl(transactionHash, selectedNetwork) });
+          }
         }
         setStage(2);
         toast("Private route submitted.", { description: tx.transaction_hash ? `${networkLabel(selectedNetwork)} · View on Voyager: ${explorerUrl(tx.transaction_hash, selectedNetwork)}` : "Waiting for confirmation." });

@@ -1,21 +1,21 @@
-# VeilPay — Private Payroll and Split Payments on STRK20
+# Veyra — Private Payroll and Split Payments on STRK20
 
-VeilPay is a privacy-first payment workspace for Starknet teams. It turns a recipient roster into a STRK20 private route and produces a compact proof reference that can be shared without publishing the full payment story.
+Veyra is a privacy-first payment workspace for Starknet teams. It turns a recipient roster into a STRK20 private route and produces a compact proof reference that can be shared without publishing the full payment story.
 
-## Why VeilPay
+## Why Veyra
 
-Most private-transfer demos stop at a shield/unshield button. VeilPay focuses on the operational moment around the transfer: a team needs to prepare a payroll run, keep recipient identities and individual amounts private, and still give a finance lead a verifiable record of what happened. The app makes that state explicit through four stages: **Draft**, **Shielded**, **Routed**, and **Settled**.
+Most private-transfer demos stop at a shield/unshield button. Veyra focuses on the operational moment around the transfer: a team needs to prepare a payroll run, keep recipient identities and individual amounts private, and still give a finance lead a verifiable record of what happened. The app makes that state explicit through four stages: **Draft**, **Shielded**, **Routed**, and **Settled**.
 
 ## STRK20 integration plan
 
-The frontend is structured around the official STRK20 architecture: wallet connection, shielded balance, private transfer route, proof reference, and a mainnet evidence ledger. The current UI intentionally exposes a clear demo mode until a wallet and the live STRK20 adapter are configured. This prevents the app from implying that a transaction occurred when it did not.
+The product is structured around the official STRK20 architecture: wallet connection, private transfer route, proof reference, receipt verification, and a mainnet evidence ledger. Demo Mode remains explicitly local, while production mode requires a compatible privacy-enabled wallet and user approval. The app never presents a locally recorded hash as a confirmed chain settlement.
 
 For the final sprint entry, the following must be filled in:
 
 | Evidence | File or setting | Requirement |
 |---|---|---|
 | Mainnet transactions | `strk20.json` | At least three successful Starknet mainnet transaction hashes that touched the STRK20 pool |
-| Deployed contracts | `strk20.json` | Any VeilPay anonymizer or helper addresses, with network context in the README |
+| Deployed contracts | `strk20.json` | Any Veyra anonymizer or helper addresses, with network context in the README |
 | Demo | `strk20.json` | Public three-minute demo video URL and optional public demo URL |
 | Public project | Repository metadata | Public GitHub repository, open-source license, and the one-time sprint registry PR |
 
@@ -28,11 +28,11 @@ pnpm install
 pnpm dev
 ```
 
-The project is a React + Vite static frontend. It can be previewed without a wallet in demo mode. The `CREATE PRIVATE ROUTE` action advances the privacy-state explanation; wallet connection is represented honestly as a UI state until the official STRK20 SDK is configured for the target environment.
+The project is a React + Vite client with an authenticated Express/tRPC backend and database persistence. It can be previewed without a wallet in Demo Mode. Production route execution uses the wallet-owned STRK20 boundary, records only public transaction metadata, and exposes receipt verification and Explorer links. The `contracts/veyra_payroll` package contains a compiled and Foundry-tested non-custodial payroll settlement registry with a user-operated Sepolia deployment helper.
 
 ## Product language
 
-VeilPay uses the Copper Veil design system: graphite surfaces, paper-white type, Veil Vermilion `#F0563A`, Space Grotesk display type, and IBM Plex Mono evidence labels. The interface is intentionally asymmetric and proof-led rather than a generic centered crypto dashboard.
+Veyra uses an Obsidian, Moon Ivory, Deep Tide, Emerald, Moon Silver, and Vermilion design system with Space Grotesk display type, Manrope interface copy, and JetBrains Mono for compact technical identifiers. The interface is intentionally asymmetric and proof-led rather than a generic centered crypto dashboard.
 
 ## Hackathon checklist
 
@@ -46,4 +46,4 @@ MIT
 
 ## Security and privacy boundary
 
-VeilPay does not custody private keys, seed phrases, viewing keys, proof payloads, or plaintext private-transfer notes. Wallet signing remains in the user’s privacy-enabled Starknet wallet. The database stores workspace metadata, recipient wallet addresses entered by the workspace operator, route totals and lifecycle state, public transaction hashes, and audit metadata. Recipient notes are optional operational labels only; teams must not place secrets, private keys, or sensitive payment narratives in them. The server validates workspace membership and role before every mutation and verifies that route recipients belong to the same workspace.
+Veyra does not custody private keys, seed phrases, viewing keys, proof payloads, or plaintext private-transfer notes. Wallet signing remains in the user’s privacy-enabled Starknet wallet. The database stores workspace metadata, recipient wallet addresses entered by the workspace operator, route totals and lifecycle state, public transaction hashes, and audit metadata. Recipient notes are optional operational labels only; teams must not place secrets, private keys, or sensitive payment narratives in them. The server validates workspace membership and role before every mutation and verifies that route recipients belong to the same workspace.

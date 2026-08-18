@@ -46,14 +46,14 @@ The Wallet API is the recommended route for most private dapps. The wallet holds
 ## Official anonymizer documentation
 Source: https://strk20-by-example.org/helpers/privacy-invoke
 
-Anonymizer contracts are required for app-specific private DeFi integrations. The pool invokes `privacy_invoke` atomically; the helper performs the external action, approves the pool to pull output tokens, and returns `Span<OpenNoteDeposit>` instructions. This is relevant only if VeilPay adds a custom privacy DeFi/helper contract.
+Anonymizer contracts are required for app-specific private DeFi integrations. The pool invokes `privacy_invoke` atomically; the helper performs the external action, approves the pool to pull output tokens, and returns `Span<OpenNoteDeposit>` instructions. This is relevant only if Veyra adds a custom privacy DeFi/helper contract.
 
 ## Official Privacy SDK documentation
 Source: https://strk20-by-example.org/sdk/getting-started
 
 The low-level SDK route is intended for privacy wallets and advanced integrations that manage accounts, viewing keys, note discovery, and proving. It requires a viewing-key provider, proving provider, discovery provider, and pool address. A normal private payroll dapp should prefer the Wallet API route so private material stays inside the wallet.
 
-## VeilPay compliance status at audit time
+## Veyra compliance status at audit time
 
 Implemented locally: a public repository-ready SaaS product, a live Manus demo deployment, an STRK20-compatible wallet adapter boundary, authenticated workspaces, persistent routes and recipients, audit/receipt views, and responsive UI.
 

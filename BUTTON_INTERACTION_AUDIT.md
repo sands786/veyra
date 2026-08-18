@@ -1,4 +1,4 @@
-# VeilPay button interaction audit
+# Veyra button interaction audit
 
 The audit covered the primary workspace, Operations, Launchpad, Claim, navigation, wallet, export, proof, route, recipient, schedule, governance, treasury, and recovery controls.
 

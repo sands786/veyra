@@ -1,7 +1,7 @@
-# VeilPay Privacy Launchpad — Starknet Capability Notes
+# Veyra Privacy Launchpad — Starknet Capability Notes
 
 ## Product direction
-VeilPay can extend into a privacy-focused Starknet Launchpad for confidential project fundraising and milestone treasury management. The product should keep investor identities, contribution amounts, allocation state, and treasury intent private by default while publishing only project-level proof metadata and selectively disclosing evidence when authorized.
+Veyra can extend into a privacy-focused Starknet Launchpad for confidential project fundraising and milestone treasury management. The product should keep investor identities, contribution amounts, allocation state, and treasury intent private by default while publishing only project-level proof metadata and selectively disclosing evidence when authorized.
 
 ## Official Starknet capabilities
 
@@ -13,7 +13,7 @@ Starknet’s official privacy/compliance position frames privacy as contextual r
 
 Source: https://www.starknet.io/blog/onchain-privacy-and-compliance/
 
-Starknet accounts use native account abstraction. The official account documentation says account contracts can define custom validation and execution logic, enabling programmable authorization, fee abstraction, replay protection, batched actions, social recovery, and other account-level policies. For VeilPay, this supports future launchpad wallets or treasury accounts with project-specific spend limits and multi-approver validation, but the current SaaS must not claim these are deployed onchain until a real contract integration exists.
+Starknet accounts use native account abstraction. The official account documentation says account contracts can define custom validation and execution logic, enabling programmable authorization, fee abstraction, replay protection, batched actions, social recovery, and other account-level policies. For Veyra, this supports future launchpad wallets or treasury accounts with project-specific spend limits and multi-approver validation, but the current SaaS must not claim these are deployed onchain until a real contract integration exists.
 
 Source: https://docs.starknet.io/learn/protocol/accounts
 

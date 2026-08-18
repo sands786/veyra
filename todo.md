@@ -310,8 +310,8 @@
 
 - [x] Replace native amount input controls with a smooth custom stepper and accessible up/down buttons
 
-- [ ] Complete a 10/10 pre-mainnet audit and polish pass across all workflows, states, responsive surfaces, privacy boundaries, documentation, and demo readiness
+- [x] Complete a 10/10 pre-mainnet audit and polish pass across all workflows, states, responsive surfaces, privacy boundaries, documentation, and demo readiness
 
-- [ ] Upgrade Veyra toward a genuine on-chain Starknet protocol with wallet-authorized execution, contract configuration, reconciliation, and explicit pre-mainnet evidence boundaries
+- [x] Upgrade Veyra toward a genuine on-chain Starknet protocol with wallet-authorized execution, contract configuration, reconciliation, and explicit pre-mainnet evidence boundaries
 
 - [x] Generate a tested Cairo payroll settlement contract, ABI output, and user-operated Sepolia deployment package
