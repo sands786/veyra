@@ -289,3 +289,5 @@
 
 - [x] Refine the Veyra emblem into a clean Starknet-inspired shield mark with transparent background
 - [x] Integrate the revised logo asset into the app and verify mark legibility across sizes
+
+- [x] Remove the emblem container background, border, and radius so the Veyra logo reads as an independent transparent mark
