@@ -315,3 +315,5 @@
 - [x] Upgrade Veyra toward a genuine on-chain Starknet protocol with wallet-authorized execution, contract configuration, reconciliation, and explicit pre-mainnet evidence boundaries
 
 - [x] Generate a tested Cairo payroll settlement contract, ABI output, and user-operated Sepolia deployment package
+
+- [x] Add Change wallet and Sign out wallet actions, detected Starknet wallet selection, and provider-supported QR/deep-link connection handling

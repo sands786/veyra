@@ -42,6 +42,9 @@ export type ShieldedRouteIntent = {
 };
 
 export type VeilWallet = {
+  id?: string;
+  name?: string;
+  icon?: string;
   account?: { address?: string };
   address?: string;
   chainId?: string;
@@ -49,7 +52,21 @@ export type VeilWallet = {
   execute?: (calls: StarknetContractCall[]) => Promise<{ transaction_hash: string }>;
   strk20Balances?: (tokens: string[]) => Promise<unknown>;
   enable?: () => Promise<unknown>;
+  connect?: (options?: { mode?: "browser" | "qr" }) => Promise<unknown>;
+  disconnect?: () => Promise<void>;
+  request?: (request: { type: string; params?: Record<string, unknown> }) => Promise<unknown>;
 };
+
+export type StarknetWalletOption = {
+  id: string;
+  name: string;
+  icon?: string;
+  wallet: VeilWallet;
+  supportsQr: boolean;
+};
+
+export type WalletQrResult = { uri: string; walletId: string };
+
 
 declare global {
   interface Window {
@@ -61,6 +78,49 @@ declare global {
 
 function detectWallet(): VeilWallet | undefined {
   return window.starknet ?? window.starknet_argentX ?? window.starknet_braavos;
+}
+
+export function discoverStarknetWallets(): StarknetWalletOption[] {
+  if (typeof window === "undefined") return [];
+  const candidates: Array<[string, string, VeilWallet | undefined]> = [
+    ["argent-x", "Argent X", window.starknet_argentX],
+    ["braavos", "Braavos", window.starknet_braavos],
+    ["starknet", "Starknet wallet", window.starknet],
+  ];
+  const seen = new Set<VeilWallet>();
+  return candidates.flatMap(([id, fallbackName, wallet]) => {
+    if (!wallet || seen.has(wallet)) return [];
+    seen.add(wallet);
+    const supportsQr = Boolean(wallet.request || wallet.connect);
+    return [{ id, name: wallet.name || fallbackName, icon: wallet.icon, wallet, supportsQr }];
+  });
+}
+
+function addressFromWallet(wallet?: VeilWallet): string | undefined {
+  return wallet?.address ?? wallet?.account?.address;
+}
+
+export async function disconnectVeilWallet(wallet?: VeilWallet): Promise<void> {
+  await wallet?.disconnect?.();
+}
+
+export async function requestWalletQrConnection(option: StarknetWalletOption): Promise<WalletQrResult | undefined> {
+  const wallet = option.wallet;
+  if (!option.supportsQr) return undefined;
+  try {
+    const requested = await wallet.request?.({ type: "wallet_connect_qr", params: { walletId: option.id } });
+    const uri = typeof requested === "string" ? requested : typeof requested === "object" && requested !== null && "uri" in requested ? String((requested as { uri?: unknown }).uri ?? "") : "";
+    if (uri) return { uri, walletId: option.id };
+  } catch {
+    // Some injected wallets expose connect but not QR. Fall through to their browser connection.
+  }
+  try {
+    const connected = await wallet.connect?.({ mode: "qr" });
+    const uri = typeof connected === "string" ? connected : typeof connected === "object" && connected !== null && "uri" in connected ? String((connected as { uri?: unknown }).uri ?? "") : "";
+    return uri ? { uri, walletId: option.id } : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function networkFromChainId(chainId?: string): VeilNetwork | undefined {
@@ -82,11 +142,12 @@ export function assertWalletNetwork(wallet: VeilWallet, network: VeilNetwork): v
   }
 }
 
-export async function connectVeilWallet(): Promise<{ wallet?: VeilWallet; address?: string; live: boolean; network?: VeilNetwork }> {
-  const wallet = detectWallet();
+export async function connectVeilWallet(selectedWallet?: VeilWallet): Promise<{ wallet?: VeilWallet; address?: string; live: boolean; network?: VeilNetwork }> {
+  const wallet = selectedWallet ?? detectWallet();
   if (!wallet) return { live: false };
-  await wallet.enable?.();
-  const address = wallet.address ?? wallet.account?.address;
+  if (wallet.enable) await wallet.enable();
+  else await wallet.connect?.({ mode: "browser" });
+  const address = addressFromWallet(wallet);
   return { wallet, address, live: Boolean(address), network: networkFromChainId(wallet.chainId) };
 }
 

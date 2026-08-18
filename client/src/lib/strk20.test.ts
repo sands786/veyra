@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPayrollRegistryCreateCall, buildShieldedRouteActions, MAINNET_CHAIN_ID, onchainCapability, STRK_TOKEN } from "./strk20";
+import { buildPayrollRegistryCreateCall, buildShieldedRouteActions, disconnectVeilWallet, MAINNET_CHAIN_ID, onchainCapability, requestWalletQrConnection, STRK_TOKEN, type StarknetWalletOption } from "./strk20";
 
 describe("STRK20 on-chain adapter", () => {
   it("builds a deposit action for a valid shielded route intent", () => {
@@ -20,6 +20,17 @@ describe("STRK20 on-chain adapter", () => {
   it("rejects unconfigured or unsafe payroll registry calls", () => {
     expect(() => buildPayrollRegistryCreateCall("missing", STRK_TOKEN, 1n, "0xabc")).toThrow("contract address");
     expect(() => buildPayrollRegistryCreateCall("0x1234", STRK_TOKEN, 0n, "0xabc")).toThrow("greater than zero");
+  });
+
+  it("disconnects a provider wallet when it exposes a disconnect method", async () => {
+    let disconnected = false;
+    await disconnectVeilWallet({ disconnect: async () => { disconnected = true; } });
+    expect(disconnected).toBe(true);
+  });
+
+  it("returns a provider QR URI without claiming QR support when none is exposed", async () => {
+    const option = { id: "argent-x", name: "Argent X", wallet: { request: async () => ({ uri: "starknet://connect/test" }) }, supportsQr: true } satisfies StarknetWalletOption;
+    await expect(requestWalletQrConnection(option)).resolves.toEqual({ uri: "starknet://connect/test", walletId: "argent-x" });
   });
 
   it("reports whether a connected wallet can execute on the selected network", () => {
