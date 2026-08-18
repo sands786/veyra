@@ -2,7 +2,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { RpcProvider } from "starknet";
-import { buildLaunchpadPublicSummary, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, evaluateTreasuryPolicy, shouldReuseLaunchpadAllocation, summarizeLaunchpadReadiness } from "@shared/operations";
+import { buildLaunchpadPublicSummary, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canPublishShareableProof, canReuseLaunchpadAllocation, canReusePrivateMarketBid, evaluateTreasuryPolicy, shouldReuseLaunchpadAllocation, summarizeLaunchpadReadiness } from "@shared/operations";
 import {
   auditEvents,
   claimLinks,
@@ -324,10 +324,14 @@ export async function listWorkspaceAuditEvents(workspaceId: number) {
 export async function recordBlockchainTransaction(input: { workspaceId: number; actorUserId: number; routeId: number; network: "mainnet" | "sepolia"; transactionHash: string; status: "submitted" | "confirmed" | "reverted" | "unknown"; explorerUrl?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const ownedRoute = await db.select({ id: paymentRoutes.id }).from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
+  const ownedRoute = await db.select({ id: paymentRoutes.id, network: paymentRoutes.network }).from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
   if (!ownedRoute[0]) throw new Error("Route not found in workspace");
+  if (ownedRoute[0].network !== input.network) throw new Error("Transaction network does not match the route network");
   const existing = await db.select().from(blockchainTransactions).where(eq(blockchainTransactions.transactionHash, input.transactionHash)).limit(1);
-  if (existing[0]) return existing[0];
+  if (existing[0]) {
+    if (existing[0].routeId !== input.routeId || existing[0].network !== input.network) throw new Error("Transaction hash is already bound to another route or network");
+    return existing[0];
+  }
   await db.insert(blockchainTransactions).values({ routeId: input.routeId, network: input.network, transactionHash: input.transactionHash, status: input.status, explorerUrl: input.explorerUrl });
   if (input.status === "confirmed") await transitionPaymentRoute(input.workspaceId, input.routeId, input.actorUserId, "settled");
   const rows = await db.select().from(blockchainTransactions).where(eq(blockchainTransactions.transactionHash, input.transactionHash)).limit(1);
@@ -348,13 +352,23 @@ export async function listWorkspacesForUser(userId: number) {
   return db.select({ workspace: workspaces, memberRole: workspaceMembers.role }).from(workspaceMembers).innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id)).where(eq(workspaceMembers.userId, userId)).orderBy(desc(workspaces.updatedAt));
 }
 
-export async function verifyStarknetReceipt(transactionHash: string) {
-  const provider = new RpcProvider({ nodeUrl: process.env.STARKNET_RPC_URL || "https://rpc.starknet.lava.build" });
+export async function verifyStarknetReceipt(transactionHash: string, network: "mainnet" | "sepolia") {
+  const nodeUrl = network === "sepolia" ? (process.env.STARKNET_SEPOLIA_RPC_URL || process.env.STARKNET_RPC_URL || "https://starknet-sepolia.public.blastapi.io") : (process.env.STARKNET_MAINNET_RPC_URL || process.env.STARKNET_RPC_URL || "https://starknet-mainnet.public.blastapi.io");
+  const provider = new RpcProvider({ nodeUrl });
   const receipt = await provider.getTransactionReceipt(transactionHash);
   const executionStatus = String((receipt as { execution_status?: string }).execution_status || "").toUpperCase();
   const finalityStatus = String((receipt as { finality_status?: string }).finality_status || "").toUpperCase();
   const status = executionStatus === "SUCCEEDED" && ["ACCEPTED_ON_L2", "ACCEPTED_ON_L1"].includes(finalityStatus) ? "confirmed" : executionStatus === "REVERTED" ? "reverted" : "unknown";
   return { status, finalityStatus, executionStatus } as const;
+}
+
+export async function verifyWorkspaceStarknetReceipt(workspaceId: number, transactionHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const rows = await db.select({ tx: blockchainTransactions, route: paymentRoutes }).from(blockchainTransactions).innerJoin(paymentRoutes, eq(blockchainTransactions.routeId, paymentRoutes.id)).where(and(eq(blockchainTransactions.transactionHash, transactionHash), eq(paymentRoutes.workspaceId, workspaceId))).limit(1);
+  if (!rows[0]) throw new Error("Transaction not found in workspace");
+  if (rows[0].tx.network !== rows[0].route.network) throw new Error("Stored transaction network does not match its route");
+  return verifyStarknetReceipt(transactionHash, rows[0].tx.network);
 }
 
 export async function confirmBlockchainTransaction(input: { workspaceId: number; actorUserId: number; transactionHash: string; status: "confirmed" | "reverted" | "unknown" }) {
@@ -363,7 +377,7 @@ export async function confirmBlockchainTransaction(input: { workspaceId: number;
   const rows = await db.select({ tx: blockchainTransactions, route: paymentRoutes }).from(blockchainTransactions).innerJoin(paymentRoutes, eq(blockchainTransactions.routeId, paymentRoutes.id)).where(and(eq(blockchainTransactions.transactionHash, input.transactionHash), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
   const current = rows[0];
   if (!current) throw new Error("Transaction not found in workspace");
-  await db.update(blockchainTransactions).set({ status: input.status, confirmedAt: input.status === "confirmed" ? new Date() : null }).where(eq(blockchainTransactions.transactionHash, input.transactionHash));
+  await db.update(blockchainTransactions).set({ status: input.status, confirmedAt: input.status === "confirmed" ? new Date() : null }).where(eq(blockchainTransactions.id, current.tx.id));
   const routeStatus = input.status === "confirmed" ? "settled" : input.status === "reverted" ? "failed" : "routed";
   await transitionPaymentRoute(input.workspaceId, current.route.id, input.actorUserId, routeStatus);
   const updated = await db.select().from(blockchainTransactions).where(eq(blockchainTransactions.transactionHash, input.transactionHash)).limit(1);
@@ -498,6 +512,7 @@ export async function createShareableProof(input: { workspaceId: number; routeId
   if (!db) throw new Error("Database is not configured");
   const route = await db.select({ id: paymentRoutes.id, proofReference: paymentRoutes.proofReference, status: paymentRoutes.status, token: paymentRoutes.token, totalAmount: paymentRoutes.totalAmount, name: paymentRoutes.name, createdAt: paymentRoutes.createdAt }).from(paymentRoutes).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId))).limit(1);
   if (!route[0]) throw new Error("Route not found in workspace");
+  if (!canPublishShareableProof(route[0].status)) throw new Error("Public proofs require a settled route");
   const existing = await db.select().from(shareableProofs).where(and(eq(shareableProofs.workspaceId, input.workspaceId), eq(shareableProofs.routeId, input.routeId), eq(shareableProofs.status, "active"))).limit(1);
   if (existing[0]) return { slug: existing[0].slug, route: route[0] };
   const slug = `vp-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
@@ -579,7 +594,10 @@ export async function commitPrivateMarketBid(input: { workspaceId: number; bidde
   if (!market[0] || market[0].status !== "live") throw new Error("Private market is not open for sealed bids");
   if (market[0].bidDeadline && market[0].bidDeadline.getTime() <= Date.now()) throw new Error("Sealed-bid window has closed");
   const existing = await db.select().from(privateMarketBids).where(eq(privateMarketBids.commitmentHash, input.commitmentHash)).limit(1);
-  if (existing[0]) return { bid: { id: existing[0].id, status: existing[0].status, commitmentHash: existing[0].commitmentHash }, market: market[0] };
+  if (existing[0]) {
+    if (canReusePrivateMarketBid(existing[0].marketId, input.marketId, existing[0].commitmentHash, input.commitmentHash)) return { bid: { id: existing[0].id, status: existing[0].status, commitmentHash: existing[0].commitmentHash }, market: market[0] };
+    throw new Error("Commitment hash has already been used in another market");
+  }
   const inserted = await db.insert(privateMarketBids).values({ marketId: input.marketId, bidderUserId: input.bidderUserId, commitmentHash: input.commitmentHash, encryptedTerms: input.encryptedTerms, bidAmount: input.bidAmount, status: "committed" }).$returningId();
   const id = inserted[0]?.id;
   if (!id) throw new Error("Could not commit sealed bid");
@@ -723,7 +741,10 @@ export async function createLaunchpadAllocation(input: { workspaceId: number; cr
   const project = await db.select({ id: launchpadProjects.id }).from(launchpadProjects).where(and(eq(launchpadProjects.id, input.projectId), eq(launchpadProjects.workspaceId, input.workspaceId))).limit(1);
   if (!project[0]) throw new Error("Launchpad project not found in workspace");
   const existing = await db.select().from(launchpadAllocations).where(eq(launchpadAllocations.commitment, input.commitment)).limit(1);
-  if (existing[0] && shouldReuseLaunchpadAllocation(existing[0].commitment, input.commitment)) return existing[0];
+  if (existing[0]) {
+    if (canReuseLaunchpadAllocation(existing[0].projectId, input.projectId, existing[0].commitment, input.commitment)) return existing[0];
+    throw new Error("Allocation commitment has already been used in another project");
+  }
   const inserted = await db.insert(launchpadAllocations).values({ projectId: input.projectId, commitment: input.commitment, encryptedReference: input.encryptedReference, allocationAmount: input.allocationAmount }).$returningId();
   const id = inserted[0]?.id;
   if (!id) throw new Error("Could not reserve Launchpad allocation");

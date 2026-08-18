@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLaunchpadPublicSummary, buildPayrollCron, canDecideLaunchpadRelease, canRequestLaunchpadRelease, summarizeLaunchpadReadiness, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canCreateRecipientClaim, canScheduleRoute, canSubmitLaunchpadAllocation, canSubmitLaunchpadProject, evaluateTreasuryPolicy, getLaunchpadInitialTab, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, isValidStarknetAddress, isWalletActionLocked, launchpadProjectActionLabel, nextLaunchpadProjectStatus, nextPayrollRunAt, normalizeAmountInput, resolveLaunchpadEmptyState, resolveLaunchpadPanel, shouldReuseLaunchpadAllocation } from "@shared/operations";
+import { buildLaunchpadPublicSummary, buildPayrollCron, canDecideLaunchpadRelease, canRequestLaunchpadRelease, summarizeLaunchpadReadiness, canAdvanceLaunchpadMilestoneStatus, canAdvanceLaunchpadProjectStatus, canCreateRecipientClaim, canScheduleRoute, canSubmitLaunchpadAllocation, canSubmitLaunchpadProject, canPublishShareableProof, canReuseLaunchpadAllocation, evaluateTreasuryPolicy, getLaunchpadInitialTab, isClaimToken, isLaunchpadAdminRole, isLaunchpadOperatorRole, isLaunchpadSlug, isPublicProofSlug, isValidStarknetAddress, isWalletActionLocked, launchpadProjectActionLabel, nextLaunchpadProjectStatus, nextPayrollRunAt, normalizeAmountInput, resolveLaunchpadEmptyState, resolveLaunchpadPanel, shouldReuseLaunchpadAllocation, canReusePrivateMarketBid } from "@shared/operations";
 
 describe("operations primitives", () => {
   it("builds weekly Heartbeat cron expressions in UTC", () => {
@@ -46,6 +46,23 @@ describe("operations primitives", () => {
     expect(canAdvanceLaunchpadMilestoneStatus("planned", "ready")).toBe(true);
     expect(canAdvanceLaunchpadMilestoneStatus("planned", "released")).toBe(false);
     expect(canAdvanceLaunchpadMilestoneStatus("released", "blocked")).toBe(false);
+  });
+
+  it("allows Launchpad allocation idempotency only inside the same project", () => {
+    expect(canReuseLaunchpadAllocation(4, 4, "cm-0123456789abcdef", "cm-0123456789abcdef")).toBe(true);
+    expect(canReuseLaunchpadAllocation(4, 5, "cm-0123456789abcdef", "cm-0123456789abcdef")).toBe(false);
+  });
+
+  it("allows public proofs only for settled routes", () => {
+    expect(canPublishShareableProof("settled")).toBe(true);
+    expect(canPublishShareableProof("draft")).toBe(false);
+    expect(canPublishShareableProof("failed")).toBe(false);
+  });
+
+  it("allows sealed-bid idempotency only inside the same market", () => {
+    expect(canReusePrivateMarketBid(7, 7, "commitment-123456789", "commitment-123456789")).toBe(true);
+    expect(canReusePrivateMarketBid(7, 8, "commitment-123456789", "commitment-123456789")).toBe(false);
+    expect(canReusePrivateMarketBid(7, 7, "commitment-123456789", "different-commitment")).toBe(false);
   });
 
   it("reuses the same Launchpad allocation commitment idempotently", () => {

@@ -270,3 +270,8 @@
 - [x] Add persisted shielded funding intent and sealed-bid launch workflows with authorization boundaries
 - [x] Optimize the app around the new markets surface and verify privacy, tests, build, and responsive behavior
 - [x] Document the Veyl-inspired markets boundary and remaining wallet-owned onchain evidence
+
+- [x] Audit VeilPay against the Strix repository’s relevant security and quality patterns
+- [x] Run safe static, dependency, authorization, privacy, transaction, and UX checks
+- [x] Fix confirmed defects and add regression coverage
+- [x] Document confirmed findings, limitations, and final verification results

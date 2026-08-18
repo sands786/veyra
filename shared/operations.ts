@@ -106,6 +106,14 @@ export function shouldReuseLaunchpadAllocation(existingCommitment: string | unde
   return Boolean(existingCommitment) && existingCommitment === requestedCommitment;
 }
 
+export function canReuseLaunchpadAllocation(existingProjectId: number, requestedProjectId: number, existingCommitment: string | undefined, requestedCommitment: string): boolean {
+  return existingProjectId === requestedProjectId && shouldReuseLaunchpadAllocation(existingCommitment, requestedCommitment);
+}
+
+export function canReusePrivateMarketBid(existingMarketId: number, requestedMarketId: number, existingCommitment: string | undefined, requestedCommitment: string): boolean {
+  return existingMarketId === requestedMarketId && Boolean(existingCommitment) && existingCommitment === requestedCommitment;
+}
+
 export function isLaunchpadSlug(value: string): boolean {
   return /^launch-[a-f0-9]{20}$/.test(value);
 }
@@ -116,6 +124,10 @@ export function buildLaunchpadPublicSummary(project: { slug: string; name: strin
 
 export function canScheduleRoute(routeId: number | null, pending: boolean): boolean {
   return routeId !== null && routeId > 0 && !pending;
+}
+
+export function canPublishShareableProof(status: "draft" | "shielded" | "routed" | "settled" | "failed" | "cancelled"): boolean {
+  return status === "settled";
 }
 
 export function canCreateRecipientClaim(routeId: number | null, recipientIds: number[], pending: boolean): boolean {
