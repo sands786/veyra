@@ -301,3 +301,5 @@
 - [x] Refine affected panel labels, statuses, metadata, and card typography for stronger contrast and easier scanning
 
 - [x] Replace remaining mono-styled interface labels with a cleaner sans-serif treatment while preserving mono for code and wallet identifiers
+
+- [x] Refine section eyebrow labels and divider treatment for stronger readability and hierarchy

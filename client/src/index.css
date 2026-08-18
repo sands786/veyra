@@ -81,6 +81,8 @@ small { font-size: .84rem; line-height: 1.45; }
 .nav-item:hover { color:var(--veyra-ivory); background:var(--veyra-tide); }
 .nav-item-active { color:var(--veyra-ivory); background:var(--veyra-tide); box-shadow: inset 3px 0 0 var(--veyra-vermilion); }
 .eyebrow { font-family:"JetBrains Mono", "IBM Plex Mono", monospace; font-size:11px; font-weight:700; line-height:1.35; letter-spacing:.08em; color:var(--veyra-vermilion); }
+.section-marker { color: var(--veyra-vermilion); font-family: "Manrope", sans-serif; font-size: 13px; font-weight: 800; line-height: 1.2; letter-spacing: .08em; }
+@media (max-width: 640px) { .section-marker { font-size: 11px; letter-spacing: .06em; } }
 .section-title { margin-top:1.3rem; font-family:"Space Grotesk", sans-serif; font-size:clamp(2.2rem,4.4vw,4rem); font-weight:700; line-height:.94; letter-spacing:-.07em; color:var(--veyra-ivory); }
 .section-title span { color:var(--veyra-silver); }
 .field-label { display:block; margin-bottom:.65rem; font-family:"Manrope", sans-serif; font-size:11px; font-weight:800; line-height:1.35; letter-spacing:.045em; color:var(--veyra-ivory); }
