@@ -307,3 +307,5 @@
 - [x] Right-align workspace/account, Sign Out, network switch, and Connect Wallet controls in the desktop header while preserving mobile behavior
 
 - [x] Remove the desktop workspace dropdown from the header while preserving mobile workspace switching
+
+- [x] Replace native amount input controls with a smooth custom stepper and accessible up/down buttons

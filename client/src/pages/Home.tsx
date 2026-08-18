@@ -4,7 +4,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { prepareRouteEdit } from "@/lib/routeEdit";
-import { ArrowUpRight, BarChart3, BookOpen, CalendarDays, Check, CheckCircle2, ChevronRight, CircleHelp, Copy, Download, EyeOff, Fingerprint, Link2, LockKeyhole, Menu, PlayCircle, Shield, Sparkles, UserCheck, WalletCards, X } from "lucide-react";
+import { ArrowUpRight, BarChart3, BookOpen, CalendarDays, Check, CheckCircle2, ChevronRight, CircleHelp, Copy, Download, EyeOff, Fingerprint, Link2, LockKeyhole, Menu, Minus, PlayCircle, Plus, Shield, Sparkles, UserCheck, WalletCards, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -110,6 +110,11 @@ export default function Home() {
   const [selectedRecipientIds, setSelectedRecipientIds] = useState<number[]>([]);
   const [amount, setAmount] = useState("2,840");
   const normalizedAmount = normalizeAmountInput(amount);
+  const adjustAmount = (delta: number) => {
+    const current = Number(normalizedAmount || 0);
+    const next = Math.max(0, current + delta);
+    setAmount(next.toLocaleString("en-US"));
+  };
   const [stage, setStage] = useState(1);
   const [connected, setConnected] = useState(false);
   const [walletConnecting, setWalletConnecting] = useState(false);
@@ -317,7 +322,7 @@ export default function Home() {
               <div className="mt-10 grid gap-5 sm:grid-cols-2">
                 <div><Label className="field-label">ROUTE NAME</Label><Input value={routeName} onChange={(event) => setRouteName(event.target.value)} className="field-input" /></div>
                 <div><Label className="field-label">ASSET</Label><div className="relative"><Input value={tokenSymbol} onChange={(event) => setTokenSymbol(event.target.value.toUpperCase())} className="field-input pr-16" /><span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#AEB8BE]">STRK20</span></div></div>
-                <div><Label className="field-label">TOTAL AMOUNT</Label><div className="relative"><Input value={amount} onChange={(e) => setAmount(e.target.value)} className="field-input pr-16" /><span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#AEB8BE]">{tokenSymbol}</span></div></div>
+                <div><Label className="field-label">TOTAL AMOUNT</Label><div className="amount-stepper"><Input aria-label="Total amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} className="field-input amount-stepper-input" /><span className="amount-stepper-token">{tokenSymbol}</span><div className="amount-stepper-controls" aria-label="Adjust total amount"><button type="button" aria-label="Increase total amount" onClick={() => adjustAmount(100)} className="amount-stepper-button"><Plus size={13} strokeWidth={2.5} /></button><button type="button" aria-label="Decrease total amount" disabled={Number(normalizedAmount || 0) <= 0} onClick={() => adjustAmount(-100)} className="amount-stepper-button"><Minus size={13} strokeWidth={2.5} /></button></div></div></div>
                 <div><Label className="field-label">RECIPIENTS</Label><div className="field-input flex items-center justify-between"><span>{selectedRecipientIds.length || "None selected"}</span><span className="font-mono text-[10px] text-[#AEB8BE]">ROSTER</span></div></div>
               </div>
               <div className="mt-8 rounded-[14px] border border-white/10 bg-[#151D21]/75 p-4 sm:p-5"><div className="flex items-center gap-2 text-[#F3EEE5]"><EyeOff size={15} className="text-[#F0563A]" /><span className="font-mono text-[10px] tracking-[0.12em]">WHAT STAYS SHIELDED</span></div><div className="mt-4 grid gap-3 text-[13px] text-[#A8A195] sm:grid-cols-3"><div><span className="block text-[#F3EEE5]">Recipient roster</span>not published</div><div><span className="block text-[#F3EEE5]">Individual amounts</span>not published</div><div><span className="block text-[#F3EEE5]">Proof reference</span>shareable</div></div></div>

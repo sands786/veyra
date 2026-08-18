@@ -88,6 +88,17 @@ small { font-size: .84rem; line-height: 1.45; }
 .field-label { display:block; margin-bottom:.65rem; font-family:"Manrope", sans-serif; font-size:11px; font-weight:800; line-height:1.35; letter-spacing:.045em; color:var(--veyra-ivory); }
 .field-input { height:3rem; width:100%; border:1px solid rgb(174 184 190 / 20%); border-radius:10px; background:var(--veyra-tide); color:var(--veyra-ivory); padding:0 .9rem; font-family:"Manrope", sans-serif; font-size:13px; font-weight:600; line-height:1.4; outline:none; }
 .field-input:focus { border-color:var(--veyra-vermilion); box-shadow:0 0 0 3px rgb(240 86 58 / 14%); }
+.amount-stepper { position: relative; display: flex; align-items: stretch; }
+.amount-stepper-input { padding-right: 8.4rem; }
+.amount-stepper-input::-webkit-inner-spin-button, .amount-stepper-input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.amount-stepper-token { position: absolute; right: 5.25rem; top: 50%; transform: translateY(-50%); color: var(--veyra-silver); font-family: "JetBrains Mono", "IBM Plex Mono", monospace; font-size: 10px; font-weight: 600; letter-spacing: .04em; pointer-events: none; }
+.amount-stepper-controls { position: absolute; top: 4px; right: 4px; bottom: 4px; display: flex; width: 3.7rem; overflow: hidden; border: 1px solid rgb(174 184 190 / 20%); border-radius: 8px; background: rgb(17 18 16 / 55%); }
+.amount-stepper-button { display: grid; flex: 1; place-items: center; border: 0; color: var(--veyra-ivory); background: transparent; transition: background-color 150ms ease, color 150ms ease, transform 150ms cubic-bezier(.23,1,.32,1); }
+.amount-stepper-button + .amount-stepper-button { border-left: 1px solid rgb(174 184 190 / 16%); }
+.amount-stepper-button:hover:not(:disabled) { color: var(--veyra-vermilion); background: rgb(240 86 58 / 12%); }
+.amount-stepper-button:active:not(:disabled) { transform: scale(.9); }
+.amount-stepper-button:disabled { color: var(--veyra-silver); opacity: .35; cursor: not-allowed; }
+@media (max-width: 640px) { .amount-stepper-input { padding-right: 7.6rem; } .amount-stepper-token { right: 4.8rem; } .amount-stepper-controls { width: 3.4rem; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior:auto !important; transition-duration:0.01ms !important; animation-duration:0.01ms !important; } }
 @layer base {
   * { @apply outline-ring/50; }
