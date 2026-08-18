@@ -293,3 +293,5 @@
 - [x] Remove the emblem container background, border, and radius so the Veyra logo reads as an independent transparent mark
 
 - [x] Recolor and refine the Veyra emblem so its geometry, contrast, and accents match the app palette exactly
+
+- [x] Remove the baked white square from the Veyra logo so it floats naturally on the dark sidebar
