@@ -265,3 +265,8 @@
 - [x] Replace demo-only UI actions with real database-backed state and network-aware transaction records
 - [x] Add real privacy, authorization, testnet, and failure-path verification for the converted workflows
 - [x] Update documentation to distinguish real SaaS behavior, testnet execution, mainnet readiness, and remaining wallet-owned evidence
+
+- [x] Add a Veyl-inspired Private Markets workspace with private trader identity and public aggregate signals
+- [x] Add persisted shielded funding intent and sealed-bid launch workflows with authorization boundaries
+- [x] Optimize the app around the new markets surface and verify privacy, tests, build, and responsive behavior
+- [x] Document the Veyl-inspired markets boundary and remaining wallet-owned onchain evidence

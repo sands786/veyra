@@ -11,3 +11,9 @@ The Starknet execution boundary is explicit. Testnet and mainnet selection, chai
 ## Verification
 
 The current implementation has been verified with 46 Vitest tests, TypeScript, a production build, and responsive desktop/mobile visual QA. Real mainnet evidence remains user-owned because it requires signing from the user’s wallet.
+
+## Private Markets
+
+The `/private-markets` workspace adds a persisted market terminal inspired by private identity/public market design. Workspace operators can create and open a market with a selected Starknet network. Authenticated members can commit sealed bids. The database stores the bidder identity and bid amount behind workspace authorization, while the market projection exposes only aggregate public volume and participant count.
+
+The current feature is a real persisted market and commitment workflow, not an order-matching engine. Price discovery, bid reveal/selection, and live settlement are deliberately not inferred from a commitment. Those capabilities require an explicit matching policy and deployed privacy-capable contract/SDK integration before they can be represented as live onchain behavior.

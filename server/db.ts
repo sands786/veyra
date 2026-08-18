@@ -19,6 +19,8 @@ import {
   treasuryPolicies,
   InsertUser,
   paymentRoutes,
+  privateMarkets,
+  privateMarketBids,
   recipients,
   routeRecipients,
   users,
@@ -28,6 +30,29 @@ import {
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
+
+function addDecimalStrings(left: string, right: string): string {
+  const [leftWhole, leftFraction = ""] = left.split(".");
+  const [rightWhole, rightFraction = ""] = right.split(".");
+  const fractionLength = Math.max(leftFraction.length, rightFraction.length);
+  const leftDigits = `${leftWhole || "0"}${leftFraction.padEnd(fractionLength, "0")}`;
+  const rightDigits = `${rightWhole || "0"}${rightFraction.padEnd(fractionLength, "0")}`;
+  const width = Math.max(leftDigits.length, rightDigits.length);
+  const a = leftDigits.padStart(width, "0");
+  const b = rightDigits.padStart(width, "0");
+  let carry = 0;
+  let result = "";
+  for (let index = width - 1; index >= 0; index -= 1) {
+    const sum = Number(a[index]) + Number(b[index]) + carry;
+    result = String(sum % 10) + result;
+    carry = Math.floor(sum / 10);
+  }
+  if (carry) result = String(carry) + result;
+  const wholeEnd = result.length - fractionLength;
+  const whole = result.slice(0, wholeEnd) || "0";
+  const fraction = result.slice(wholeEnd).replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : whole;
+}
 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
@@ -515,6 +540,54 @@ export async function listWorkspaceOperationsHealth(workspaceId: number) {
     unresolvedReceipts: receipts.filter(({ tx }) => ["submitted", "unknown"].includes(tx.status)).map(({ tx, route }) => ({ transactionHash: tx.transactionHash, status: tx.status, routeId: route.id, routeName: route.name, updatedAt: tx.submittedAt })),
     proofHealth: proofs.map(({ proof, route }) => ({ slug: proof.slug, routeId: route.id, routeName: route.name, routeStatus: route.status, hasCommitment: Boolean(route.proofReference), createdAt: proof.createdAt })),
   };
+}
+
+export async function listPrivateMarkets(workspaceId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select().from(privateMarkets).where(eq(privateMarkets.workspaceId, workspaceId)).orderBy(desc(privateMarkets.createdAt));
+  return rows.map(({ createdByUserId: _createdByUserId, ...market }) => market);
+}
+
+export async function createPrivateMarket(input: { workspaceId: number; createdByUserId: number; name: string; token: string; network: "mainnet" | "sepolia"; targetAmount: string; bidDeadline?: Date }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const slug = `market-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
+  const inserted = await db.insert(privateMarkets).values({ ...input, slug, status: "draft", currentPrice: "0", publicVolume: "0", publicParticipants: 0 }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not create private market");
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.createdByUserId, entityType: "private_market", entityId: id, action: "created" });
+  const rows = await db.select().from(privateMarkets).where(eq(privateMarkets.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function updatePrivateMarketStatus(input: { workspaceId: number; actorUserId: number; marketId: number; status: "draft" | "live" | "closed" }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const market = await db.select().from(privateMarkets).where(and(eq(privateMarkets.id, input.marketId), eq(privateMarkets.workspaceId, input.workspaceId))).limit(1);
+  if (!market[0]) throw new Error("Private market not found in workspace");
+  await db.update(privateMarkets).set({ status: input.status }).where(eq(privateMarkets.id, input.marketId));
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "private_market", entityId: input.marketId, action: `status_${input.status}` });
+  const rows = await db.select().from(privateMarkets).where(eq(privateMarkets.id, input.marketId)).limit(1);
+  return rows[0];
+}
+
+export async function commitPrivateMarketBid(input: { workspaceId: number; bidderUserId: number; marketId: number; commitmentHash: string; encryptedTerms?: string; bidAmount: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const market = await db.select().from(privateMarkets).where(and(eq(privateMarkets.id, input.marketId), eq(privateMarkets.workspaceId, input.workspaceId))).limit(1);
+  if (!market[0] || market[0].status !== "live") throw new Error("Private market is not open for sealed bids");
+  if (market[0].bidDeadline && market[0].bidDeadline.getTime() <= Date.now()) throw new Error("Sealed-bid window has closed");
+  const existing = await db.select().from(privateMarketBids).where(eq(privateMarketBids.commitmentHash, input.commitmentHash)).limit(1);
+  if (existing[0]) return { bid: { id: existing[0].id, status: existing[0].status, commitmentHash: existing[0].commitmentHash }, market: market[0] };
+  const inserted = await db.insert(privateMarketBids).values({ marketId: input.marketId, bidderUserId: input.bidderUserId, commitmentHash: input.commitmentHash, encryptedTerms: input.encryptedTerms, bidAmount: input.bidAmount, status: "committed" }).$returningId();
+  const id = inserted[0]?.id;
+  if (!id) throw new Error("Could not commit sealed bid");
+  await db.update(privateMarkets).set({ publicParticipants: market[0].publicParticipants + 1, publicVolume: addDecimalStrings(market[0].publicVolume, input.bidAmount) }).where(eq(privateMarkets.id, input.marketId));
+  await db.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.bidderUserId, entityType: "private_market_bid", entityId: id, action: "committed" });
+  const bid = await db.select({ id: privateMarketBids.id, status: privateMarketBids.status, commitmentHash: privateMarketBids.commitmentHash }).from(privateMarketBids).where(eq(privateMarketBids.id, id)).limit(1);
+  const updatedMarket = await db.select().from(privateMarkets).where(eq(privateMarkets.id, input.marketId)).limit(1);
+  return { bid: bid[0], market: updatedMarket[0] };
 }
 
 export async function createLaunchpadProject(input: { workspaceId: number; createdByUserId: number; name: string; description?: string; token: string; network: "mainnet" | "sepolia"; targetAmount: string; fundingEndsAt?: Date }) {

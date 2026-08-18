@@ -223,6 +223,36 @@ export const launchpadAllocations = mysqlTable("launchpadAllocations", {
   claimedAt: timestamp("claimedAt"),
 });
 
+export const privateMarkets = mysqlTable("privateMarkets", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  createdByUserId: int("createdByUserId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  slug: varchar("slug", { length: 160 }).notNull().unique(),
+  token: varchar("token", { length: 80 }).notNull(),
+  network: mysqlEnum("network", ["mainnet", "sepolia"]).notNull().default("sepolia"),
+  targetAmount: varchar("targetAmount", { length: 80 }).notNull(),
+  currentPrice: varchar("currentPrice", { length: 80 }).notNull().default("0"),
+  publicVolume: varchar("publicVolume", { length: 80 }).notNull().default("0"),
+  publicParticipants: int("publicParticipants").notNull().default(0),
+  status: mysqlEnum("status", ["draft", "live", "closed"]).notNull().default("draft"),
+  bidDeadline: timestamp("bidDeadline"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const privateMarketBids = mysqlTable("privateMarketBids", {
+  id: int("id").autoincrement().primaryKey(),
+  marketId: int("marketId").notNull(),
+  bidderUserId: int("bidderUserId").notNull(),
+  commitmentHash: varchar("commitmentHash", { length: 255 }).notNull().unique(),
+  encryptedTerms: text("encryptedTerms"),
+  bidAmount: varchar("bidAmount", { length: 80 }).notNull(),
+  status: mysqlEnum("status", ["committed", "revealed", "accepted", "rejected"]).notNull().default("committed"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  revealedAt: timestamp("revealedAt"),
+}, (table) => ({ marketIdx: index("privateMarketBids_market_idx").on(table.marketId), bidderIdx: index("privateMarketBids_bidder_idx").on(table.bidderUserId) }));
+
 export const blockchainTransactions = mysqlTable("blockchainTransactions", {
   id: int("id").autoincrement().primaryKey(),
   routeId: int("routeId").notNull(),
