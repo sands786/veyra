@@ -256,12 +256,12 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#111210] text-[#F3EEE5] selection:bg-[#F0563A] selection:text-[#111210]">
+    <div className="min-h-screen overflow-hidden bg-[#111210] text-[#F3EEE5] selection:bg-[#70D49D] selection:text-[#111210]">
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.11] [background-image:radial-gradient(#F3EEE5_0.6px,transparent_0.6px)] [background-size:18px_18px]" />
       <div className="relative z-10 flex min-h-screen">
-        <aside className="hidden w-[204px] shrink-0 border-r border-white/10 bg-[#151614]/95 px-5 py-6 lg:flex lg:flex-col">
+        <aside className="hidden w-[204px] shrink-0 border-r border-[#163B4A]/70 bg-[#111210]/95 px-5 py-6 lg:flex lg:flex-col">
           <div className="flex items-center gap-3">
-            <img src="/manus-storage/veilpay-logo_9b291ef8.png" alt="Veyra mark" className="h-10 w-10 object-contain drop-shadow-[0_0_18px_rgba(240,86,58,.28)]" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-[#70D49D]/35 bg-[#163B4A] shadow-[0_0_28px_rgba(112,212,157,.16)]"><img src="/manus-storage/veyra-legacy-mark_7dac94a7.png" alt="Veyra legacy privacy mark" className="h-8 w-8 object-contain" /></div>
             <div>
               <div className="font-display text-[17px] font-bold tracking-[-0.04em]">Veyra</div>
               <div className="font-mono text-[9px] tracking-[0.18em] text-[#AEB8BE]">STRK20 / PRIVATE</div>
@@ -276,7 +276,7 @@ export default function Home() {
             <button onClick={() => goToOperations("overview")} className={`nav-item ${activeSection === "operations" && operationsView === "overview" ? "nav-item-active" : ""}`}><BarChart3 size={16} /> Operations</button><button onClick={() => goToOperations("treasury")} className={`nav-item pl-10 text-[11px] ${activeSection === "operations" && operationsView === "treasury" ? "nav-item-active" : ""}`}><LockKeyhole size={14} /> Treasury</button><button onClick={() => goToOperations("claims")} className={`nav-item pl-10 text-[11px] ${activeSection === "operations" && operationsView === "claims" ? "nav-item-active" : ""}`}><Link2 size={14} /> Claims</button><button onClick={() => { window.location.href = "/launchpad"; }} className="nav-item"><Sparkles size={16} /> Launchpad</button><button onClick={() => { window.location.href = "/private-primitives"; }} className="nav-item"><Fingerprint size={16} /> Private primitives</button><button onClick={() => { window.location.href = "/private-markets"; }} className="nav-item"><BarChart3 size={16} /> Private markets</button><button onClick={() => { window.location.href = "/docs"; }} className="nav-item"><BookOpen size={16} /> Documentation</button><button onClick={() => { window.location.href = "/demo"; }} className="nav-item"><PlayCircle size={16} /> Demo mode</button>
           </div>
 
-          <div className="mt-auto rounded-[16px] border border-white/10 bg-[#1D1E1B] p-4">
+          <div className="mt-auto rounded-[16px] border border-[#70D49D]/20 bg-[#163B4A]/75 p-4">
             <div className="flex items-center justify-between"><span className="font-mono text-[9px] tracking-[0.16em] text-[#AEB8BE]">NETWORK</span><span className="h-2 w-2 rounded-full bg-[#70D49D] shadow-[0_0_12px_#70D49D]" /></div>
             <select aria-label="Starknet network" value={selectedNetwork} onChange={(event) => changeNetwork(event.target.value as VeilNetwork)} className="mt-3 w-full bg-transparent font-display text-[15px] text-[#F3EEE5] outline-none"><option value="sepolia">Starknet Sepolia</option><option value="mainnet">Starknet mainnet</option></select>
             <div className="mt-1 text-[12px] leading-5 text-[#AEB8BE]">{selectedNetwork === "sepolia" ? "Safe testnet verification path. No mainnet evidence." : "Production path. Wallet approval required."}</div>
@@ -303,7 +303,7 @@ export default function Home() {
 
           <section className="relative isolate overflow-hidden border-b border-white/10 px-5 py-11 sm:px-8 lg:px-8 lg:py-14">
             <img src="/manus-storage/veilpay-hero_c0925870.png" alt="Copper cryptographic veil texture" className="absolute inset-0 -z-20 h-full w-full object-cover opacity-45" />
-            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#111210] via-[#111210]/80 to-[#111210]/20" />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#111210] via-[#111210]/75 to-[#163B4A]/35" />
             <div className="max-w-[900px]">
               <div className="mb-6 flex items-center gap-3 font-mono text-[10px] tracking-[0.18em] text-[#F0563A]"><span className="h-px w-8 bg-[#F0563A]" />PRIVATE PAYROLL / STRK20</div>
               <h1 className="font-display max-w-[780px] text-[clamp(3.2rem,8vw,7.7rem)] font-bold leading-[0.86] tracking-[-0.08em] text-[#F3EEE5]">Move the money.<br /><span className="text-[#F0563A]">Keep the roster</span><br />private.</h1>

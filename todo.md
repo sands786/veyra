@@ -282,3 +282,7 @@
 
 - [x] Apply the Veyra Obsidian, Moon Ivory, Deep Tide, Emerald, Moon Silver, and restrained Vermilion palette across core surfaces
 - [x] Verify color contrast, responsive rendering, tests, and production build after the palette update
+
+- [x] Make the Veyra palette more prominent across navigation, controls, cards, and product surfaces
+- [x] Create and integrate a distinctive legacy-grade Veyra logo mark and wordmark
+- [x] Verify logo legibility, contrast, responsive rendering, tests, and production build
