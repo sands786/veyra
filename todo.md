@@ -291,3 +291,5 @@
 - [x] Integrate the revised logo asset into the app and verify mark legibility across sizes
 
 - [x] Remove the emblem container background, border, and radius so the Veyra logo reads as an independent transparent mark
+
+- [x] Recolor and refine the Veyra emblem so its geometry, contrast, and accents match the app palette exactly
