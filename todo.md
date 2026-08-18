@@ -275,3 +275,7 @@
 - [x] Run safe static, dependency, authorization, privacy, transaction, and UX checks
 - [x] Fix confirmed defects and add regression coverage
 - [x] Document confirmed findings, limitations, and final verification results
+
+- [x] Rebrand VeilPay as Veyra across app metadata, workspace identity, navigation, and product-line copy
+- [x] Preserve technical VeilPay history only where required for evidence and compatibility
+- [x] Verify Veyra branding consistency with tests, build, and responsive visual QA
