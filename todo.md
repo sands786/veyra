@@ -259,3 +259,9 @@
 - [x] Inspect the referenced StarkWare post and select 2–3 ideas relevant to VeilPay
 - [x] Implement the selected StarkWare-inspired features with privacy and network safety preserved
 - [x] Add tests, documentation, and responsive verification for the new features
+
+- [x] Audit every Demo Mode-only path and current Starknet execution boundary
+- [x] Convert simulated business actions into authenticated persisted backend workflows
+- [x] Replace demo-only UI actions with real database-backed state and network-aware transaction records
+- [x] Add real privacy, authorization, testnet, and failure-path verification for the converted workflows
+- [x] Update documentation to distinguish real SaaS behavior, testnet execution, mainnet readiness, and remaining wallet-owned evidence

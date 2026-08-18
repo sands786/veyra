@@ -61,3 +61,8 @@ The production boundary remains explicit:
 | Starknet mainnet | Production wallet execution and hackathon proof | Requires user-approved transactions touching the live STRK20 pool |
 
 Verification after this implementation: **43 Vitest tests pass, TypeScript passes, and the production build succeeds**. The remaining mainnet evidence is still user-owned and must not be fabricated or inferred from Demo Mode or Sepolia activity.
+
+
+## Full-stack reality update — 2026-08-18
+
+VeilPay’s production workspace is server-backed rather than static: authenticated tRPC procedures, workspace-scoped authorization, database persistence, audit events, claims, proofs, Launchpad milestone state, and network-aware transaction records are implemented. The `/private-primitives` workspace calls real `claims.create`, `proofs.create`, and `launchpad.updateMilestoneStatus` procedures instead of local-only action state. Demo Mode remains intentionally local and reversible. Live STRK20 settlement and mainnet evidence still require compatible wallet/SDK execution, user wallet approval, and real transaction hashes.
