@@ -23,6 +23,7 @@ import {
   privateMarketBids,
   privateMarketQuotes,
   privateMarketRiskPolicies,
+  privateMarketAlerts,
   recipients,
   routeRecipients,
   users,
@@ -896,4 +897,19 @@ export async function exportPrivateMarketBook(workspaceId: number, marketId: num
     ...quotes.map((quote) => [quote.providerLabel, quote.price, String(quote.feeBps), quote.capacity, quote.status, quote.expiresAt.toISOString(), quote.createdAt.toISOString()]),
   ];
   return rows.map((row) => row.map((cell) => escape(String(cell ?? ""))).join(",")).join("\n");
+}
+
+
+export async function listPrivateMarketAlerts(workspaceId: number, marketId?: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  return db.select().from(privateMarketAlerts).where(marketId ? and(eq(privateMarketAlerts.workspaceId, workspaceId), eq(privateMarketAlerts.marketId, marketId)) : eq(privateMarketAlerts.workspaceId, workspaceId)).orderBy(desc(privateMarketAlerts.createdAt)).limit(50);
+}
+
+export async function acknowledgePrivateMarketAlert(input: { workspaceId: number; alertId: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  await db.update(privateMarketAlerts).set({ status: "acknowledged", acknowledgedAt: new Date() }).where(and(eq(privateMarketAlerts.id, input.alertId), eq(privateMarketAlerts.workspaceId, input.workspaceId), eq(privateMarketAlerts.status, "open")));
+  const updated = await db.select().from(privateMarketAlerts).where(and(eq(privateMarketAlerts.id, input.alertId), eq(privateMarketAlerts.workspaceId, input.workspaceId))).limit(1);
+  return updated[0] ?? null;
 }

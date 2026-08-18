@@ -279,6 +279,18 @@ export const privateMarketRiskPolicies = mysqlTable("privateMarketRiskPolicies",
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({ workspaceIdx: index("privateMarketRiskPolicies_workspace_idx").on(table.workspaceId), marketIdx: index("privateMarketRiskPolicies_market_idx").on(table.marketId) }));
 
+export const privateMarketAlerts = mysqlTable("privateMarketAlerts", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  marketId: int("marketId"),
+  severity: mysqlEnum("severity", ["info", "warning", "critical"]).notNull().default("info"),
+  code: varchar("code", { length: 80 }).notNull(),
+  message: varchar("message", { length: 500 }).notNull(),
+  status: mysqlEnum("status", ["open", "acknowledged", "resolved"]).notNull().default("open"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  acknowledgedAt: timestamp("acknowledgedAt"),
+}, (table) => ({ workspaceIdx: index("privateMarketAlerts_workspace_idx").on(table.workspaceId), statusIdx: index("privateMarketAlerts_status_idx").on(table.status), marketIdx: index("privateMarketAlerts_market_idx").on(table.marketId) }));
+
 export const blockchainTransactions = mysqlTable("blockchainTransactions", {
   id: int("id").autoincrement().primaryKey(),
   routeId: int("routeId").notNull(),

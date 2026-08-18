@@ -326,3 +326,5 @@
 - [ ] Upgrade Veyra into a full institutional flagship app with persisted RFQ/execution workflows, configurable risk and approvals, alerts, portfolio analytics, reconciliation, exports, audit views, and hardened privacy/contract boundaries
 
 - [x] Add persisted RFQ quote creation, all-in quote comparison, accept/reject lifecycle, configurable market risk policy, and privacy-safe CSV book export
+
+- [x] Correct Private Primitives so links and values remain explicitly unsigned/pending until a real wallet signature and confirmed Starknet receipt exist
