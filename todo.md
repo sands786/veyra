@@ -279,3 +279,6 @@
 - [x] Rebrand VeilPay as Veyra across app metadata, workspace identity, navigation, and product-line copy
 - [x] Preserve technical VeilPay history only where required for evidence and compatibility
 - [x] Verify Veyra branding consistency with tests, build, and responsive visual QA
+
+- [x] Apply the Veyra Obsidian, Moon Ivory, Deep Tide, Emerald, Moon Silver, and restrained Vermilion palette across core surfaces
+- [x] Verify color contrast, responsive rendering, tests, and production build after the palette update
