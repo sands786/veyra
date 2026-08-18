@@ -1,0 +1,1 @@
+{"version":1,"contracts":[{"id":"2svnm42mrpdq2","package_name":"veyra_payroll","contract_name":"VeyraPayrollRegistry","module_path":"veyra_payroll::VeyraPayrollRegistry","artifacts":{"sierra":"veyra_payroll_VeyraPayrollRegistry.contract_class.json","casm":null}}]}

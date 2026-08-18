@@ -21,11 +21,25 @@ export const NETWORKS: Record<VeilNetwork, { label: string; chainId: string; exp
   },
 };
 
+export type OnchainAction = {
+  type: "deposit" | "transfer";
+  token: string;
+  amount: string;
+  recipient?: string;
+};
+
+export type ShieldedRouteIntent = {
+  network: VeilNetwork;
+  token: string;
+  amountSmallestUnit: bigint;
+  recipient?: string;
+};
+
 export type VeilWallet = {
   account?: { address?: string };
   address?: string;
   chainId?: string;
-  strk20InvokeTransaction?: (actions: unknown[]) => Promise<{ transaction_hash: string }>;
+  strk20InvokeTransaction?: (actions: OnchainAction[]) => Promise<{ transaction_hash: string }>;
   strk20Balances?: (tokens: string[]) => Promise<unknown>;
   enable?: () => Promise<unknown>;
 };
@@ -69,14 +83,32 @@ export async function connectVeilWallet(): Promise<{ wallet?: VeilWallet; addres
   return { wallet, address, live: Boolean(address), network: networkFromChainId(wallet.chainId) };
 }
 
+export function buildShieldedRouteActions(intent: ShieldedRouteIntent): OnchainAction[] {
+  if (intent.amountSmallestUnit <= BigInt(0)) throw new Error("Shielded route amount must be greater than zero.");
+  if (!intent.token.trim()) throw new Error("Shielded route token is required.");
+  const amount = num.toHex(intent.amountSmallestUnit);
+  return [
+    { type: "deposit", token: intent.token, amount },
+    ...(intent.recipient ? [{ type: "transfer" as const, token: intent.token, amount, recipient: intent.recipient }] : []),
+  ];
+}
+
+export function onchainCapability(wallet: VeilWallet | undefined, network: VeilNetwork) {
+  const walletNetwork = networkFromChainId(wallet?.chainId);
+  return {
+    network,
+    walletConnected: Boolean(wallet?.address ?? wallet?.account?.address),
+    walletNetwork,
+    networkCompatible: !walletNetwork || walletNetwork === network,
+    strk20Ready: Boolean(wallet?.strk20InvokeTransaction),
+    canExecute: Boolean(wallet?.strk20InvokeTransaction) && (!walletNetwork || walletNetwork === network),
+  } as const;
+}
+
 export async function submitShieldedRoute(wallet: VeilWallet, amountSmallestUnit: bigint, network: VeilNetwork = "mainnet", recipient?: string) {
   if (!wallet.strk20InvokeTransaction) throw new Error("This wallet does not expose the STRK20 privacy API yet.");
   assertWalletNetwork(wallet, network);
-  const actions = [
-    { type: "deposit", token: STRK_TOKEN, amount: num.toHex(amountSmallestUnit) },
-    ...(recipient ? [{ type: "transfer", token: STRK_TOKEN, amount: num.toHex(amountSmallestUnit), recipient }] : []),
-  ];
-  return wallet.strk20InvokeTransaction(actions);
+  return wallet.strk20InvokeTransaction(buildShieldedRouteActions({ network, token: STRK_TOKEN, amountSmallestUnit, recipient }));
 }
 
 export function explorerUrl(txHash: string, networkOrChainId?: VeilNetwork | string) {
