@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, lt, or } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { RpcProvider } from "starknet";
@@ -33,6 +33,22 @@ import {
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
+
+function compareDecimalStrings(left: string, right: string): number {
+  const normalize = (value: string) => {
+    const [whole = "0", fraction = ""] = value.split(".");
+    return { whole: whole.replace(/^0+(?=\d)/, "") || "0", fraction: fraction.replace(/0+$/, "") };
+  };
+  const a = normalize(left);
+  const b = normalize(right);
+  if (a.whole.length !== b.whole.length) return a.whole.length > b.whole.length ? 1 : -1;
+  if (a.whole !== b.whole) return a.whole > b.whole ? 1 : -1;
+  const width = Math.max(a.fraction.length, b.fraction.length);
+  const af = a.fraction.padEnd(width, "0");
+  const bf = b.fraction.padEnd(width, "0");
+  if (af === bf) return 0;
+  return af > bf ? 1 : -1;
+}
 
 function addDecimalStrings(left: string, right: string): string {
   const [leftWhole, leftFraction = ""] = left.split(".");
@@ -596,6 +612,20 @@ export async function commitPrivateMarketBid(input: { workspaceId: number; bidde
   const market = await db.select().from(privateMarkets).where(and(eq(privateMarkets.id, input.marketId), eq(privateMarkets.workspaceId, input.workspaceId))).limit(1);
   if (!market[0] || market[0].status !== "live") throw new Error("Private market is not open for sealed bids");
   if (market[0].bidDeadline && market[0].bidDeadline.getTime() <= Date.now()) throw new Error("Sealed-bid window has closed");
+  if (!/^\d+(\.\d{1,18})?$/.test(input.bidAmount)) throw new Error("Bid amount must be a valid positive decimal");
+  if (compareDecimalStrings(input.bidAmount, "0") <= 0) throw new Error("Bid amount must be greater than zero");
+  const policyRows = await db.select().from(privateMarketRiskPolicies).where(and(eq(privateMarketRiskPolicies.workspaceId, input.workspaceId), eq(privateMarketRiskPolicies.status, "active"), or(eq(privateMarketRiskPolicies.marketId, input.marketId), isNull(privateMarketRiskPolicies.marketId)))).orderBy(desc(privateMarketRiskPolicies.marketId), desc(privateMarketRiskPolicies.updatedAt)).limit(1);
+  const policy = policyRows[0];
+  const existingVolume = market[0].publicVolume;
+  const projectedVolume = addDecimalStrings(existingVolume, input.bidAmount);
+  const violations: string[] = [];
+  if (policy && compareDecimalStrings(input.bidAmount, policy.maxBidAmount) > 0) violations.push(`Bid exceeds the configured maximum of ${policy.maxBidAmount}`);
+  if (policy && compareDecimalStrings(market[0].targetAmount, "0") > 0 && compareDecimalStrings(addDecimalStrings(input.bidAmount, "0"), ((Number(market[0].targetAmount) * policy.maxConcentrationPct) / 100).toFixed(18)) > 0) violations.push(`Bid exceeds the configured ${policy.maxConcentrationPct}% concentration limit`);
+  if (compareDecimalStrings(projectedVolume, market[0].targetAmount) > 0) violations.push("Bid would exceed the market target capacity");
+  if (violations.length) {
+    await db.insert(privateMarketAlerts).values({ workspaceId: input.workspaceId, marketId: input.marketId, severity: "warning", code: "BID_RISK_POLICY_BLOCKED", message: violations.join("; "), status: "open" });
+    throw new Error(`Bid blocked by risk policy: ${violations.join("; ")}`);
+  }
   const existing = await db.select().from(privateMarketBids).where(eq(privateMarketBids.commitmentHash, input.commitmentHash)).limit(1);
   if (existing[0]) {
     if (canReusePrivateMarketBid(existing[0].marketId, input.marketId, existing[0].commitmentHash, input.commitmentHash)) return { bid: { id: existing[0].id, status: existing[0].status, commitmentHash: existing[0].commitmentHash }, market: market[0] };
@@ -794,20 +824,35 @@ export async function exportWorkspaceAuditCsv(workspaceId: number) {
 
 export async function getPrivateMarketInsights(workspaceId: number, userId: number) {
   const db = await getDb();
-  if (!db) return { markets: [], portfolio: { committedAmount: "0", openCommitments: 0, settledAmount: "0", currentValue: "0", pnl: "0" }, risk: { activeMarkets: 0, openCommitments: 0, maxUtilizationPct: 0, attention: [] as string[] }, disclosure: { allowedScopes: ["aggregate" as const], privateFields: ["bidder_identity", "raw_bid_amount", "encrypted_terms"] } };
+  if (!db) return { markets: [], portfolio: { committedAmount: "0", openCommitments: 0, settledAmount: "0", currentValue: "0", pnl: "0", history: [] }, execution: { acceptedQuotes: 0, openQuotes: 0, averageAcceptedFeeBps: 0 }, risk: { activeMarkets: 0, openCommitments: 0, maxUtilizationPct: 0, attention: [] as string[] }, disclosure: { allowedScopes: ["aggregate" as const], privateFields: ["bidder_identity", "raw_bid_amount", "encrypted_terms"] } };
   const markets = await db.select().from(privateMarkets).where(eq(privateMarkets.workspaceId, workspaceId)).orderBy(desc(privateMarkets.updatedAt));
   const marketIds = markets.map((market) => market.id);
-  const allBids = marketIds.length ? await db.select().from(privateMarketBids).where(eq(privateMarketBids.bidderUserId, userId)) : [];
+  const [allBids, allQuotes, policies] = await Promise.all([
+    marketIds.length ? db.select().from(privateMarketBids).where(eq(privateMarketBids.bidderUserId, userId)) : Promise.resolve([]),
+    marketIds.length ? db.select().from(privateMarketQuotes).where(inArray(privateMarketQuotes.marketId, marketIds)) : Promise.resolve([]),
+    marketIds.length ? db.select().from(privateMarketRiskPolicies).where(and(eq(privateMarketRiskPolicies.workspaceId, workspaceId), eq(privateMarketRiskPolicies.status, "active"))) : Promise.resolve([]),
+  ]);
   const visibleBids = allBids.filter((bid) => marketIds.includes(bid.marketId));
   const committed = visibleBids.filter((bid) => bid.status !== "rejected").reduce((sum, bid) => sum + Number(bid.bidAmount), 0);
+  const accepted = visibleBids.filter((bid) => bid.status === "accepted");
+  const settledAmount = accepted.reduce((sum, bid) => sum + Number(bid.bidAmount), 0);
+  const currentValue = accepted.reduce((sum, bid) => {
+    const market = markets.find((item) => item.id === bid.marketId);
+    return sum + Number(bid.bidAmount) * Number(market?.currentPrice ?? 0);
+  }, 0);
   const openCommitments = visibleBids.filter((bid) => bid.status === "committed" || bid.status === "revealed").length;
   const maxUtilizationPct = markets.reduce((max, market) => Math.max(max, Number(market.targetAmount) > 0 ? (Number(market.publicVolume) / Number(market.targetAmount)) * 100 : 0), 0);
   const attention: string[] = [];
   if (markets.some((market) => market.status === "live" && market.bidDeadline && market.bidDeadline.getTime() < Date.now())) attention.push("One or more live bid windows require operator review");
   if (maxUtilizationPct > 90) attention.push("A market is approaching its target allocation");
+  if (policies.some((policy) => policy.maxConcentrationPct < 10)) attention.push("At least one active policy has a tightly constrained concentration limit");
+  const history = visibleBids.slice().sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()).map((bid) => ({ at: bid.createdAt.toISOString(), committedAmount: bid.status === "rejected" ? "0" : bid.bidAmount, status: bid.status }));
+  const acceptedQuotes = allQuotes.filter((quote) => quote.status === "accepted");
+  const averageAcceptedFeeBps = acceptedQuotes.length ? Math.round(acceptedQuotes.reduce((sum, quote) => sum + quote.feeBps, 0) / acceptedQuotes.length) : 0;
   return {
     markets: markets.map(({ createdByUserId: _createdByUserId, ...market }) => ({ ...market, utilizationPct: Number(market.targetAmount) > 0 ? Number(((Number(market.publicVolume) / Number(market.targetAmount)) * 100).toFixed(2)) : 0, lifecycleAction: market.status === "draft" ? "SCHEDULE MARKET" : market.status === "live" ? "START REVEAL" : market.status === "closed" ? "ARCHIVED" : "REVIEW MARKET" })),
-    portfolio: { committedAmount: committed.toString(), openCommitments, settledAmount: "0", currentValue: "0", pnl: "0" },
+    portfolio: { committedAmount: committed.toString(), openCommitments, settledAmount: settledAmount.toString(), currentValue: currentValue.toString(), pnl: (currentValue - settledAmount).toString(), history },
+    execution: { acceptedQuotes: acceptedQuotes.length, openQuotes: allQuotes.filter((quote) => quote.status === "open" && quote.expiresAt.getTime() > Date.now()).length, averageAcceptedFeeBps },
     risk: { activeMarkets: markets.filter((market) => market.status === "live").length, openCommitments, maxUtilizationPct: Number(maxUtilizationPct.toFixed(2)), attention },
     disclosure: { allowedScopes: ["aggregate" as const], privateFields: ["bidder_identity", "raw_bid_amount", "encrypted_terms"] },
   };
@@ -843,7 +888,7 @@ export async function createPrivateMarketQuote(input: { workspaceId: number; mar
 export async function getPrivateMarketRiskPolicy(workspaceId: number, marketId: number | undefined) {
   const db = await getDb();
   if (!db) return null;
-  const rows = await db.select().from(privateMarketRiskPolicies).where(and(eq(privateMarketRiskPolicies.workspaceId, workspaceId), marketId === undefined ? eq(privateMarketRiskPolicies.status, "active") : eq(privateMarketRiskPolicies.marketId, marketId), eq(privateMarketRiskPolicies.status, "active"))).orderBy(desc(privateMarketRiskPolicies.updatedAt)).limit(1);
+  const rows = await db.select().from(privateMarketRiskPolicies).where(and(eq(privateMarketRiskPolicies.workspaceId, workspaceId), eq(privateMarketRiskPolicies.status, "active"), marketId === undefined ? isNull(privateMarketRiskPolicies.marketId) : or(eq(privateMarketRiskPolicies.marketId, marketId), isNull(privateMarketRiskPolicies.marketId)))).orderBy(desc(privateMarketRiskPolicies.marketId), desc(privateMarketRiskPolicies.updatedAt)).limit(1);
   return rows[0] ? { ...rows[0], createdByUserId: undefined } : null;
 }
 
@@ -903,6 +948,21 @@ export async function exportPrivateMarketBook(workspaceId: number, marketId: num
 export async function listPrivateMarketAlerts(workspaceId: number, marketId?: number) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
+  const markets = await db.select().from(privateMarkets).where(marketId ? and(eq(privateMarkets.workspaceId, workspaceId), eq(privateMarkets.id, marketId)) : eq(privateMarkets.workspaceId, workspaceId));
+  for (const market of markets) {
+    const [openExpiredQuotes, existingQuoteAlert, existingUtilizationAlert] = await Promise.all([
+      db.select({ id: privateMarketQuotes.id }).from(privateMarketQuotes).where(and(eq(privateMarketQuotes.marketId, market.id), eq(privateMarketQuotes.status, "open"), lt(privateMarketQuotes.expiresAt, new Date()))).then((rows) => rows.length),
+      db.select({ id: privateMarketAlerts.id }).from(privateMarketAlerts).where(and(eq(privateMarketAlerts.workspaceId, workspaceId), eq(privateMarketAlerts.marketId, market.id), eq(privateMarketAlerts.code, "RFQ_QUOTES_EXPIRED"), eq(privateMarketAlerts.status, "open"))).limit(1),
+      db.select({ id: privateMarketAlerts.id }).from(privateMarketAlerts).where(and(eq(privateMarketAlerts.workspaceId, workspaceId), eq(privateMarketAlerts.marketId, market.id), eq(privateMarketAlerts.code, "MARKET_UTILIZATION_HIGH"), eq(privateMarketAlerts.status, "open"))).limit(1),
+    ]);
+    if (openExpiredQuotes > 0 && !existingQuoteAlert[0]) {
+      await db.insert(privateMarketAlerts).values({ workspaceId, marketId: market.id, severity: "warning", code: "RFQ_QUOTES_EXPIRED", message: `${openExpiredQuotes} open RFQ quote(s) require expiry review.`, status: "open" });
+    }
+    const utilization = Number(market.targetAmount) > 0 ? (Number(market.publicVolume) / Number(market.targetAmount)) * 100 : 0;
+    if (utilization > 90 && !existingUtilizationAlert[0]) {
+      await db.insert(privateMarketAlerts).values({ workspaceId, marketId: market.id, severity: utilization > 100 ? "critical" : "warning", code: "MARKET_UTILIZATION_HIGH", message: `Market utilization is ${utilization.toFixed(2)}% of target capacity.`, status: "open" });
+    }
+  }
   return db.select().from(privateMarketAlerts).where(marketId ? and(eq(privateMarketAlerts.workspaceId, workspaceId), eq(privateMarketAlerts.marketId, marketId)) : eq(privateMarketAlerts.workspaceId, workspaceId)).orderBy(desc(privateMarketAlerts.createdAt)).limit(50);
 }
 
