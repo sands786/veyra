@@ -255,3 +255,7 @@
 - [x] Verify final smoothness pass with tests, build, and responsive screenshots
 
 - [x] Simplify the top header by removing unnecessary labels and reducing control density
+
+- [x] Inspect the referenced StarkWare post and select 2–3 ideas relevant to VeilPay
+- [x] Implement the selected StarkWare-inspired features with privacy and network safety preserved
+- [x] Add tests, documentation, and responsive verification for the new features
