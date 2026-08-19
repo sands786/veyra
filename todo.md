@@ -335,4 +335,6 @@
 
 - [x] Create and deliver a three-minute, submission-grade Veyra product demo video with accurate feature narration and an explicit mainnet-evidence boundary
 
+- [x] Rebuild the Veyra submission demo as a memorable, cinematic institutional product film with premium motion typography and teaser-grade visual storytelling
+
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
