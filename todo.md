@@ -364,3 +364,5 @@
 - [x] Replace the earlier shield artwork with the actual Veyra cinematic teaser logo mark across all brand lockups
 
 - [x] Remove the STRK20 slash descriptor and refine the Veyra wordmark into a clean premium title-case lockup
+
+- [x] Redesign the workspace sidebar navigation into an institutional control rail with refined grouping, active states, and responsive behavior

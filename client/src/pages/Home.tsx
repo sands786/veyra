@@ -352,13 +352,31 @@ export default function Home() {
         <aside className="hidden w-[204px] shrink-0 border-r border-[#163B4A]/70 bg-[#111210]/95 px-5 py-6 lg:flex lg:flex-col">
           <VeyraBrand />
 
-          <div className="mt-11 space-y-2">
-            <div className="mb-4 font-mono text-[9px] tracking-[0.18em] text-[#7F8F97]">WORKSPACE</div>
-            <button onClick={() => goToSection("routes")} className={`nav-item ${activeSection === "routes" ? "nav-item-active" : ""}`}><WalletCards size={16} /> Payment routes <span className="ml-auto font-mono text-[10px]">{isAuthenticated ? String(liveRoutes.length).padStart(2, "0") : "03"}</span></button>
-            <button onClick={() => goToSection("ledger")} className={`nav-item ${activeSection === "ledger" ? "nav-item-active" : ""}`}><Shield size={16} /> Proof ledger</button>
-            <button onClick={() => goToSection("identity")} className={`nav-item ${activeSection === "identity" ? "nav-item-active" : ""}`}><Fingerprint size={16} /> Identity keys</button>
-            <button onClick={() => goToOperations("overview")} className={`nav-item ${activeSection === "operations" && operationsView === "overview" ? "nav-item-active" : ""}`}><BarChart3 size={16} /> Operations</button><button onClick={() => goToOperations("treasury")} className={`nav-item pl-10 text-[11px] ${activeSection === "operations" && operationsView === "treasury" ? "nav-item-active" : ""}`}><LockKeyhole size={14} /> Treasury</button><button onClick={() => goToOperations("claims")} className={`nav-item pl-10 text-[11px] ${activeSection === "operations" && operationsView === "claims" ? "nav-item-active" : ""}`}><Link2 size={14} /> Claims</button><button onClick={() => { window.location.href = "/launchpad"; }} className="nav-item"><Sparkles size={16} /> Launchpad</button><button onClick={() => { window.location.href = "/private-primitives"; }} className="nav-item"><Fingerprint size={16} /> Private primitives</button><button onClick={() => { window.location.href = "/private-markets"; }} className="nav-item"><BarChart3 size={16} /> Private markets</button><button onClick={() => { window.location.href = "/docs"; }} className="nav-item"><BookOpen size={16} /> Documentation</button><button onClick={() => { window.location.href = "/demo"; }} className="nav-item"><PlayCircle size={16} /> Demo mode</button>
-          </div>
+          <nav className="mt-11 space-y-6" aria-label="Veyra workspace navigation">
+            <div className="space-y-1">
+              <div className="nav-group-label">WORKSPACE</div>
+              <button onClick={() => goToSection("routes")} aria-current={activeSection === "routes" ? "page" : undefined} className={`nav-item ${activeSection === "routes" ? "nav-item-active" : ""}`}><WalletCards size={16} /> <span>Payment routes</span><span className="ml-auto pr-3 font-mono text-[9px] tracking-[0.08em] text-[#D7E0E0]">{isAuthenticated ? String(liveRoutes.length).padStart(2, "0") : "03"}</span></button>
+              <button onClick={() => goToSection("ledger")} aria-current={activeSection === "ledger" ? "page" : undefined} className={`nav-item ${activeSection === "ledger" ? "nav-item-active" : ""}`}><Shield size={16} /> <span>Proof ledger</span></button>
+              <button onClick={() => goToSection("identity")} aria-current={activeSection === "identity" ? "page" : undefined} className={`nav-item ${activeSection === "identity" ? "nav-item-active" : ""}`}><Fingerprint size={16} /> <span>Identity keys</span></button>
+            </div>
+            <div className="space-y-1">
+              <div className="nav-group-label">CONTROL</div>
+              <button onClick={() => goToOperations("overview")} aria-current={activeSection === "operations" && operationsView === "overview" ? "page" : undefined} className={`nav-item ${activeSection === "operations" && operationsView === "overview" ? "nav-item-active" : ""}`}><BarChart3 size={16} /> <span>Operations</span></button>
+              <button onClick={() => goToOperations("treasury")} aria-current={activeSection === "operations" && operationsView === "treasury" ? "page" : undefined} className={`nav-item nav-item-sub ${activeSection === "operations" && operationsView === "treasury" ? "nav-item-active" : ""}`}><LockKeyhole size={14} /> <span>Treasury</span></button>
+              <button onClick={() => goToOperations("claims")} aria-current={activeSection === "operations" && operationsView === "claims" ? "page" : undefined} className={`nav-item nav-item-sub ${activeSection === "operations" && operationsView === "claims" ? "nav-item-active" : ""}`}><Link2 size={14} /> <span>Claims</span></button>
+            </div>
+            <div className="space-y-1">
+              <div className="nav-group-label">PROTOCOL</div>
+              <button onClick={() => { window.location.href = "/launchpad"; }} className="nav-item"><Sparkles size={16} /> <span>Launchpad</span></button>
+              <button onClick={() => { window.location.href = "/private-primitives"; }} className="nav-item"><Fingerprint size={16} /> <span>Private primitives</span></button>
+              <button onClick={() => { window.location.href = "/private-markets"; }} className="nav-item"><BarChart3 size={16} /> <span>Private markets</span></button>
+            </div>
+            <div className="space-y-1">
+              <div className="nav-group-label">RESOURCE</div>
+              <button onClick={() => { window.location.href = "/docs"; }} className="nav-item"><BookOpen size={16} /> <span>Documentation</span></button>
+              <button onClick={() => { window.location.href = "/demo"; }} className="nav-item"><PlayCircle size={16} /> <span>Demo mode</span></button>
+            </div>
+          </nav>
 
           <div className="mt-auto rounded-[16px] border border-[#70D49D]/20 bg-[#163B4A]/75 p-4">
             <div className="flex items-center justify-between"><span className="font-mono text-[9px] tracking-[0.16em] text-[#AEB8BE]">NETWORK</span><span className="h-2 w-2 rounded-full bg-[#70D49D] shadow-[0_0_12px_#70D49D]" /></div>
