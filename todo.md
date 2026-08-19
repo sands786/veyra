@@ -337,4 +337,6 @@
 
 - [x] Rebuild the Veyra submission demo as a memorable, cinematic institutional product film with premium motion typography and teaser-grade visual storytelling
 
+- [x] Add premium animated cursor movement, click feedback, and scroll-through interactions to the cinematic Veyra submission film
+
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
