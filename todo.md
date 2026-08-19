@@ -349,4 +349,6 @@
 
 - [x] Create a 30-second Veyra cinematic teaser with voice and original music, embed it in the lower-right main hero, and remove the standalone teaser button
 
+- [x] Fix the main-hero Veyra teaser visibility so the embedded 30-second film is immediately visible in the user-facing viewport
+
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
