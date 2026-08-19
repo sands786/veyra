@@ -341,4 +341,6 @@
 
 - [x] Elevate the Veyra interactive cinematic film with a beast-level opening hook, richer dimensional motion, premium transitions, a Private Markets climax, and an unforgettable final resolve
 
+- [x] Restore the preferred prior teaser-style opening to the final Veyra cinematic film while preserving the upgraded interactive middle and ending
+
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
