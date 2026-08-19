@@ -351,4 +351,6 @@
 
 - [x] Fix the main-hero Veyra teaser visibility so the embedded 30-second film is immediately visible in the user-facing viewport
 
+- [x] Move the 30-second Veyra teaser out of the main hero and into a dedicated lower main-page cinematic section
+
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough

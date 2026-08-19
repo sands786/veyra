@@ -11,3 +11,7 @@ The prior standalone teaser button has been removed. On desktop, the new 30-seco
 ## 2026-08-19 — Teaser visibility correction
 
 The desktop teaser was moved into a high-contrast, shadowed right-side focal band at the center of the first hero viewport. It now remains visible beside the headline at a standard 1280×720 viewport. On mobile, the inline teaser continues to appear immediately beneath the private-route action and receipt-boundary copy, with its header and video controls visible in the first screen.
+
+## 2026-08-19 — Dedicated lower teaser section
+
+The teaser is no longer embedded in the hero/header composition. Desktop verification shows a separate cinematic section directly beneath the landing hero, with feature framing on the left and the 30-second player on the right. Mobile verification shows the same section stacked under the hero and before the route builder, making the teaser discoverable without treating it as header content.
