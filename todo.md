@@ -345,4 +345,6 @@
 
 - [x] Replace every VeilPay-era in-app documentation video with Veyra-branded section walkthroughs using animated cursor interactions and smooth scrolling
 
+- [x] Refresh the Documentation teaser presentation around the restored-final Veyra cinematic asset with Veyra-specific framing and copy
+
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
