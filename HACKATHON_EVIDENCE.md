@@ -21,7 +21,7 @@ Veyra’s source code includes a full-stack privacy-finance workspace, wallet-co
     "0xREAL_SUCCESSFUL_MAINNET_STRK20_HASH_3"
   ],
   "contracts": ["0xOPTIONAL_REAL_DEPLOYED_VEYRA_CONTRACT"],
-  "demo_video": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/FgFOulOuDCLlIYPX.mp4",
+  "demo_video": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/YpdhctUPynQPmena.mp4",
   "demo_url": "https://veilpay-spri-t4knu9mv.manus.space"
 }
 ```
