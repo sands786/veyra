@@ -330,3 +330,5 @@
 - [x] Correct Private Primitives so links and values remain explicitly unsigned/pending until a real wallet signature and confirmed Starknet receipt exist
 
 - [x] Apply explicit persisted/unsigned/wallet-pending/submitted/confirmed/failed semantics across every Veyra option and prevent unconfirmed records from appearing as real settlement evidence
+
+- [x] Create and deliver a rebranded Veyra teaser video covering institutional privacy-finance features and honest Starknet receipt boundaries
