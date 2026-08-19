@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowUpRight, BookOpen, Check, ChevronRight, CircleHelp, EyeOff, Fingerprint, GitBranch, Layers3, LockKeyhole, PlayCircle, Shield, Sparkles, WalletCards } from "lucide-react";
 import { Link } from "wouter";
 import { useDemoMode } from "@/contexts/DemoModeContext";
+import { VeyraBrand } from "@/components/VeyraBrand";
 import { documentationChapters, documentationProductSurfaces, documentationTeaserAsset, documentationVideoGuides } from "@shared/documentation";
 
 const teaserVideo = documentationTeaserAsset;
@@ -42,10 +43,7 @@ export default function Documentation() {
     <div className="min-h-screen bg-[#111210] text-[#F2EEE7]">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[204px] border-r border-white/10 bg-[#151614] lg:block">
         <div className="flex h-full flex-col px-5 py-6">
-          <Link href="/" className="mb-12 flex items-center gap-3 no-underline">
-            <div className="grid h-9 w-9 place-items-center bg-[#F0563A] text-[#111210]"><BookOpen size={18} /></div>
-            <div><div className="font-sans text-lg font-semibold tracking-[-0.04em]">Veyra</div><div className="font-mono text-[8px] uppercase tracking-[0.18em] text-[#AEB8BE]">Documentation</div></div>
-          </Link>
+          <Link href="/" className="mb-12 no-underline"><VeyraBrand compact descriptor="PRODUCT DOCUMENTATION" /></Link>
           <div className="mb-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[#6E6A63]">Read the system</div>
           <nav className="space-y-1">
             {chapters.map((chapter) => <button key={chapter.id} onClick={() => jumpTo(chapter.id)} className={`flex w-full items-center justify-between px-3 py-3 text-left font-mono text-[10px] uppercase tracking-[0.11em] transition ${activeChapter === chapter.id ? "bg-[#F0563A] text-[#111210]" : "text-[#AAA49A] hover:bg-white/5 hover:text-white"}`}><span>{chapter.label}</span><ChevronRight size={13} /></button>)}

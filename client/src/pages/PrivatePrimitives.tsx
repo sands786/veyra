@@ -6,6 +6,7 @@ import { ArrowUpRight, Check, Copy, EyeOff, Fingerprint, Link2, LockKeyhole, Spa
 import { Button } from "@/components/ui/button";
 import { copyText } from "@/lib/clipboard";
 import { toast } from "sonner";
+import { VeyraBrand } from "@/components/VeyraBrand";
 import { milestoneSteps, privateClaimDemoPath, privateSettlementState, type PrivatePrimitiveId } from "@shared/privatePrimitives";
 import { privateDisclosureFields, type PrivateDisclosureScope } from "@shared/operations";
 
@@ -45,7 +46,7 @@ export default function PrivatePrimitives() {
   return (
     <div className="min-h-screen bg-[#111210] text-[#F3EEE5]">
       <header className="flex items-center justify-between border-b border-white/10 px-5 py-5 sm:px-8 lg:px-12">
-        <button onClick={() => { window.location.href = "/"; }} className="font-display text-lg font-bold tracking-[-0.04em]">Veyra</button>
+        <button onClick={() => { window.location.href = "/"; }} aria-label="Return to Veyra workspace"><VeyraBrand compact descriptor="PRIVATE FINANCIAL COORDINATION" /></button>
         <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.12em] text-[#AEB8BE]"><span>PRIVATE PRIMITIVES</span><button onClick={() => { window.location.href = "/"; }} className="text-[#F0563A]">BACK TO WORKSPACE</button></div>
       </header>
       <main className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-12 lg:py-16">

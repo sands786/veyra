@@ -16,6 +16,7 @@ import { protocolContracts } from "@/lib/onchainConfig";
 import { canCreateRecipientClaim, canScheduleRoute, isValidStarknetAddress, isWalletActionLocked, normalizeAmountInput } from "@shared/operations";
 import { copyText } from "@/lib/clipboard";
 import { useDemoMode } from "@/contexts/DemoModeContext";
+import { VeyraBrand } from "@/components/VeyraBrand";
 import * as QRCode from "qrcode";
 
 async function buildRecipientCommitment(recipientIds: number[], amount: string, routeName: string): Promise<string> {
@@ -349,13 +350,7 @@ export default function Home() {
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.11] [background-image:radial-gradient(#F3EEE5_0.6px,transparent_0.6px)] [background-size:18px_18px]" />
       <div className="relative z-10 flex min-h-screen">
         <aside className="hidden w-[204px] shrink-0 border-r border-[#163B4A]/70 bg-[#111210]/95 px-5 py-6 lg:flex lg:flex-col">
-          <div className="flex items-center gap-3">
-            <img src="/manus-storage/veyra-transparent-mark-clean_a867fd1b.png" alt="Veyra legacy privacy mark" className="h-11 w-11 object-contain drop-shadow-[0_0_18px_rgba(112,212,157,.22)]" />
-            <div>
-              <div className="font-display text-[17px] font-bold tracking-[-0.04em]">Veyra</div>
-              <div className="font-mono text-[9px] tracking-[0.18em] text-[#AEB8BE]">STRK20 / PRIVATE</div>
-            </div>
-          </div>
+          <VeyraBrand descriptor="STRK20 / PRIVATE" />
 
           <div className="mt-11 space-y-2">
             <div className="mb-4 font-mono text-[9px] tracking-[0.18em] text-[#7F8F97]">WORKSPACE</div>
@@ -377,7 +372,7 @@ export default function Home() {
           <header className="relative flex items-center justify-between border-b border-white/10 px-5 py-4 sm:px-8 lg:justify-end lg:px-8">
             <div className="flex items-center gap-3 lg:hidden">
               <button onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu" className="rounded-lg border border-white/10 p-2">{mobileOpen ? <X size={18} /> : <Menu size={18} />}</button>
-              <span className="font-display text-lg font-bold tracking-[-0.04em]">Veyra</span>
+              <VeyraBrand compact descriptor="STRK20 / PRIVATE" />
             </div>
             
             <div className="ml-auto flex items-center gap-3">

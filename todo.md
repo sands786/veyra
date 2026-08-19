@@ -358,3 +358,5 @@
 - [x] Rebuild the first ten seconds of the teaser to eliminate transition overlap and deliver a clean world-class Veyra opening
 
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
+
+- [x] Replace the in-app Veyra logo with the exact teaser shield-and-wordmark treatment and verify responsive presentation
