@@ -1,0 +1,23 @@
+# Veyra — Three-minute submission demonstration
+
+**Purpose.** This video is designed as a factual product walkthrough for the STRK20 Private Sprint. It shows Veyra’s currently implemented software surfaces and states clearly that real settlement remains wallet-signed and receipt-confirmed. The official sprint requires a public demo, a three-minute demo video, and three successful mainnet transactions that touch the STRK20 pool before scoring.[1]
+
+| Time | Screen | Presenter narration | On-screen emphasis |
+|---:|---|---|---|
+| 0:00–0:20 | Veyra teaser and payroll home | “Meet Veyra: private financial coordination for Starknet. Veyra brings payroll, treasury governance, claims, launch operations, and markets into one privacy-first operating layer. It is built for teams that need to move value without publishing the roster behind every decision.” | **VEYRA** / Private financial coordination for Starknet |
+| 0:20–0:40 | Private Payroll route builder | “This is the payroll workspace. Operators create a private route, select recipients from a shielded roster, and produce a structured payment intent. Sensitive notes and private keys are never stored by Veyra. The route begins as an authenticated, persisted workflow record—not as a claim that money already moved.” | Private roster · Persisted intent · No private keys |
+| 0:40–1:00 | Wallet and receipt boundary | “The transaction boundary is explicit. First comes the persisted intent. Then the user-controlled wallet approval. Next, a submitted transaction. Finally, Veyra treats value as settled only after Starknet receipt verification. Public proof links are blocked until that confirmed receipt exists.” | Intent → Wallet approval → Submitted → Receipt confirmed |
+| 1:00–1:20 | Treasury and approvals | “For institutional control, Veyra adds treasury policies, spending limits, approval thresholds, audit events, and monitoring. Teams can test route readiness before asking a wallet to sign. This gives finance operators policy enforcement without turning privacy into an afterthought.” | Policies · Approvals · Audit trail |
+| 1:20–1:40 | Private Primitives | “Private Primitives turn privacy into reusable product components. Recipient-scoped claim links avoid a public directory. Selective disclosure reveals only the fields a counterparty or auditor needs. Milestone controls record off-chain governance intent but never pretend that a release is on-chain before a verified receipt.” | Private links · Selective proof · Evidence-gated releases |
+| 1:40–2:00 | Private Launchpad | “The Launchpad brings the same boundary to capital formation. Project rooms, allocations, milestone readiness, and release governance stay workspace-scoped. Public surfaces expose only aggregate project state. Contributor identity and allocation commitments remain private by default.” | Shielded allocations · Milestone governance · Aggregate public state |
+| 2:00–2:25 | Private Markets | “Private Markets separates public signals from private actors. Market operators can create a private round, collect sealed-bid commitments, compare RFQ quotes, apply risk policy, review alerts, and progress through scheduled, live, reveal, settled, and closed states. The control room tracks analytics without exposing raw bids or bidder identity.” | Sealed bids · RFQ desk · Risk policy · Public aggregates |
+| 2:25–2:45 | Documentation and Demo Mode | “Every product surface documents its privacy model and supports a clearly marked demo mode. Demo data is simulated. Persisted records are not settlement. And settlement is not asserted without a wallet signature and confirmed receipt. That distinction is central to Veyra’s operating model.” | Simulated ≠ settled · Proofs require receipts |
+| 2:45–3:00 | Final Veyra mark and evidence checklist | “Veyra is ready for real-user integration. For the STRK20 sprint, the final evidence is clear: a public open-source repository, a live demo, this walkthrough, and three successful mainnet transactions that touch the STRK20 pool. Veyra: private financial coordination, with clear intent.” | Public repo · Live demo · 3 mainnet STRK20 transactions |
+
+## Recording rules
+
+The presenter should use only real Veyra screens or clearly labeled demo-mode material. Do not show fabricated hashes, invented recipient balances, or invented contract addresses. The final three transaction hashes and any deployed Veyra contract address should be inserted only after the submitting team has signed and verified them on Starknet mainnet.
+
+## References
+
+[1]: https://github.com/starkience/strk20-hackathon "STRK20 Private Sprint official repository and submission rules"

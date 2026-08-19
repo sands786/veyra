@@ -29,6 +29,7 @@ function Router() {
       <Route path="/launchpad" component={Launchpad} />
       <Route path="/demo" component={DemoMode} />
       <Route path="/docs" component={Documentation} />
+      <Route path="/documentation" component={Documentation} />
       <Route path="/private-primitives" component={PrivatePrimitives} />
       <Route path="/private-markets" component={PrivateMarkets} />
       <Route path="/proof/:slug" component={Proof} />

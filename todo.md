@@ -332,3 +332,7 @@
 - [x] Apply explicit persisted/unsigned/wallet-pending/submitted/confirmed/failed semantics across every Veyra option and prevent unconfirmed records from appearing as real settlement evidence
 
 - [x] Create and deliver a rebranded Veyra teaser video covering institutional privacy-finance features and honest Starknet receipt boundaries
+
+- [x] Create and deliver a three-minute, submission-grade Veyra product demo video with accurate feature narration and an explicit mainnet-evidence boundary
+
+- [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
