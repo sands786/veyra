@@ -353,4 +353,8 @@
 
 - [x] Move the 30-second Veyra teaser out of the main hero and into a dedicated lower main-page cinematic section
 
+- [x] Add a clear Veyra wordmark beside the shield in the opening reveal of the 30-second teaser and republish it in the lower-page player
+
+- [x] Rebuild the first ten seconds of the teaser to eliminate transition overlap and deliver a clean world-class Veyra opening
+
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
