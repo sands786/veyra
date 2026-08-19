@@ -347,6 +347,6 @@
 
 - [x] Refresh the Documentation teaser presentation around the restored-final Veyra cinematic asset with Veyra-specific framing and copy
 
-- [x] Add a prominent main-page Veyra teaser entry point so judges can open only the short cinematic teaser, not the full submission walkthrough
+- [x] Create a 30-second Veyra cinematic teaser with voice and original music, embed it in the lower-right main hero, and remove the standalone teaser button
 
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
