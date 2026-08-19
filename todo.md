@@ -362,3 +362,5 @@
 - [x] Replace the in-app Veyra logo with the exact teaser shield-and-wordmark treatment and verify responsive presentation
 
 - [x] Replace the earlier shield artwork with the actual Veyra cinematic teaser logo mark across all brand lockups
+
+- [x] Remove the STRK20 slash descriptor and refine the Veyra wordmark into a clean premium title-case lockup
