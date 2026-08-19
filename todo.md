@@ -360,3 +360,5 @@
 - [x] Repair the Veyra Documentation sidebar route, which currently returns a 404 and blocks a complete submission-demo walkthrough
 
 - [x] Replace the in-app Veyra logo with the exact teaser shield-and-wordmark treatment and verify responsive presentation
+
+- [x] Replace the earlier shield artwork with the actual Veyra cinematic teaser logo mark across all brand lockups
