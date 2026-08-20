@@ -399,3 +399,5 @@
 - [x] Assign distinct semantic icons to every sidebar destination, eliminating duplicated Identity, Private Primitives, Operations, and Private Markets symbols
 - [x] Restore the stronger Veyra shield-and-wordmark opening to the current 30-second teaser while preserving stabilized pacing
 - [ ] Restore Manus OAuth Sign In on the Vercel-hosted frontend, including API rewrite and callback-origin verification
+- [x] Verify that the Vercel project deploys the latest Veyra GitHub commit and resolve any stale-deployment path
+- [ ] Register the Vercel callback origin in the Manus OAuth application allowlist, or provide the user the exact user-only approval step

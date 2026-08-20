@@ -8,6 +8,8 @@ The deployed client bundle, however, was built without the public Vite OAuth var
 
 The managed Veyra backend was separately verified to return valid non-secret `appId` and `oauthPortalUrl` values from `GET /api/oauth/config`. The current repair makes the Vercel client use that same-origin route whenever optional Vite OAuth variables are absent.
 
+The Vercel deployment was then rechecked and confirmed to serve the repaired client bundle: it contains the `/api/oauth/config` fallback and no longer contains the prior `undefined/app-auth` launch string. A Vercel title placeholder can remain visible when optional presentation variables are absent; it does not affect the OAuth launch path.
+
 ## Required correction
 
 Set both values in the Vercel project’s environment variables for **Production**, **Preview**, and **Development**, then redeploy from a clean build:
