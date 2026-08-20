@@ -392,3 +392,4 @@
 - [x] Rebuild the system-architecture plate with contained card titles, dedicated connector captions, and full README-scale visual QA
 
 - [x] Add a Vercel-ready manual deployment package with serverless routing, environment template, and Manus OAuth configuration guidance
+- [x] Restore missing embedded video players in the Documentation film library and verify playback surfaces

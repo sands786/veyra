@@ -49,23 +49,19 @@ This repository is designed to make that sequence inspectable. It is not a landi
 
 ## Film library
 
+> **Playback note.** GitHub sanitizes external HTML `<video>` embeds in repository Markdown, which can leave a film heading with no visible player. The previews below are intentionally clickable: each opens the original MP4, while the [live Veyra Documentation room](https://veilpay-spri-t4knu9mv.manus.space/documentation#overview) provides the native, inline video players.
+
 ### Film 01 — The thesis
 
-<video controls preload="metadata" width="100%" poster="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/eeAuPiqfhiOlCqpM.png">
-  <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4" type="video/mp4" />
-  Your browser does not support embedded video playback.
-</video>
+[![Open Film 01 — The Veyra thesis](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/eeAuPiqfhiOlCqpM.png)](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4)
 
-The stable 30-second teaser establishes Veyra’s visual system and its private-to-proof operating principle.
+The stable 30-second teaser establishes Veyra’s visual system and its private-to-proof operating principle. **[Play the original MP4](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4)** or **[watch inline in the Veyra Documentation room](https://veilpay-spri-t4knu9mv.manus.space/documentation#overview)**.
 
 ### Film 00 — The operating model
 
-<video controls preload="metadata" width="100%" poster="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/QrIoqSGetmaJtKjn.png">
-  <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4" type="video/mp4" />
-  Your browser does not support embedded video playback.
-</video>
+[![Open Film 00 — The Veyra operating model](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/QrIoqSGetmaJtKjn.png)](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4)
 
-The 3:10 product walkthrough traces private routes, wallet/receipt boundaries, claims, governance, Private Markets, and the documentation library without presenting Demo Mode as chain evidence.
+The 3:10 product walkthrough traces private routes, wallet/receipt boundaries, claims, governance, Private Markets, and the documentation library without presenting Demo Mode as chain evidence. **[Play the original MP4](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4)** or **[watch inline in the Veyra Documentation room](https://veilpay-spri-t4knu9mv.manus.space/documentation#overview)**.
 
 ---
 
