@@ -209,6 +209,18 @@ scarb build
 
 ---
 
+## Manual Vercel frontend deployment
+
+The repository now includes a Vercel-ready **frontend deployment package**. It serves the Vite application from Vercel and rewrites same-origin API and storage paths to the managed Veyra backend, preserving the existing tRPC and Manus OAuth callback contract without exposing backend secrets to the browser.
+
+| Included                                                                                                                                 | Intentional boundary                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`vercel.json`](vercel.json), [`.env.vercel.example`](.env.vercel.example), and [`docs/VERCEL_DEPLOYMENT.md`](docs/VERCEL_DEPLOYMENT.md) | Vercel hosts the client and proxies `/api/*`; Manus continues to hold the database, protected API, OAuth exchange, receipt verification, and server-only credentials. |
+
+Before a manual Vercel deployment, set the safe public Vite values in the Vercel dashboard and add `https://YOUR-VERCEL-DOMAIN/api/oauth/callback` to the Manus application’s allowed redirect origins. The [deployment guide](docs/VERCEL_DEPLOYMENT.md) provides the exact import, environment, verification, and rollback-safe sequence.
+
+---
+
 ## Release posture
 
 | Ready now                                                                                                                                                                                                   | Requires owner-operated evidence or further engineering                                                                                                                                                                   |

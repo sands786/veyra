@@ -390,3 +390,5 @@
 - [x] Complete a full trust-map visual QA rebuild covering headline fit, card padding, caption lanes, arrow spacing, and GitHub-scale readability
 
 - [x] Rebuild the system-architecture plate with contained card titles, dedicated connector captions, and full README-scale visual QA
+
+- [x] Add a Vercel-ready manual deployment package with serverless routing, environment template, and Manus OAuth configuration guidance
