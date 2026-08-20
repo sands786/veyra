@@ -366,3 +366,5 @@
 - [x] Remove the STRK20 slash descriptor and refine the Veyra wordmark into a clean premium title-case lockup
 
 - [x] Redesign the workspace sidebar navigation into an institutional control rail with refined grouping, active states, and responsive behavior
+
+- [x] Remove shivering and shaking artifacts from the Veyra teaser, submission demo, and documentation videos, then republish stable cuts
