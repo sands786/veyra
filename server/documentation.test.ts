@@ -88,4 +88,17 @@ describe("documentation contract", () => {
     expect(documentationPage).toContain("active:scale-[0.985]");
     expect(documentationPage).toContain("group-hover:translate-x-1");
   });
+
+  it("keeps the public teaser viewing room free of redundant production metadata", () => {
+    const homePage = fs.readFileSync(
+      path.join(root, "client", "src", "pages", "Home.tsx"),
+      "utf8"
+    );
+
+    expect(homePage).toContain("See the boundary.");
+    expect(homePage).not.toContain(">Format<");
+    expect(homePage).not.toContain(">Audio<");
+    expect(homePage).not.toContain(">Motion<");
+    expect(homePage).not.toContain(">Original score<");
+  });
 });

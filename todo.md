@@ -394,3 +394,4 @@
 - [x] Add a Vercel-ready manual deployment package with serverless routing, environment template, and Manus OAuth configuration guidance
 - [x] Restore missing embedded video players in the Documentation film library and verify playback surfaces
 - [x] Recompose the Documentation product-film metadata at narrow widths and elevate chapter-navigation controls with premium accessible motion
+- [x] Remove the redundant Format, Audio, and Motion metadata strip from the Documentation film presentation
