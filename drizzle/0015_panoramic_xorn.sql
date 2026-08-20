@@ -1,0 +1,1 @@
+ALTER TABLE `routeRecipients` ADD CONSTRAINT `routeRecipients_route_recipient_unique` UNIQUE(`routeId`,`recipientId`);

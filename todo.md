@@ -403,3 +403,7 @@
 - [ ] Register the Vercel callback origin in the Manus OAuth application allowlist, or provide the user the exact user-only approval step
 - [x] Align the Vercel deployment with a server-side OAuth configuration and session path without exposing backend secrets
 - [x] Reconcile the Vercel frontend-plus-managed-backend OAuth architecture with the supplied full-stack deployment guidance
+- [x] Conduct a full frontend, backend, persistence, authorization, deployment, and critical-flow audit; fix verified defects with regression coverage
+- [x] Harden public claim responses and redemption against route-total disclosure and concurrent double-redemption races
+- [x] Enforce route allocation uniqueness and exact totals, and validate backend route lifecycle transitions against the shared state machine
+- [x] Remove unused template-only UI modules and their vulnerable production dependencies from the shipped Veyra application

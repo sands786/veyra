@@ -1,20 +1,54 @@
 export type PayrollFrequency = "weekly" | "biweekly" | "monthly";
 
 function zonedParts(date: Date, timezone: string) {
-  const parts = new Intl.DateTimeFormat("en-US", { timeZone: timezone, hour12: false, weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).formatToParts(date);
-  const values = Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
-  const weekdays: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-  return { minute: Number(values.minute), hour: Number(values.hour) % 24, dayOfMonth: Number(values.day), dayOfWeek: weekdays[values.weekday] ?? 0 };
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    hour12: false,
+    weekday: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(date);
+  const values = Object.fromEntries(
+    parts
+      .filter(part => part.type !== "literal")
+      .map(part => [part.type, part.value])
+  );
+  const weekdays: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+  return {
+    minute: Number(values.minute),
+    hour: Number(values.hour) % 24,
+    dayOfMonth: Number(values.day),
+    dayOfWeek: weekdays[values.weekday] ?? 0,
+  };
 }
 
-export function buildPayrollCron(nextRunAt: Date, frequency: PayrollFrequency, timezone = "UTC"): string {
-  const { minute, hour, dayOfMonth, dayOfWeek } = zonedParts(nextRunAt, timezone);
+export function buildPayrollCron(
+  nextRunAt: Date,
+  frequency: PayrollFrequency,
+  timezone = "UTC"
+): string {
+  const { minute, hour, dayOfMonth, dayOfWeek } = zonedParts(
+    nextRunAt,
+    timezone
+  );
   return frequency === "monthly"
     ? `0 ${minute} ${hour} ${dayOfMonth} * *`
     : `0 ${minute} ${hour} * * ${dayOfWeek}`;
 }
 
-export function nextPayrollRunAt(current: Date, frequency: PayrollFrequency): Date {
+export function nextPayrollRunAt(
+  current: Date,
+  frequency: PayrollFrequency
+): Date {
   const next = new Date(current);
   if (frequency === "monthly") next.setUTCMonth(next.getUTCMonth() + 1);
   else next.setUTCDate(next.getUTCDate() + (frequency === "biweekly" ? 14 : 7));
@@ -25,16 +59,49 @@ export function isPublicProofSlug(value: string): boolean {
   return /^vp-[a-f0-9]{20}$/.test(value);
 }
 
-export type PolicyEvaluation = { maxRouteAmount: string; dailyLimit: string; approvalThreshold: number; network: "mainnet" | "sepolia" };
+export type PolicyEvaluation = {
+  maxRouteAmount: string;
+  dailyLimit: string;
+  approvalThreshold: number;
+  network: "mainnet" | "sepolia";
+};
 
-export function evaluateTreasuryPolicy(policy: PolicyEvaluation | undefined, input: { totalAmount: string; approvalCount: number; network: "mainnet" | "sepolia"; dailyUsed: string }) {
-  if (!policy) return { policyFound: false, allowed: true, reasons: ["No active policy for this token"] } as const;
+export function evaluateTreasuryPolicy(
+  policy: PolicyEvaluation | undefined,
+  input: {
+    totalAmount: string;
+    approvalCount: number;
+    network: "mainnet" | "sepolia";
+    dailyUsed: string;
+  }
+) {
+  if (!policy)
+    return {
+      policyFound: false,
+      allowed: true,
+      reasons: ["No active policy for this token"],
+    } as const;
   const reasons: string[] = [];
-  if (input.network !== policy.network) reasons.push(`Policy is restricted to ${policy.network}`);
-  if (Number(input.totalAmount) > Number(policy.maxRouteAmount)) reasons.push(`Amount exceeds per-route limit of ${policy.maxRouteAmount}`);
-  if (Number(input.dailyUsed) + Number(input.totalAmount) > Number(policy.dailyLimit)) reasons.push(`Daily limit of ${policy.dailyLimit} would be exceeded`);
-  if (input.approvalCount < policy.approvalThreshold) reasons.push(`Requires ${policy.approvalThreshold} approval(s)`);
-  return { policyFound: true, allowed: reasons.length === 0, reasons, maxRouteAmount: policy.maxRouteAmount, dailyLimit: policy.dailyLimit, approvalThreshold: policy.approvalThreshold, network: policy.network } as const;
+  if (input.network !== policy.network)
+    reasons.push(`Policy is restricted to ${policy.network}`);
+  if (Number(input.totalAmount) > Number(policy.maxRouteAmount))
+    reasons.push(`Amount exceeds per-route limit of ${policy.maxRouteAmount}`);
+  if (
+    Number(input.dailyUsed) + Number(input.totalAmount) >
+    Number(policy.dailyLimit)
+  )
+    reasons.push(`Daily limit of ${policy.dailyLimit} would be exceeded`);
+  if (input.approvalCount < policy.approvalThreshold)
+    reasons.push(`Requires ${policy.approvalThreshold} approval(s)`);
+  return {
+    policyFound: true,
+    allowed: reasons.length === 0,
+    reasons,
+    maxRouteAmount: policy.maxRouteAmount,
+    dailyLimit: policy.dailyLimit,
+    approvalThreshold: policy.approvalThreshold,
+    network: policy.network,
+  } as const;
 }
 
 export function isLaunchpadOperatorRole(role: string): boolean {
@@ -45,20 +112,57 @@ export function isLaunchpadAdminRole(role: string): boolean {
   return role === "owner" || role === "admin";
 }
 
-export type LaunchpadTab = "overview" | "milestones" | "allocations" | "operations";
+export type LaunchpadTab =
+  | "overview"
+  | "milestones"
+  | "allocations"
+  | "operations";
 
-export type LaunchpadReadinessCheck = { key: string; label: string; passed: boolean };
+export type LaunchpadReadinessCheck = {
+  key: string;
+  label: string;
+  passed: boolean;
+};
 
-export function summarizeLaunchpadReadiness(checks: LaunchpadReadinessCheck[], override: "none" | "blocked" | "ready" = "none") {
-  const score = checks.length ? Math.round((checks.filter((check) => check.passed).length / checks.length) * 100) : 0;
-  return { score, ready: override !== "blocked" && override === "ready" && checks.every((check) => check.passed), checks, override } as const;
+export function summarizeLaunchpadReadiness(
+  checks: LaunchpadReadinessCheck[],
+  override: "none" | "blocked" | "ready" = "none"
+) {
+  const score = checks.length
+    ? Math.round(
+        (checks.filter(check => check.passed).length / checks.length) * 100
+      )
+    : 0;
+  return {
+    score,
+    ready:
+      override !== "blocked" &&
+      override === "ready" &&
+      checks.every(check => check.passed),
+    checks,
+    override,
+  } as const;
 }
 
-export function canRequestLaunchpadRelease(projectStatus: "draft" | "live" | "funded" | "closed", milestoneStatus: "planned" | "ready" | "released" | "blocked", pendingRequest: boolean, amount: string, reason: string): boolean {
-  return projectStatus !== "closed" && milestoneStatus === "ready" && !pendingRequest && /^\d+(\.\d{1,18})?$/.test(amount.trim()) && reason.trim().length >= 8;
+export function canRequestLaunchpadRelease(
+  projectStatus: "draft" | "live" | "funded" | "closed",
+  milestoneStatus: "planned" | "ready" | "released" | "blocked",
+  pendingRequest: boolean,
+  amount: string,
+  reason: string
+): boolean {
+  return (
+    projectStatus !== "closed" &&
+    milestoneStatus === "ready" &&
+    !pendingRequest &&
+    /^\d+(\.\d{1,18})?$/.test(amount.trim()) &&
+    reason.trim().length >= 8
+  );
 }
 
-export function canDecideLaunchpadRelease(status: "pending" | "approved" | "rejected" | "settled"): boolean {
+export function canDecideLaunchpadRelease(
+  status: "pending" | "approved" | "rejected" | "settled"
+): boolean {
   return status === "pending";
 }
 
@@ -66,72 +170,281 @@ export function getLaunchpadInitialTab(): LaunchpadTab {
   return "overview";
 }
 
-export function resolveLaunchpadPanel(tab: LaunchpadTab, hasProject: boolean): "empty" | LaunchpadTab {
+export function resolveLaunchpadPanel(
+  tab: LaunchpadTab,
+  hasProject: boolean
+): "empty" | LaunchpadTab {
   return hasProject ? tab : "empty";
 }
 
-export function resolveLaunchpadEmptyState(hasProject: boolean, milestoneCount: number): "create-project" | "add-milestone" | "ready" {
+export function resolveLaunchpadEmptyState(
+  hasProject: boolean,
+  milestoneCount: number
+): "create-project" | "add-milestone" | "ready" {
   if (!hasProject) return "create-project";
   if (milestoneCount === 0) return "add-milestone";
   return "ready";
 }
 
-export function nextLaunchpadProjectStatus(status: "draft" | "live" | "funded" | "closed"): "live" | "funded" | "closed" | null {
-  return status === "draft" ? "live" : status === "live" ? "funded" : status === "funded" ? "closed" : null;
+export function nextLaunchpadProjectStatus(
+  status: "draft" | "live" | "funded" | "closed"
+): "live" | "funded" | "closed" | null {
+  return status === "draft"
+    ? "live"
+    : status === "live"
+      ? "funded"
+      : status === "funded"
+        ? "closed"
+        : null;
 }
 
-export function launchpadProjectActionLabel(status: "draft" | "live" | "funded" | "closed"): string {
-  return status === "draft" ? "OPEN ROOM" : status === "live" ? "MARK FUNDED" : status === "funded" ? "CLOSE ROUND" : "ROUND CLOSED";
+export function launchpadProjectActionLabel(
+  status: "draft" | "live" | "funded" | "closed"
+): string {
+  return status === "draft"
+    ? "OPEN ROOM"
+    : status === "live"
+      ? "MARK FUNDED"
+      : status === "funded"
+        ? "CLOSE ROUND"
+        : "ROUND CLOSED";
 }
 
-export function canSubmitLaunchpadProject(name: string, targetAmount: string): boolean {
-  return name.trim().length >= 2 && /^\d+(\.\d{1,18})?$/.test(targetAmount.trim());
+export function canSubmitLaunchpadProject(
+  name: string,
+  targetAmount: string
+): boolean {
+  return (
+    name.trim().length >= 2 && /^\d+(\.\d{1,18})?$/.test(targetAmount.trim())
+  );
 }
 
-export function canSubmitLaunchpadAllocation(commitment: string, amount: string): boolean {
-  return commitment.trim().length >= 16 && /^\d+(\.\d{1,18})?$/.test(amount.trim());
+export function canSubmitLaunchpadAllocation(
+  commitment: string,
+  amount: string
+): boolean {
+  return (
+    commitment.trim().length >= 16 && /^\d+(\.\d{1,18})?$/.test(amount.trim())
+  );
 }
 
-export function canAdvanceLaunchpadProjectStatus(from: "draft" | "live" | "funded" | "closed", to: "draft" | "live" | "funded" | "closed"): boolean {
+export function canAdvanceLaunchpadProjectStatus(
+  from: "draft" | "live" | "funded" | "closed",
+  to: "draft" | "live" | "funded" | "closed"
+): boolean {
   if (from === to) return true;
-  return (from === "draft" && to === "live") || (from === "live" && (to === "funded" || to === "closed")) || (from === "funded" && to === "closed");
+  return (
+    (from === "draft" && to === "live") ||
+    (from === "live" && (to === "funded" || to === "closed")) ||
+    (from === "funded" && to === "closed")
+  );
 }
 
-export function canAdvanceLaunchpadMilestoneStatus(from: "planned" | "ready" | "released" | "blocked", to: "planned" | "ready" | "released" | "blocked"): boolean {
+export function canAdvanceLaunchpadMilestoneStatus(
+  from: "planned" | "ready" | "released" | "blocked",
+  to: "planned" | "ready" | "released" | "blocked"
+): boolean {
   if (from === to) return true;
-  return (from === "planned" && (to === "ready" || to === "blocked")) || (from === "ready" && (to === "released" || to === "blocked")) || (from === "blocked" && to === "ready");
+  return (
+    (from === "planned" && (to === "ready" || to === "blocked")) ||
+    (from === "ready" && (to === "released" || to === "blocked")) ||
+    (from === "blocked" && to === "ready")
+  );
 }
 
-export function shouldReuseLaunchpadAllocation(existingCommitment: string | undefined, requestedCommitment: string): boolean {
-  return Boolean(existingCommitment) && existingCommitment === requestedCommitment;
+export function shouldReuseLaunchpadAllocation(
+  existingCommitment: string | undefined,
+  requestedCommitment: string
+): boolean {
+  return (
+    Boolean(existingCommitment) && existingCommitment === requestedCommitment
+  );
 }
 
-export function canReuseLaunchpadAllocation(existingProjectId: number, requestedProjectId: number, existingCommitment: string | undefined, requestedCommitment: string): boolean {
-  return existingProjectId === requestedProjectId && shouldReuseLaunchpadAllocation(existingCommitment, requestedCommitment);
+export function canReuseLaunchpadAllocation(
+  existingProjectId: number,
+  requestedProjectId: number,
+  existingCommitment: string | undefined,
+  requestedCommitment: string
+): boolean {
+  return (
+    existingProjectId === requestedProjectId &&
+    shouldReuseLaunchpadAllocation(existingCommitment, requestedCommitment)
+  );
 }
 
-export function canReusePrivateMarketBid(existingMarketId: number, requestedMarketId: number, existingCommitment: string | undefined, requestedCommitment: string): boolean {
-  return existingMarketId === requestedMarketId && Boolean(existingCommitment) && existingCommitment === requestedCommitment;
+export function canReusePrivateMarketBid(
+  existingMarketId: number,
+  requestedMarketId: number,
+  existingCommitment: string | undefined,
+  requestedCommitment: string
+): boolean {
+  return (
+    existingMarketId === requestedMarketId &&
+    Boolean(existingCommitment) &&
+    existingCommitment === requestedCommitment
+  );
 }
 
 export function isLaunchpadSlug(value: string): boolean {
   return /^launch-[a-f0-9]{20}$/.test(value);
 }
 
-export function buildLaunchpadPublicSummary(project: { slug: string; name: string; description: string | null; token: string; network: "mainnet" | "sepolia"; targetAmount: string; raisedAmount: string; privacyMode: "shielded" | "public"; status: "draft" | "live" | "funded" | "closed"; fundingEndsAt: Date | null }, milestones: Array<{ id: number; name: string; sequence: number; releaseAmount: string; status: "planned" | "ready" | "released" | "blocked"; proofReference: string | null }>) {
-  return { ...project, milestones: milestones.map(({ id, name, sequence, releaseAmount, status, proofReference }) => ({ id, name, sequence, releaseAmount, status, proofReference })) };
+export function buildLaunchpadPublicSummary(
+  project: {
+    slug: string;
+    name: string;
+    description: string | null;
+    token: string;
+    network: "mainnet" | "sepolia";
+    targetAmount: string;
+    raisedAmount: string;
+    privacyMode: "shielded" | "public";
+    status: "draft" | "live" | "funded" | "closed";
+    fundingEndsAt: Date | null;
+  },
+  milestones: Array<{
+    id: number;
+    name: string;
+    sequence: number;
+    releaseAmount: string;
+    status: "planned" | "ready" | "released" | "blocked";
+    proofReference: string | null;
+  }>
+) {
+  return {
+    ...project,
+    milestones: milestones.map(
+      ({ id, name, sequence, releaseAmount, status, proofReference }) => ({
+        id,
+        name,
+        sequence,
+        releaseAmount,
+        status,
+        proofReference,
+      })
+    ),
+  };
 }
 
-export function canScheduleRoute(routeId: number | null, pending: boolean): boolean {
+export function canScheduleRoute(
+  routeId: number | null,
+  pending: boolean
+): boolean {
   return routeId !== null && routeId > 0 && !pending;
 }
 
-export function canPublishShareableProof(status: "draft" | "shielded" | "routed" | "settled" | "failed" | "cancelled"): boolean {
+export function canPublishShareableProof(
+  status: "draft" | "shielded" | "routed" | "settled" | "failed" | "cancelled"
+): boolean {
   return status === "settled";
 }
 
-export function canCreateRecipientClaim(routeId: number | null, recipientIds: number[], pending: boolean): boolean {
-  return routeId !== null && routeId > 0 && recipientIds.length === 1 && recipientIds[0] > 0 && !pending;
+export type PaymentRouteStatus =
+  | "draft"
+  | "shielded"
+  | "routed"
+  | "settled"
+  | "failed"
+  | "cancelled";
+
+export function canAdvancePaymentRouteStatus(
+  from: PaymentRouteStatus,
+  to: PaymentRouteStatus
+): boolean {
+  if (from === to) return true;
+  const transitions: Record<PaymentRouteStatus, PaymentRouteStatus[]> = {
+    draft: ["shielded", "cancelled"],
+    shielded: ["routed", "failed", "cancelled"],
+    routed: ["settled", "failed"],
+    settled: [],
+    failed: [],
+    cancelled: [],
+  };
+  return transitions[from].includes(to);
+}
+
+export function hasExactRouteAllocations(
+  totalAmount: string,
+  recipientAmounts: Array<{ recipientId: number; amount: string }>
+): boolean {
+  if (!/^\d+(\.\d{1,18})?$/.test(totalAmount) || recipientAmounts.length === 0)
+    return false;
+  const normalize = (value: string) => {
+    const [whole = "0", fraction = ""] = value.split(".");
+    return {
+      whole: whole.replace(/^0+(?=\d)/, "") || "0",
+      fraction: fraction.replace(/0+$/, ""),
+    };
+  };
+  const compare = (left: string, right: string) => {
+    const a = normalize(left);
+    const b = normalize(right);
+    if (a.whole.length !== b.whole.length)
+      return a.whole.length > b.whole.length ? 1 : -1;
+    if (a.whole !== b.whole) return a.whole > b.whole ? 1 : -1;
+    const width = Math.max(a.fraction.length, b.fraction.length);
+    const af = a.fraction.padEnd(width, "0");
+    const bf = b.fraction.padEnd(width, "0");
+    return af === bf ? 0 : af > bf ? 1 : -1;
+  };
+  const add = (left: string, right: string) => {
+    const [leftWhole, leftFraction = ""] = left.split(".");
+    const [rightWhole, rightFraction = ""] = right.split(".");
+    const precision = Math.max(leftFraction.length, rightFraction.length);
+    const a = `${leftWhole || "0"}${leftFraction.padEnd(precision, "0")}`;
+    const b = `${rightWhole || "0"}${rightFraction.padEnd(precision, "0")}`;
+    const width = Math.max(a.length, b.length);
+    let carry = 0;
+    let result = "";
+    for (let index = width - 1; index >= 0; index -= 1) {
+      const sum =
+        Number(a.padStart(width, "0")[index]) +
+        Number(b.padStart(width, "0")[index]) +
+        carry;
+      result = String(sum % 10) + result;
+      carry = Math.floor(sum / 10);
+    }
+    if (carry) result = String(carry) + result;
+    const wholeEnd = result.length - precision;
+    const whole = result.slice(0, wholeEnd) || "0";
+    const fraction = result.slice(wholeEnd).replace(/0+$/, "");
+    return fraction ? `${whole}.${fraction}` : whole;
+  };
+  const ids = new Set<number>();
+  let allocationTotal = "0";
+  for (const allocation of recipientAmounts) {
+    if (
+      !Number.isInteger(allocation.recipientId) ||
+      allocation.recipientId <= 0 ||
+      ids.has(allocation.recipientId)
+    )
+      return false;
+    if (
+      !/^\d+(\.\d{1,18})?$/.test(allocation.amount) ||
+      compare(allocation.amount, "0") <= 0
+    )
+      return false;
+    ids.add(allocation.recipientId);
+    allocationTotal = add(allocationTotal, allocation.amount);
+  }
+  return (
+    compare(totalAmount, "0") > 0 && compare(allocationTotal, totalAmount) === 0
+  );
+}
+
+export function canCreateRecipientClaim(
+  routeId: number | null,
+  recipientIds: number[],
+  pending: boolean
+): boolean {
+  return (
+    routeId !== null &&
+    routeId > 0 &&
+    recipientIds.length === 1 &&
+    recipientIds[0] > 0 &&
+    !pending
+  );
 }
 
 export function isWalletActionLocked(pending: boolean): boolean {
@@ -140,7 +453,11 @@ export function isWalletActionLocked(pending: boolean): boolean {
 
 export function isValidStarknetAddress(value: string): boolean {
   const normalized = value.trim();
-  return normalized.length >= 4 && normalized.length <= 100 && /^0x[0-9a-fA-F]+$/.test(normalized);
+  return (
+    normalized.length >= 4 &&
+    normalized.length <= 100 &&
+    /^0x[0-9a-fA-F]+$/.test(normalized)
+  );
 }
 
 export function normalizeAmountInput(value: string): string {
@@ -151,50 +468,171 @@ export function isClaimToken(value: string): boolean {
   return /^claim-[a-f0-9]{32}$/.test(value);
 }
 
-
-export type PrivateMarketStatus = "draft" | "scheduled" | "live" | "reveal" | "settled" | "paused" | "closed";
+export type PrivateMarketStatus =
+  | "draft"
+  | "scheduled"
+  | "live"
+  | "reveal"
+  | "settled"
+  | "paused"
+  | "closed";
 export type PrivateMarketOrderKind = "sealed_bid" | "rfq";
-export type PrivateDisclosureScope = "none" | "aggregate" | "counterparty" | "auditor";
+export type PrivateDisclosureScope =
+  | "none"
+  | "aggregate"
+  | "counterparty"
+  | "auditor";
 
-export function canAdvancePrivateMarketStatus(from: PrivateMarketStatus, to: PrivateMarketStatus): boolean {
+export function canAdvancePrivateMarketStatus(
+  from: PrivateMarketStatus,
+  to: PrivateMarketStatus
+): boolean {
   if (from === to) return true;
   const transitions: Record<PrivateMarketStatus, PrivateMarketStatus[]> = {
-    draft: ["scheduled", "live", "paused", "closed"], scheduled: ["live", "paused", "closed"], live: ["reveal", "paused", "closed"], reveal: ["settled", "paused", "closed"], settled: ["closed"], paused: ["scheduled", "live", "closed"], closed: [],
+    draft: ["scheduled", "live", "paused", "closed"],
+    scheduled: ["live", "paused", "closed"],
+    live: ["reveal", "paused", "closed"],
+    reveal: ["settled", "paused", "closed"],
+    settled: ["closed"],
+    paused: ["scheduled", "live", "closed"],
+    closed: [],
   };
   return transitions[from].includes(to);
 }
 
 export function marketActionLabel(status: PrivateMarketStatus): string {
-  return status === "draft" ? "SCHEDULE MARKET" : status === "scheduled" ? "OPEN MARKET" : status === "live" ? "START REVEAL" : status === "reveal" ? "SETTLE ALLOCATIONS" : status === "settled" ? "ARCHIVE MARKET" : status === "paused" ? "RESUME MARKET" : "MARKET CLOSED";
+  return status === "draft"
+    ? "SCHEDULE MARKET"
+    : status === "scheduled"
+      ? "OPEN MARKET"
+      : status === "live"
+        ? "START REVEAL"
+        : status === "reveal"
+          ? "SETTLE ALLOCATIONS"
+          : status === "settled"
+            ? "ARCHIVE MARKET"
+            : status === "paused"
+              ? "RESUME MARKET"
+              : "MARKET CLOSED";
 }
 
-export function evaluatePrivateMarketRisk(input: { bidAmount: string; targetAmount: string; currentCommitted: string; maxBidAmount?: string; maxConcentrationPct?: number; participantCommitted?: string }): { allowed: boolean; reasons: string[]; utilizationPct: number; concentrationPct: number } {
-  const bid = Number(input.bidAmount); const target = Number(input.targetAmount); const committed = Number(input.currentCommitted); const participant = Number(input.participantCommitted ?? input.bidAmount);
-  const utilizationPct = target > 0 ? Math.min(999, ((committed + bid) / target) * 100) : 0; const concentrationPct = committed + bid > 0 ? (participant / (committed + bid)) * 100 : 0; const reasons: string[] = [];
-  if (!Number.isFinite(bid) || bid <= 0) reasons.push("Bid must be greater than zero");
-  if (input.maxBidAmount && bid > Number(input.maxBidAmount)) reasons.push(`Bid exceeds the configured cap of ${input.maxBidAmount}`);
-  if (input.maxConcentrationPct !== undefined && concentrationPct > input.maxConcentrationPct) reasons.push(`Concentration exceeds ${input.maxConcentrationPct}%`);
-  return { allowed: reasons.length === 0, reasons, utilizationPct: Number(utilizationPct.toFixed(2)), concentrationPct: Number(concentrationPct.toFixed(2)) };
+export function evaluatePrivateMarketRisk(input: {
+  bidAmount: string;
+  targetAmount: string;
+  currentCommitted: string;
+  maxBidAmount?: string;
+  maxConcentrationPct?: number;
+  participantCommitted?: string;
+}): {
+  allowed: boolean;
+  reasons: string[];
+  utilizationPct: number;
+  concentrationPct: number;
+} {
+  const bid = Number(input.bidAmount);
+  const target = Number(input.targetAmount);
+  const committed = Number(input.currentCommitted);
+  const participant = Number(input.participantCommitted ?? input.bidAmount);
+  const utilizationPct =
+    target > 0 ? Math.min(999, ((committed + bid) / target) * 100) : 0;
+  const concentrationPct =
+    committed + bid > 0 ? (participant / (committed + bid)) * 100 : 0;
+  const reasons: string[] = [];
+  if (!Number.isFinite(bid) || bid <= 0)
+    reasons.push("Bid must be greater than zero");
+  if (input.maxBidAmount && bid > Number(input.maxBidAmount))
+    reasons.push(`Bid exceeds the configured cap of ${input.maxBidAmount}`);
+  if (
+    input.maxConcentrationPct !== undefined &&
+    concentrationPct > input.maxConcentrationPct
+  )
+    reasons.push(`Concentration exceeds ${input.maxConcentrationPct}%`);
+  return {
+    allowed: reasons.length === 0,
+    reasons,
+    utilizationPct: Number(utilizationPct.toFixed(2)),
+    concentrationPct: Number(concentrationPct.toFixed(2)),
+  };
 }
 
-
-export function comparePrivateMarketQuotes(quotes: Array<{ id: string; price: string; feeBps: number; expiresAt: Date | string }>, now = new Date()) {
-  return quotes.filter((quote) => new Date(quote.expiresAt).getTime() > now.getTime()).map((quote) => ({ ...quote, allInPrice: Number(quote.price) * (1 + quote.feeBps / 10000) })).sort((left, right) => left.allInPrice - right.allInPrice);
+export function comparePrivateMarketQuotes(
+  quotes: Array<{
+    id: string;
+    price: string;
+    feeBps: number;
+    expiresAt: Date | string;
+  }>,
+  now = new Date()
+) {
+  return quotes
+    .filter(quote => new Date(quote.expiresAt).getTime() > now.getTime())
+    .map(quote => ({
+      ...quote,
+      allInPrice: Number(quote.price) * (1 + quote.feeBps / 10000),
+    }))
+    .sort((left, right) => left.allInPrice - right.allInPrice);
 }
 
-export function buildPrivateMarketPortfolio(input: { commitments: Array<{ amount: string; status: "committed" | "revealed" | "accepted" | "rejected" }>; settledValue: string; currentValue: string }) {
-  const committed = input.commitments.filter((item) => item.status !== "rejected").reduce((sum, item) => sum + Number(item.amount), 0);
-  const settled = Number(input.settledValue); const current = Number(input.currentValue);
-  return { committedAmount: committed.toFixed(18).replace(/0+$/, "").replace(/\.$/, ""), settledAmount: settled.toString(), currentValue: current.toString(), pnl: (current - settled).toString(), openCommitments: input.commitments.filter((item) => item.status === "committed" || item.status === "revealed").length };
+export function buildPrivateMarketPortfolio(input: {
+  commitments: Array<{
+    amount: string;
+    status: "committed" | "revealed" | "accepted" | "rejected";
+  }>;
+  settledValue: string;
+  currentValue: string;
+}) {
+  const committed = input.commitments
+    .filter(item => item.status !== "rejected")
+    .reduce((sum, item) => sum + Number(item.amount), 0);
+  const settled = Number(input.settledValue);
+  const current = Number(input.currentValue);
+  return {
+    committedAmount: committed
+      .toFixed(18)
+      .replace(/0+$/, "")
+      .replace(/\.$/, ""),
+    settledAmount: settled.toString(),
+    currentValue: current.toString(),
+    pnl: (current - settled).toString(),
+    openCommitments: input.commitments.filter(
+      item => item.status === "committed" || item.status === "revealed"
+    ).length,
+  };
 }
 
-export function canPublishPrivateDisclosure(scope: PrivateDisclosureScope, settlementConfirmed: boolean): boolean {
+export function canPublishPrivateDisclosure(
+  scope: PrivateDisclosureScope,
+  settlementConfirmed: boolean
+): boolean {
   return scope !== "none" && settlementConfirmed;
 }
 
-export function privateDisclosureFields(scope: PrivateDisclosureScope): string[] {
-  if (scope === "aggregate") return ["market_status", "aggregate_volume", "participant_count", "clearing_price"];
-  if (scope === "counterparty") return ["market_status", "aggregate_volume", "participant_count", "clearing_price", "counterparty_allocation"];
-  if (scope === "auditor") return ["market_status", "aggregate_volume", "participant_count", "clearing_price", "settlement_receipt", "policy_attestation"];
+export function privateDisclosureFields(
+  scope: PrivateDisclosureScope
+): string[] {
+  if (scope === "aggregate")
+    return [
+      "market_status",
+      "aggregate_volume",
+      "participant_count",
+      "clearing_price",
+    ];
+  if (scope === "counterparty")
+    return [
+      "market_status",
+      "aggregate_volume",
+      "participant_count",
+      "clearing_price",
+      "counterparty_allocation",
+    ];
+  if (scope === "auditor")
+    return [
+      "market_status",
+      "aggregate_volume",
+      "participant_count",
+      "clearing_price",
+      "settlement_receipt",
+      "policy_attestation",
+    ];
   return [];
 }
