@@ -401,3 +401,5 @@
 - [ ] Restore Manus OAuth Sign In on the Vercel-hosted frontend, including API rewrite and callback-origin verification
 - [x] Verify that the Vercel project deploys the latest Veyra GitHub commit and resolve any stale-deployment path
 - [ ] Register the Vercel callback origin in the Manus OAuth application allowlist, or provide the user the exact user-only approval step
+- [x] Align the Vercel deployment with a server-side OAuth configuration and session path without exposing backend secrets
+- [x] Reconcile the Vercel frontend-plus-managed-backend OAuth architecture with the supplied full-stack deployment guidance

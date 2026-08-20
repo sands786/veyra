@@ -43,6 +43,8 @@ Before testing sign-in, register both the production Vercel domain and any previ
 
 Vercel is appropriate here as a CDN-hosted frontend plus reverse-proxy edge. The current application’s database and protected business logic are intentionally kept on the managed Veyra backend. Vercel’s documentation notes that Express on Vercel becomes a single function and that `express.static()` does not serve static assets; the committed deployment pattern avoids that mismatch by keeping the Vite assets on Vercel and the existing Express process on Manus. [2]
 
+This remains a **server-side OAuth architecture**: Vercel only serves the browser shell, while the managed backend receives `/api/oauth/callback`, exchanges the authorization code, and issues the signed session cookie through the same-origin rewrite. Do not copy `JWT_SECRET`, `DATABASE_URL`, `OAUTH_SERVER_URL`, or other server credentials into the Vercel frontend project unless you intentionally migrate the entire backend to Vercel and configure its serverless function separately.
+
 Do not cache `/api/*` responses at the Vercel edge. These routes include authenticated tRPC procedures and session-changing OAuth callbacks. `vercel.json` explicitly disables external-rewrite caching for that path. [1]
 
 If the managed backend domain changes, replace both backend destinations in `vercel.json`, deploy a preview, then repeat the OAuth redirect-origin review. Do not commit any secret values into the repository. If Sign In opens `undefined/app-auth`, the deployment predates the runtime configuration fallback or was built without both optional Vite OAuth variables; redeploy from the current revision.

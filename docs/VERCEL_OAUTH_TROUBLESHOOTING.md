@@ -14,12 +14,18 @@ The Vercel deployment was then rechecked and confirmed to serve the repaired cli
 
 Set both values in the Vercel project’s environment variables for **Production**, **Preview**, and **Development**, then redeploy from a clean build:
 
-| Variable | Purpose |
-| --- | --- |
+| Variable                | Purpose                                                                   |
+| ----------------------- | ------------------------------------------------------------------------- |
 | `VITE_OAUTH_PORTAL_URL` | Base URL of the Manus OAuth portal used by the browser to launch sign-in. |
-| `VITE_APP_ID` | Veyra’s Manus OAuth application identifier passed to the portal. |
+| `VITE_APP_ID`           | Veyra’s Manus OAuth application identifier passed to the portal.          |
 
 Because Vite embeds `VITE_*` values during the build, changing the optional Vercel variables has no effect until a fresh deployment is created. The runtime fallback also requires a fresh deployment so the browser receives the current Sign In launcher.
+
+## Architecture alignment
+
+Veyra already follows the security boundary of a full-stack OAuth application: the browser begins authentication, while the server exchanges the authorization code, validates state, writes the signed session cookie, and protects tRPC procedures. In the supported deployment split, **Vercel serves the Vite frontend and rewrites `/api/*` to the managed Manus Express backend**. That managed backend owns `JWT_SECRET`, `DATABASE_URL`, `OAUTH_SERVER_URL`, and the OAuth exchange; no private credential is embedded in the Vercel client.
+
+Adding those server-only variables to a static Vercel project does not add an Express backend and cannot allow an unregistered redirect domain. A separate full-stack Vercel server deployment would still require the same callback-origin approval, in addition to independently configured database and session secrets. The current Vercel-plus-Manus pattern is therefore the correct path for Veyra unless the backend is intentionally migrated off Manus.
 
 ## Callback requirement
 
