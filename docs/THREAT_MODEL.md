@@ -3,7 +3,7 @@
 > **This is a code-grounded threat model, not a claim of a completed external audit or a promise of custody-grade security.** It states what Veyra protects in the current implementation, how the controls work, and what still requires real deployment validation.
 
 <p align="center">
-  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/IqgUCtwXacxBFVTq.svg" width="100%" alt="Veyra privacy trust map" />
+  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/wekOSUaPYilfgKxo.svg" width="100%" alt="Veyra privacy trust map" />
 </p>
 
 ## Assets and invariants

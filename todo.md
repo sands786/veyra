@@ -382,3 +382,5 @@
 - [x] Replace README teaser and walkthrough links with direct in-page video players and preserve accessible fallback text
 
 - [x] Correct the trust-map proof-card overflow and republish the balanced documentation visual
+
+- [x] Recompose the trust-map heading into a fully visible two-line editorial title and republish the corrected asset
