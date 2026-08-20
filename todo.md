@@ -368,3 +368,5 @@
 - [x] Redesign the workspace sidebar navigation into an institutional control rail with refined grouping, active states, and responsive behavior
 
 - [x] Remove shivering and shaking artifacts from the Veyra teaser, submission demo, and documentation videos, then republish stable cuts
+
+- [x] Refine teaser and documentation video-section typography, spacing, player framing, and metadata into premium editorial viewing surfaces
