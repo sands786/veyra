@@ -408,3 +408,5 @@
 - [x] Enforce route allocation uniqueness and exact totals, and validate backend route lifecycle transitions against the shared state machine
 - [x] Remove unused template-only UI modules and their vulnerable production dependencies from the shipped Veyra application
 - [x] Perform an independent second-pass verification of the hardened release across runtime, database, builds, dependencies, and public boundaries
+- [x] Repair the confirmed Private Markets sidebar route, which currently resolves to a generic 404 instead of the Private Markets workspace
+- [x] Bring missing-resource and unavailable claim/proof screens into the Veyra institutional visual system with precise privacy-aware recovery guidance

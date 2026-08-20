@@ -32,6 +32,7 @@ function Router() {
       <Route path="/documentation" component={Documentation} />
       <Route path="/private-primitives" component={PrivatePrimitives} />
       <Route path="/private-markets" component={PrivateMarkets} />
+      <Route path="/markets" component={PrivateMarkets} />
       <Route path="/proof/:slug" component={Proof} />
       <Route path="/claim/:token" component={Claim} />
       <Route path="/404" component={NotFound} />
