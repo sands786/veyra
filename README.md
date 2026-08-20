@@ -72,7 +72,7 @@ The 3:10 product walkthrough traces private routes, wallet/receipt boundaries, c
 ## What the system is built to protect
 
 <p align="center">
-  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/zYGVoEkveykTCWvP.svg" width="100%" alt="Veyra privacy trust map" />
+  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/IqgUCtwXacxBFVTq.svg" width="100%" alt="Veyra privacy trust map" />
 </p>
 
 ### Four non-negotiable invariants

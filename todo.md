@@ -380,3 +380,5 @@
 - [x] Recompose the documentation into a reviewer-first premium experience with visual architecture plates, trust map, invariants, threat model, decision log, and 90-second evaluation path
 
 - [x] Replace README teaser and walkthrough links with direct in-page video players and preserve accessible fallback text
+
+- [x] Correct the trust-map proof-card overflow and republish the balanced documentation visual
