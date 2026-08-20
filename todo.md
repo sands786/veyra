@@ -384,3 +384,7 @@
 - [x] Correct the trust-map proof-card overflow and republish the balanced documentation visual
 
 - [x] Recompose the trust-map heading into a fully visible two-line editorial title and republish the corrected asset
+
+- [x] Separate trust-map flow captions from arrows and card edges, then republish the collision-free visual
+
+- [x] Complete a full trust-map visual QA rebuild covering headline fit, card padding, caption lanes, arrow spacing, and GitHub-scale readability
