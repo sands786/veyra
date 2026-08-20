@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/nGZKwALPBnNMrEdQ.svg" width="680" alt="Veyra — Private Financial Coordination" />
+  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/nGZKwALPBnNMrEdQ.svg" width="700" alt="Veyra — Private Financial Coordination" />
 </p>
 
 <p align="center">
@@ -10,59 +10,72 @@
 <p align="center">
   <a href="https://veilpay-spri-t4knu9mv.manus.space">Live workspace</a> ·
   <a href="https://veilpay-spri-t4knu9mv.manus.space/documentation">Product documentation</a> ·
+  <a href="docs/ARCHITECTURE.md">Architecture</a> ·
+  <a href="docs/OPERATIONS.md">Operations guide</a> ·
   <a href="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4">30-second teaser</a> ·
-  <a href="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4">3:10 product walkthrough</a>
+  <a href="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4">3:10 walkthrough</a>
 </p>
 
 ---
 
-## The thesis
+## What Veyra is
 
 > **Move the money. Keep the roster private.**
 
-Most payment tooling makes the operating record public by default: who belongs to a team, who was paid, and how much. Veyra treats that context as private workspace data. Teams prepare a route, gather operational approvals, connect a wallet only at the execution boundary, and expose a compact receipt-backed proof rather than a public roster.
+Veyra is a privacy-first operating system for financial coordination. It gives a team one place to prepare private payroll routes, set treasury policies, coordinate private claims, run sealed-bid market workflows, govern launch milestones, and issue selective proofs—without confusing workspace state for a completed on-chain transaction.
 
-Veyra is built as an institutional operating surface rather than a transfer-button demo. It combines private payroll coordination, treasury guardrails, private claims, sealed-bid market operations, launch governance, and selective disclosure around one explicit lifecycle:
+The central product decision is simple: **privacy is not a button; it is a sequence of controlled boundaries.** Veyra persists a private operating intent, defers signing to a user-owned Starknet wallet, verifies the public receipt through an RPC provider, and only then permits a compact proof surface.
 
 ```text
 PERSISTED INTENT  →  WALLET AUTHORIZATION  →  SUBMITTED TRANSACTION  →  CONFIRMED RECEIPT  →  SELECTIVE PROOF
 ```
 
-The distinction is deliberate. A saved route is **not** a transfer. A locally generated link is **not** a wallet signature. A transaction hash is **not** settled until a receipt is verified. Veyra exposes those differences in the interface, API, audit history, and documentation.
+The application presents those states explicitly in the UI, API, persistence layer, audit history, documentation, and tests. It does not call a saved route a transfer, a claim link a signature, or a hash a settlement receipt.
 
 ---
 
-## Watch Veyra
+## Start here
 
-### Film 01 — The product thesis
+| Path                                                                                 | What it answers                                                                                              |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| [**Live workspace**](https://veilpay-spri-t4knu9mv.manus.space)                      | What does the private payroll, treasury, proof, wallet, and operations experience feel like?                 |
+| [**Product documentation**](https://veilpay-spri-t4knu9mv.manus.space/documentation) | How does Veyra explain its operating model, privacy posture, Demo Mode, and receipt boundary?                |
+| [**Architecture**](docs/ARCHITECTURE.md)                                             | Where do the browser, API, OAuth, database, wallet, RPC provider, and Cairo registry sit in the trust model? |
+| [**Operations guide**](docs/OPERATIONS.md)                                           | Which controls are code-enforced, how are they verified, and what still requires the project owner?          |
+| [**Cairo registry**](contracts/veyra_payroll/README.md)                              | What does the non-custodial commitment registry do—and intentionally not do?                                 |
+
+---
+
+## Film library
+
+### 01 — The product thesis
 
 <a href="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4">
-  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/eeAuPiqfhiOlCqpM.png" alt="Veyra workspace teaser poster — Move the money. Keep the roster private." width="100%" />
+  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/eeAuPiqfhiOlCqpM.png" alt="Veyra workspace — Move the money. Keep the roster private." width="100%" />
 </a>
 
-**[Watch the 30-second Veyra teaser](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4)**. It is a stable H.264/AAC product cut with original score and voiceover, built around the operating boundary from private intent to verified proof.
+**[Watch the stable 30-second teaser](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4)**. The cut presents Veyra’s visual system and private-to-proof thesis with original score and voiceover.
 
-### Film 00 — The operating model
+### 00 — The operating model
 
 <a href="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4">
-  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/QrIoqSGetmaJtKjn.png" alt="Veyra product documentation and cinematic walkthrough poster" width="100%" />
+  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/QrIoqSGetmaJtKjn.png" alt="Veyra documentation and product walkthrough" width="100%" />
 </a>
 
-**[Watch the 3:10 institutional walkthrough](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4)**. The walkthrough covers the private route workflow, receipt boundary, private primitives, Launchpad, Private Markets, product documentation, and Demo Mode—with deliberate title cards and one-direction product motion.
+**[Watch the 3:10 product walkthrough](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4)**. It walks through private routes, wallet and receipt boundaries, private primitives, launch governance, Private Markets, and the in-product guide library.
 
 ---
 
-## Product, not a dashboard
+## Product system
 
-| Surface | What it does | Privacy and settlement boundary |
-|---|---|---|
-| **Private payroll** | Converts a team recipient roster into a structured payment route with lifecycle state, workspace audit history, and proof references. | Recipient identity and individual amounts remain workspace-scoped. A route only becomes a settlement candidate after wallet authorization. |
-| **Treasury and operations** | Persists policy templates, thresholds, schedules, approvals, health checks, and audit export data. | Policy or approval state is operational state; it does not move funds or substitute for a signature. |
-| **Private claims** | Issues time-bounded, workspace-governed claim workflows without opening a recipient directory. | A claim link or preview is unsigned until a connected wallet and confirmed receipt exist. |
-| **Selective proof** | Publishes receipt-gated aggregate proof metadata for a route. | Proof publication is gated by confirmed settlement; raw roster, amounts, and private notes are excluded. |
-| **Launchpad governance** | Records project rooms, shielded allocation intent, milestones, and governance decisions. | Milestone records are off-chain workflow data until a real wallet-approved execution is submitted and confirmed. |
-| **Private Markets** | Runs persisted RFQs, sealed bids, risk policy checks, lifecycle transitions, alerts, portfolio math, and CSV exports. | Bidder identity and terms remain workspace-scoped; public-facing disclosure is aggregate-only. |
-| **Wallet boundary** | Detects Starknet wallets and makes authorization user-operated. | Veyra never creates, stores, exports, or receives a seed phrase, private key, or keystore. |
+| Surface                        | Operational value                                                                                                                                    | Code-backed boundary                                                                                                             |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Private payroll**            | Turns a recipient roster into a route with approvals, schedules, lifecycle state, audit history, and transaction references.                         | Route data is workspace-scoped. Settlement requires the configured approval threshold; public proof creation requires `settled`. |
+| **Treasury and operations**    | Stores token/network policy limits, daily controls, approval thresholds, schedules, balance snapshots, and audit exports.                            | Policy evaluation and membership checks run server-side before workflow changes.                                                 |
+| **Claims and selective proof** | Creates recipient claim workflows and receipt-gated public proof slugs.                                                                              | A proof query returns only permitted route summary fields; no recipient roster or individual allocation is returned.             |
+| **Launchpad governance**       | Records shielded allocation commitments, projects, milestones, release requests, and readiness checks.                                               | Milestone/release records are coordination data until a wallet-approved and externally verified execution exists.                |
+| **Private Markets**            | Provides persisted RFQs, sealed-bid commitments, policy enforcement, operational alerts, lifecycle transitions, portfolio calculations, and exports. | Bids are workspace-scoped; risk checks run before persistence; settlement requires an accepted allocation.                       |
+| **Wallet and receipt**         | Discovers Starknet wallets, tracks pending/submitted/confirmed states, and looks up Starknet receipts.                                               | The wallet signs. The server only records and verifies public transaction metadata.                                              |
 
 <p align="center">
   <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/mOERMfGFHMsRvNYm.png" alt="Veyra Private Markets control room" width="100%" />
@@ -70,78 +83,122 @@ The distinction is deliberate. A saved route is **not** a transfer. A locally ge
 
 ---
 
-## Architecture: privacy is an operating model
+## Architecture at a glance
 
 ```mermaid
 flowchart LR
-    A[Workspace operator] --> B[Manus-authenticated Veyra workspace]
-    B --> C[Persisted coordination layer<br/>routes · policies · claims · RFQs · audit]
-    C --> D{Execution boundary}
-    D -->|User authorizes| E[Starknet wallet]
-    E --> F[STRK20 transfer or registry interaction]
-    F --> G[Public transaction metadata]
-    G --> H[Receipt verification]
-    H --> I[Receipt-gated proof]
-    C --> J[Private workspace context]
-    J -. roster, notes, bid terms .-> B
-    I --> K[Aggregate public disclosure]
+  U[User browser] --> C[React + Vite client]
+  C -->|typed /api/trpc| A[Express + tRPC API]
+  C -->|user-owned signing| W[Starknet wallet]
+  C -->|OAuth request| O[Manus OAuth]
+  O -->|code + nonce-bound state| A
+  A <--> D[(MySQL / TiDB)]
+  A -->|receipt lookup| R[Starknet RPC]
+  W --> S[Starknet]
+  R --> S
+  W -. optional registry call .-> K[Cairo route-commitment registry]
 ```
 
-The browser is a React 19 and Vite application. The backend is an Express 4 and tRPC 11 service with Drizzle ORM persistence against MySQL/TiDB. Authentication is handled through the Manus OAuth flow; every protected mutation derives the workspace member from the authenticated server context rather than trusting a client-supplied user identifier.
+The full architecture includes the OAuth sequence, data model, lifecycle state machines, role matrix, trust zones, configuration contract, and code map in **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 
-| Layer | Implementation | Responsibility |
-|---|---|---|
-| **Experience** | React 19, Vite, Tailwind 4, Radix primitives | Institutional control surfaces, accessible UI, responsive product documentation, wallet status, and explicit lifecycle states. |
-| **Application API** | Express 4, tRPC 11, Zod | Typed procedures for workspaces, routes, recipients, operations, claims, proof references, launch governance, RFQs, bids, and risk checks. |
-| **Persistence** | Drizzle ORM, MySQL/TiDB | Workspace-scoped records, audit metadata, policies, lifecycle state, market activity, and public transaction references. |
-| **Wallet integration** | Starknet.js 10.4, Starknet wallet discovery | User-owned wallet discovery and authorization. The wallet remains the signing authority. |
-| **Contract boundary** | Cairo 2 / `contracts/veyra_payroll` | A non-custodial route and settlement-commitment registry; it does not custody or transfer tokens. |
+### Trust model
 
----
-
-## The truth table
-
-Veyra is designed to avoid the most common credibility failure in financial prototypes: presenting a simulated workflow as a completed on-chain event.
-
-| State shown in Veyra | What is real | What it does **not** mean |
-|---|---|---|
-| **Persisted** | The authenticated workspace record was stored in the backend. | No chain transaction exists. |
-| **Unsigned** | A private claim, governance record, or preview was prepared. | No wallet has approved it. |
-| **Wallet pending** | A user has reached the wallet execution boundary. | The wallet may still reject, fail, or be on the wrong network. |
-| **Submitted** | A public transaction reference is recorded. | It is not yet confirmed settlement. |
-| **Confirmed receipt** | A receipt has been verified and can unlock proof publication. | It does not disclose the private roster or private bid context. |
-| **Demo Mode** | Deterministic local interaction state is running. | It never becomes mainnet evidence and never creates a private key. |
-
-### Contract boundary
-
-`contracts/veyra_payroll` is intentionally narrow. It records recipient and settlement commitments and emits lifecycle events, but it does **not** hold or transfer tokens. Token movement remains a wallet-owned STRK20 concern until the official transfer interface and real deployment addresses are supplied. See the [contract README](contracts/veyra_payroll/README.md) for the compile, Sepolia deployment, and production-boundary details.
+| Domain             | Veyra can do                                                                                                              | Veyra cannot and does not do                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **Workspace API**  | Persist coordination state, enforce roles, evaluate policy, record public hashes, query receipts, and issue audit events. | Sign a user’s transaction, access a seed phrase, or pretend an unverified hash is settled. |
+| **Wallet**         | Present a user-owned approval boundary.                                                                                   | Provide the server with private key material.                                              |
+| **Database**       | Store operational metadata and permitted public references.                                                               | Store a private key, recovery phrase, keystore, or plaintext private-transfer note.        |
+| **Public proof**   | Reveal an active proof slug and constrained route summary after settlement.                                               | Reveal private roster membership, individual amounts, or sealed bid terms.                 |
+| **Cairo registry** | Record non-custodial recipient and settlement commitments.                                                                | Custody or transfer funds; it is not an audited escrow contract.                           |
 
 ---
 
-## Explore the product
+## State machines are part of the product
 
-| Start here | What to inspect |
-|---|---|
-| [Live workspace](https://veilpay-spri-t4knu9mv.manus.space) | Private route creation, proof ledger, wallet state, operations, and recipient controls. |
-| [Documentation](https://veilpay-spri-t4knu9mv.manus.space/documentation) | Architecture narrative, privacy model, 3:10 walkthrough, and eight stable function films. |
-| [`Private Markets`](https://veilpay-spri-t4knu9mv.manus.space/private-markets) | RFQ desk, sealed-bid lifecycle, risk policy enforcement, alerts, portfolio analytics, and aggregate disclosure boundary. |
-| [`Launchpad`](https://veilpay-spri-t4knu9mv.manus.space/launchpad) | Project rooms, shielded allocation intent, milestones, and governance status. |
-| [`Private Primitives`](https://veilpay-spri-t4knu9mv.manus.space/private-primitives) | Claim links, selective disclosure, receipt-gated proofs, and the explicit signed/unsigned distinction. |
+### Route and proof gate
+
+```mermaid
+stateDiagram-v2
+  [*] --> draft
+  draft --> shielded
+  shielded --> routed
+  routed --> settled: receipt confirmed + approvals
+  routed --> failed: receipt reverted
+  draft --> cancelled
+  shielded --> cancelled
+  routed --> cancelled
+  settled --> [*]
+  failed --> [*]
+  cancelled --> [*]
+```
+
+### Sealed market lifecycle
+
+```mermaid
+stateDiagram-v2
+  [*] --> draft
+  draft --> scheduled
+  scheduled --> live
+  draft --> live
+  live --> reveal
+  reveal --> settled: accepted allocation exists
+  settled --> closed
+  draft --> paused
+  scheduled --> paused
+  live --> paused
+  reveal --> paused
+  paused --> scheduled
+  paused --> live
+```
+
+The route lifecycle is not merely a UI design. `transitionPaymentRoute` enforces approval thresholds for settlement; `recordBlockchainTransaction` binds a hash to a route and network; `confirmBlockchainTransaction` derives status from a Starknet receipt; `createShareableProof` rejects all non-settled routes. Private Market transitions and risk checks are likewise enforced in `server/db.ts` and `shared/operations.ts`.
 
 ---
 
-## Run locally
+## Evidence and semantics
+
+| State displayed by Veyra | Verified meaning                                               | It does **not** mean                                |
+| ------------------------ | -------------------------------------------------------------- | --------------------------------------------------- |
+| **Persisted**            | Authenticated workspace state was stored.                      | A transaction exists.                               |
+| **Unsigned**             | An action, claim, allocation, or proof candidate was prepared. | A user has approved it in a wallet.                 |
+| **Wallet pending**       | The app reached the user-owned signing boundary.               | The transaction will necessarily submit or succeed. |
+| **Submitted**            | A route-bound transaction hash was recorded.                   | The chain receipt is confirmed.                     |
+| **Confirmed receipt**    | RPC lookup reports succeeded execution and accepted finality.  | Private workspace data becomes public.              |
+| **Demo Mode**            | Deterministic local UI state is available for explanation.     | On-chain evidence exists.                           |
+
+This explicit language prevents local state, demo data, and saved transaction identifiers from being presented as settlement evidence.
+
+---
+
+## Security and operating controls
+
+| Control             | Current implementation                                                                                                 |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Authentication**  | Manus OAuth callback with a nonce bound to a one-time browser cookie before code exchange.                             |
+| **Authorization**   | Protected tRPC procedures resolve server-side user context and workspace membership; the UI is not the trust boundary. |
+| **Roles**           | Owners/admins manage approval and policy; operators run permitted workflows; viewers are read-only.                    |
+| **Policy**          | Treasury limits and market bid controls are evaluated before persisting sensitive workflow changes.                    |
+| **Receipt status**  | `submitted`, `confirmed`, `reverted`, and `unknown` are distinct states.                                               |
+| **Auditability**    | Workspace-scoped mutation events are recorded and exportable.                                                          |
+| **Proof safety**    | Shareable proof generation is receipt-gated to settled routes.                                                         |
+| **Secret handling** | Veyra never accepts or stores wallet seed phrases, private keys, recovery words, or keystores.                         |
+
+Read the **[Operations and Verification Guide](docs/OPERATIONS.md)** for exact enforcement paths, reviewer flow, local tests, incident posture, and mainnet release gates.
+
+---
+
+## Build and run
 
 ### Prerequisites
 
-Use **Node.js 22**, **pnpm 10**, and a reachable MySQL/TiDB database. The authenticated deployment also requires the Manus OAuth environment values used by `server/_core/env.ts`; do not commit secrets or copy production credentials into the repository.
+Use **Node.js 22**, **pnpm 10**, a MySQL/TiDB database you control, and the Manus OAuth environment values required by [`server/_core/env.ts`](server/_core/env.ts). Never commit secrets, production cookies, or wallet material.
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-The development server starts the Express/tRPC service and Vite client together. For a production-equivalent verification run:
+Run the project verification suite and production build:
 
 ```bash
 pnpm test
@@ -149,63 +206,53 @@ pnpm build
 pnpm start
 ```
 
-### Database workflow
+The current suite contains **14 Vitest files / 64 tests**, covering server routes, workspace isolation, operations and lifecycle logic, documentation, Demo Mode, wallet helpers, and frontend utility behavior.
 
-Schema lives in `drizzle/schema.ts`; data access helpers live in `server/db.ts`; typed server procedures live in `server/routers.ts`. Generate and apply migrations only against a database you control:
+### Database and contract workflow
 
 ```bash
+# Generate and apply migrations only against a database you control.
 pnpm db:push
-```
 
-### Cairo payroll registry
-
-The registry is a separate Cairo package. Build it from its directory:
-
-```bash
+# Build the non-custodial Cairo registry.
 cd contracts/veyra_payroll
 scarb build
 ```
 
-Use a funded testnet account for Sepolia experiments, keep all wallet material outside this repository, and treat the registry as non-custodial coordination infrastructure—not an audited custody or escrow contract.
+The registry records commitments. It does **not** custody or transfer tokens. Before any real-fund use, complete the STRK20 transfer semantics, deploy and test on Sepolia, define emergency and role-rotation controls, and obtain an independent security review.
 
 ---
 
 ## Repository map
 
 ```text
-client/                 React application, workspace surfaces, public proof and claim views
-server/                 Express/tRPC procedures, persistence helpers, authentication integration
-shared/                 Lifecycle semantics, documentation registry, shared operations logic
-drizzle/                Database schema and migrations
-contracts/veyra_payroll/ Cairo non-custodial payroll registry and tests
-strk20.json             Submission metadata; user-owned transaction evidence is intentionally not fabricated
-HACKATHON_EVIDENCE.md   Evidence handoff and the remaining owner-operated release steps
-SECURITY_AUDIT_STRIX.md Application audit notes
+client/                    React workspace, public proof/claim views, wallet UI
+server/                    Express/tRPC procedures, auth, receipt verification, persistence helpers
+shared/                    Lifecycle, policy, disclosure, and documentation registry logic
+drizzle/                   MySQL/TiDB schema and migrations
+contracts/veyra_payroll/   Cairo non-custodial route and settlement-commitment registry
+docs/                      Architecture and operations evidence guides
+strk20.json                Submission metadata; no fabricated transaction evidence
+HACKATHON_EVIDENCE.md      Owner-operated evidence handoff
+SECURITY_AUDIT_STRIX.md    Application audit notes
 ```
-
----
-
-## Security and privacy commitments
-
-Veyra does not custody seed phrases, private keys, viewing keys, keystores, proof payloads, or plaintext private-transfer notes. The database stores workspace metadata, operator-entered recipient wallet addresses, route totals, lifecycle state, public transaction references, and audit metadata. Recipient notes are operational labels only and must never contain secrets or sensitive payment narratives.
-
-Server procedures enforce workspace membership and role context before mutations. Proof publication requires the relevant receipt-confirmed route state. Private market views are designed to keep bids and identities workspace-scoped while disclosing only permitted aggregate signals.
-
-Report a security concern through the process described in [SECURITY_AUDIT_STRIX.md](SECURITY_AUDIT_STRIX.md). Never include secrets, wallet material, or personal payment data in an issue.
 
 ---
 
 ## Current evidence boundary
 
-The application, product films, documentation library, backend workflow, test suite, and Cairo registry source are present in this repository. The `transactions` array in `strk20.json` remains empty by design until the project owner performs and records real successful mainnet STRK20 pool interactions. No transaction hash, contract address, reviewer testimony, or mainnet settlement claim is fabricated here.
+The repository contains the Veyra application, full-stack workflow, technical documentation, product film library, test suite, and Cairo registry source. The `transactions` array in `strk20.json` remains empty by design until the project owner performs real successful STRK20 pool interactions and records their public hashes. No contract address, transaction hash, testimonial, or settlement claim is fabricated in this repository.
 
-For the final release procedure, see [HACKATHON_EVIDENCE.md](HACKATHON_EVIDENCE.md). For STRK20 program context, consult the [Starknet STRK20 Private Sprint page](https://strk20.starknet.io/hackathon) and verify its current requirements before any submission.
+For current program context, consult the [Starknet STRK20 Private Sprint page](https://strk20.starknet.io/hackathon) [1]. For the project’s exact architecture and operational evidence, use the repository-local docs linked above.
 
 ---
 
 <p align="center">
   <strong>Veyra</strong><br />
-  <sub>PRIVATE FINANCIAL COORDINATION · WALLET → RECEIPT → PROOF</sub>
+  <sub>PRIVATE FINANCIAL COORDINATION · WALLET → RECEIPT → PROOF</sub><br /><br />
+  <a href="LICENSE">MIT License</a>
 </p>
 
-<p align="center"><a href="LICENSE">MIT License</a></p>
+## References
+
+[1]: https://strk20.starknet.io/hackathon "STRK20 Private Sprint"

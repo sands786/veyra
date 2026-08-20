@@ -374,3 +374,5 @@
 - [ ] Complete Vercel frontend deployment and Manus-auth callback configuration after the user authorizes Vercel with their GitHub account; private GitHub publication is complete
 
 - [x] Rebuild the GitHub README as a flagship Veyra product document with branding, teaser, walkthrough, architecture, verified boundaries, and developer guidance
+
+- [x] Expand the Veyra README into a code-grounded institutional technical guide with architecture, trust boundaries, data model, state machines, deployment topology, testing, and evidence matrix
