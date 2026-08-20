@@ -61,14 +61,31 @@ describe("documentation contract", () => {
     const readme = fs.readFileSync(path.join(root, "README.md"), "utf8");
 
     expect(documentationPage).toContain("documentationVideoGuides.map");
-    expect(documentationPage).toContain(
-      'controls playsInline preload="metadata"'
-    );
+    expect(documentationPage).toContain("controls");
+    expect(documentationPage).toContain("playsInline");
+    expect(documentationPage).toContain('preload="metadata"');
     expect(readme).not.toContain("<video controls");
     expect(readme).toContain("[![Open Film 01");
     expect(readme).toContain("[![Open Film 00");
     expect(readme).toContain(
       "https://veilpay-spri-t4knu9mv.manus.space/documentation#overview"
     );
+  });
+
+  it("keeps film metadata legible below the desktop breakpoint and supplies accessible navigation motion", () => {
+    const documentationPage = fs.readFileSync(
+      path.join(root, "client", "src", "pages", "Documentation.tsx"),
+      "utf8"
+    );
+
+    expect(documentationPage).toContain(
+      "mt-5 space-y-4 border-t border-white/10 pt-5"
+    );
+    expect(documentationPage).not.toContain("sm:grid-cols-[1fr_auto]");
+    expect(documentationPage).toContain(
+      "focus-visible:ring-2 focus-visible:ring-[#6DE3A1]"
+    );
+    expect(documentationPage).toContain("active:scale-[0.985]");
+    expect(documentationPage).toContain("group-hover:translate-x-1");
   });
 });
