@@ -398,3 +398,4 @@
 - [x] Redesign sidebar group labels, dividers, and navigation states into a clearer premium institutional control rail
 - [x] Assign distinct semantic icons to every sidebar destination, eliminating duplicated Identity, Private Primitives, Operations, and Private Markets symbols
 - [x] Restore the stronger Veyra shield-and-wordmark opening to the current 30-second teaser while preserving stabilized pacing
+- [ ] Restore Manus OAuth Sign In on the Vercel-hosted frontend, including API rewrite and callback-origin verification

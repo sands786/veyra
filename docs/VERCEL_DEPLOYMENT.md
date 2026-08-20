@@ -18,7 +18,7 @@ The frontend already calls `/api/trpc` with same-origin credentials. The externa
 
 1. Open [Vercel New Project](https://vercel.com/new) and import `sands786/veyra`.
 2. Confirm the root directory is the repository root. The committed [`vercel.json`](../vercel.json) selects the Vite framework, `pnpm install --frozen-lockfile`, `pnpm build:vercel`, and `dist/public` output.
-3. In **Project Settings → Environment Variables**, add the values from [`.env.vercel.example`](../.env.vercel.example). `VITE_APP_ID` and `VITE_OAUTH_PORTAL_URL` must match the existing Manus application configuration.
+3. No private backend values belong in Vercel. The frontend now obtains the non-secret OAuth launch configuration from `/api/oauth/config` through the existing same-origin rewrite. The optional public `VITE_APP_ID` and `VITE_OAUTH_PORTAL_URL` values in [`.env.vercel.example`](../.env.vercel.example) may be used together as build-time overrides, but are not required for the documented Vercel-plus-Manus deployment.
 4. Deploy a preview first. Confirm `/`, `/documentation`, and a direct deep link such as `/proof/<id>` all render the SPA.
 5. Promote the verified deployment or attach a custom domain only after completing the OAuth-origin step below.
 
@@ -32,12 +32,12 @@ https://YOUR-VERCEL-DOMAIN/api/oauth/callback
 
 Before testing sign-in, register both the production Vercel domain and any preview domain you intend to use as allowed redirect origins for the Manus application. The callback continues to execute on the managed Veyra backend through the `/api/oauth/callback` rewrite; this preserves the existing state nonce validation and host-scoped session cookie flow.
 
-| Verify                                         | Expected result                                                                                                               |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Open `https://YOUR-VERCEL-DOMAIN/`             | Vite frontend loads from Vercel.                                                                                              |
-| Open `https://YOUR-VERCEL-DOMAIN/api/trpc/...` | Request is proxied to the managed Veyra backend without a browser-visible origin change.                                      |
-| Select **Sign in**                             | Browser is sent to the Manus OAuth portal with the Vercel callback URI.                                                       |
-| Complete sign-in                               | OAuth returns to `https://YOUR-VERCEL-DOMAIN/api/oauth/callback`, the session is established, and the browser returns to `/`. |
+| Verify                                         | Expected result                                                                                                                            |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Open `https://YOUR-VERCEL-DOMAIN/`             | Vite frontend loads from Vercel.                                                                                                           |
+| Open `https://YOUR-VERCEL-DOMAIN/api/trpc/...` | Request is proxied to the managed Veyra backend without a browser-visible origin change.                                                   |
+| Select **Sign in**                             | The browser reads public launch configuration through `/api/oauth/config`, then opens the Manus OAuth portal with the Vercel callback URI. |
+| Complete sign-in                               | OAuth returns to `https://YOUR-VERCEL-DOMAIN/api/oauth/callback`, the session is established, and the browser returns to `/`.              |
 
 ## 4. Deployment boundary and operational notes
 
@@ -45,7 +45,7 @@ Vercel is appropriate here as a CDN-hosted frontend plus reverse-proxy edge. The
 
 Do not cache `/api/*` responses at the Vercel edge. These routes include authenticated tRPC procedures and session-changing OAuth callbacks. `vercel.json` explicitly disables external-rewrite caching for that path. [1]
 
-If the managed backend domain changes, replace both backend destinations in `vercel.json`, deploy a preview, then repeat the OAuth redirect-origin review. Do not commit any secret values into the repository.
+If the managed backend domain changes, replace both backend destinations in `vercel.json`, deploy a preview, then repeat the OAuth redirect-origin review. Do not commit any secret values into the repository. If Sign In opens `undefined/app-auth`, the deployment predates the runtime configuration fallback or was built without both optional Vite OAuth variables; redeploy from the current revision.
 
 ## References
 
