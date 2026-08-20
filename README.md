@@ -91,7 +91,7 @@ Read the complete [Threat Model and Security Posture](docs/THREAT_MODEL.md) for 
 ## Visual architecture
 
 <p align="center">
-  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/EVvTBiYXSyltsuOA.svg" width="100%" alt="Veyra system architecture" />
+  <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/HxKPSdnGRrcrWpBM.svg" width="100%" alt="Veyra system architecture" />
 </p>
 
 | Domain                   | Purpose                                                                                                     | Trust boundary                                                                             |
