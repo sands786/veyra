@@ -372,3 +372,5 @@
 - [x] Refine teaser and documentation video-section typography, spacing, player framing, and metadata into premium editorial viewing surfaces
 
 - [ ] Publish the Veyra code to a private GitHub repository and configure a Vercel-compatible frontend deployment that preserves Manus authentication
+
+- [ ] Rebuild the GitHub README as a flagship Veyra product document with branding, teaser, walkthrough, architecture, verified boundaries, and developer guidance
