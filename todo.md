@@ -376,3 +376,7 @@
 - [x] Rebuild the GitHub README as a flagship Veyra product document with branding, teaser, walkthrough, architecture, verified boundaries, and developer guidance
 
 - [x] Expand the Veyra README into a code-grounded institutional technical guide with architecture, trust boundaries, data model, state machines, deployment topology, testing, and evidence matrix
+
+- [x] Recompose the documentation into a reviewer-first premium experience with visual architecture plates, trust map, invariants, threat model, decision log, and 90-second evaluation path
+
+- [x] Replace README teaser and walkthrough links with direct in-page video players and preserve accessible fallback text
