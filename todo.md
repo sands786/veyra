@@ -370,3 +370,5 @@
 - [x] Remove shivering and shaking artifacts from the Veyra teaser, submission demo, and documentation videos, then republish stable cuts
 
 - [x] Refine teaser and documentation video-section typography, spacing, player framing, and metadata into premium editorial viewing surfaces
+
+- [ ] Publish the Veyra code to a private GitHub repository and configure a Vercel-compatible frontend deployment that preserves Manus authentication
