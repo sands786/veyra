@@ -1499,7 +1499,7 @@ export default function Home() {
                   key={item.id}
                   className="group flex items-center gap-4 border-b border-white/10 px-5 py-5 last:border-b-0"
                 >
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] border border-white/10 bg-[#163B4A]">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] border border-[#F0563A]/25 bg-[#201815] shadow-[inset_0_0_0_1px_rgba(240,86,58,0.06)]">
                     <LockKeyhole size={16} className="text-[#F0563A]" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -1582,9 +1582,13 @@ export default function Home() {
               ))}
             </div>
             <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-[12px] border border-white/10 bg-[#163B4A] p-4">
-                <div className="font-mono text-[9px] tracking-[0.12em] text-[#AEB8BE]">
-                  AUDIT HISTORY
+              <div className="relative overflow-hidden rounded-[12px] border border-white/10 bg-[#151D21] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                <div aria-hidden="true" className="absolute right-0 top-0 h-8 w-8 border-b border-l border-[#F0563A]/25 bg-[#201815]" />
+                <div className="relative flex items-center justify-between gap-3">
+                  <div className="font-mono text-[9px] tracking-[0.12em] text-[#AEB8BE]">
+                    AUDIT HISTORY
+                  </div>
+                  <span className="font-mono text-[8px] tracking-[0.1em] text-[#F0563A]">SEALED EVENT REGISTER</span>
                 </div>
                 {isAuthenticated ? (
                   (auditQuery.data?.slice(0, 5).map(event => (
@@ -1608,9 +1612,13 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <div className="rounded-[12px] border border-white/10 bg-[#163B4A] p-4">
-                <div className="font-mono text-[9px] tracking-[0.12em] text-[#AEB8BE]">
-                  TRANSACTION RECEIPTS
+              <div className="relative overflow-hidden rounded-[12px] border border-white/10 bg-[#151D21] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                <div aria-hidden="true" className="absolute right-0 top-0 h-8 w-8 border-b border-l border-[#F0563A]/25 bg-[#201815]" />
+                <div className="relative flex items-center justify-between gap-3">
+                  <div className="font-mono text-[9px] tracking-[0.12em] text-[#AEB8BE]">
+                    TRANSACTION RECEIPTS
+                  </div>
+                  <span className="font-mono text-[8px] tracking-[0.1em] text-[#F0563A]">RECEIPT VAULT</span>
                 </div>
                 {selectedRouteId ? (
                   transactionsQuery.data?.length ? (

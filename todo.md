@@ -410,3 +410,5 @@
 - [x] Perform an independent second-pass verification of the hardened release across runtime, database, builds, dependencies, and public boundaries
 - [x] Repair the confirmed Private Markets sidebar route, which currently resolves to a generic 404 instead of the Private Markets workspace
 - [x] Bring missing-resource and unavailable claim/proof screens into the Veyra institutional visual system with precise privacy-aware recovery guidance
+- [x] Reassert Veyra’s graphite, ivory, and vermilion hierarchy on selected teal-heavy core workspace cards without reducing operational legibility
+- [x] Add tangible sealed-record and receipt/provenance artifacts to selected core workspace surfaces, with focused visual regression coverage
