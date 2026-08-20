@@ -7,6 +7,7 @@ import { prepareRouteEdit } from "@/lib/routeEdit";
 import {
   ArrowUpRight,
   BarChart3,
+  Blocks,
   BookOpen,
   CalendarDays,
   Check,
@@ -18,6 +19,8 @@ import {
   EyeOff,
   ExternalLink,
   Fingerprint,
+  KeyRound,
+  LineChart,
   Link2,
   LockKeyhole,
   Menu,
@@ -29,6 +32,7 @@ import {
   Sparkles,
   UserCheck,
   WalletCards,
+  Workflow,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -837,7 +841,7 @@ export default function Home() {
                 aria-current={activeSection === "identity" ? "page" : undefined}
                 className={`nav-item ${activeSection === "identity" ? "nav-item-active" : ""}`}
               >
-                <Fingerprint size={16} /> <span>Identity keys</span>
+                <KeyRound size={16} /> <span>Identity keys</span>
               </button>
             </div>
             <div className="space-y-1">
@@ -852,7 +856,7 @@ export default function Home() {
                 }
                 className={`nav-item ${activeSection === "operations" && operationsView === "overview" ? "nav-item-active" : ""}`}
               >
-                <BarChart3 size={16} /> <span>Operations</span>
+                <Workflow size={16} /> <span>Operations</span>
               </button>
               <button
                 onClick={() => goToOperations("treasury")}
@@ -894,7 +898,7 @@ export default function Home() {
                 }}
                 className="nav-item"
               >
-                <Fingerprint size={16} /> <span>Private primitives</span>
+                <Blocks size={16} /> <span>Private primitives</span>
               </button>
               <button
                 onClick={() => {
@@ -902,7 +906,7 @@ export default function Home() {
                 }}
                 className="nav-item"
               >
-                <BarChart3 size={16} /> <span>Private markets</span>
+                <LineChart size={16} /> <span>Private markets</span>
               </button>
             </div>
             <div className="space-y-1">
@@ -1233,7 +1237,7 @@ export default function Home() {
                     aria-label="Thirty-second Veyra teaser with voiceover and original score"
                   >
                     <source
-                      src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4"
+                      src="/manus-storage/veyra-30s-logo-led-stable-teaser_edb01985.mp4"
                       type="video/mp4"
                     />
                     Your browser does not support the Veyra teaser.

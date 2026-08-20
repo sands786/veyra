@@ -11,6 +11,8 @@ import {
 
 const veyraVideoCdnPattern =
   /^https:\/\/files\.manuscdn\.com\/user_upload_by_module\/session_file\/\d+\/[A-Za-z0-9]+\.mp4$/;
+const veyraManagedTeaserPattern =
+  /^\/manus-storage\/veyra-30s-logo-led-stable-teaser_[a-z0-9]+\.mp4$/;
 const root = path.resolve(import.meta.dirname, "..");
 
 describe("documentation contract", () => {
@@ -33,7 +35,7 @@ describe("documentation contract", () => {
   });
 
   it("uses the published Veyra cinematic teaser asset", () => {
-    expect(documentationTeaserAsset).toMatch(veyraVideoCdnPattern);
+    expect(documentationTeaserAsset).toMatch(veyraManagedTeaserPattern);
   });
 
   it("maps every standalone function video to a published Veyra guide asset", () => {
@@ -100,5 +102,6 @@ describe("documentation contract", () => {
     expect(homePage).not.toContain(">Audio<");
     expect(homePage).not.toContain(">Motion<");
     expect(homePage).not.toContain(">Original score<");
+    expect(homePage).toContain(documentationTeaserAsset);
   });
 });

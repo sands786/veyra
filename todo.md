@@ -395,3 +395,6 @@
 - [x] Restore missing embedded video players in the Documentation film library and verify playback surfaces
 - [x] Recompose the Documentation product-film metadata at narrow widths and elevate chapter-navigation controls with premium accessible motion
 - [x] Remove the redundant Format, Audio, and Motion metadata strip from the Documentation film presentation
+- [x] Redesign sidebar group labels, dividers, and navigation states into a clearer premium institutional control rail
+- [x] Assign distinct semantic icons to every sidebar destination, eliminating duplicated Identity, Private Primitives, Operations, and Private Markets symbols
+- [x] Restore the stronger Veyra shield-and-wordmark opening to the current 30-second teaser while preserving stabilized pacing
