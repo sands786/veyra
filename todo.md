@@ -415,3 +415,5 @@
 - [x] Replace Manus-dependent OAuth with Veyra-owned email-and-password registration, sign-in, session, and sign-out flows that work without a callback allowlist
 - [x] Preserve existing protected workspace authorization and add tests for account registration, sign-in, session creation, protected access, and sign-out
 - [x] Replace the Vercel OAuth blocker documentation with the Veyra-owned authentication deployment path and verify both deployment builds
+- [ ] Resolve the confirmed stale Vercel deployment, which still serves the pre-migration generic 404 at /sign-in after the current GitHub revision was pushed
+- [x] Add an explicit Sign Up entry point for unauthenticated visitors and make wallet discovery and Connect Wallet controls visible only after successful Veyra authentication

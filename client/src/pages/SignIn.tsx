@@ -14,8 +14,9 @@ function safeReturnTo(value: string | null) {
 
 export default function SignIn() {
   const [, setLocation] = useLocation();
-  const returnTo = useMemo(() => safeReturnTo(new URLSearchParams(window.location.search).get("returnTo")), []);
-  const [mode, setMode] = useState<"signIn" | "register">("signIn");
+  const signInParams = useMemo(() => new URLSearchParams(window.location.search), []);
+  const returnTo = useMemo(() => safeReturnTo(signInParams.get("returnTo")), [signInParams]);
+  const [mode, setMode] = useState<"signIn" | "register">(() => signInParams.get("mode") === "register" ? "register" : "signIn");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

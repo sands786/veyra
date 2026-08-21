@@ -1,7 +1,7 @@
 // Copper Veil style reminder: editorial brutalism, graphite canvas, ivory surfaces, Veil Vermilion #F0563A, Space Grotesk + IBM Plex Mono, visible privacy state.
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { startLogin } from "@/const";
+import { startLogin, startSignup } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { prepareRouteEdit } from "@/lib/routeEdit";
 import {
@@ -507,6 +507,10 @@ export default function Home() {
   const stageCopy = useMemo(() => stages[stage], [stage]);
 
   function openWalletPicker() {
+    if (!isAuthenticated) {
+      startLogin();
+      return;
+    }
     setWalletQrUri("");
     setWalletQrImage("");
     const options = discoverStarknetWallets();
@@ -977,12 +981,20 @@ export default function Home() {
 
             <div className="ml-auto flex items-center gap-3">
               {!isAuthenticated ? (
-                <Button
-                  onClick={startLogin}
-                  className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10"
-                >
-                  SIGN IN
-                </Button>
+                <>
+                  <Button
+                    onClick={startLogin}
+                    className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10"
+                  >
+                    SIGN IN
+                  </Button>
+                  <Button
+                    onClick={startSignup}
+                    className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]"
+                  >
+                    SIGN UP
+                  </Button>
+                </>
               ) : (
                 <Button
                   onClick={() => void logout()}
@@ -1012,17 +1024,19 @@ export default function Home() {
                   MAINNET
                 </button>
               </div>
-              <Button
-                disabled={isWalletActionLocked(walletConnecting)}
-                onClick={openWalletPicker}
-                className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]"
-              >
-                {walletConnecting
-                  ? "CONNECTING…"
-                  : connected
-                    ? `${walletName || "WALLET"} · ${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}`
-                    : "ADD WALLET"}
-              </Button>
+              {isAuthenticated && (
+                <Button
+                  disabled={isWalletActionLocked(walletConnecting)}
+                  onClick={openWalletPicker}
+                  className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]"
+                >
+                  {walletConnecting
+                    ? "CONNECTING…"
+                    : connected
+                      ? `${walletName || "WALLET"} · ${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}`
+                      : "ADD WALLET"}
+                </Button>
+              )}
             </div>
           </header>
 
@@ -1741,25 +1755,34 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-6 flex flex-wrap gap-2">
-                <Button
-                  disabled={isWalletActionLocked(walletConnecting)}
-                  onClick={openWalletPicker}
-                  className="h-11 rounded-full bg-[#F3EEE5] px-5 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-white"
-                >
-                  {walletConnecting
-                    ? "CONNECTING…"
-                    : connected
-                      ? "CHANGE WALLET"
-                      : "ADD WALLET"}
-                </Button>
-                {connected && (
-                  <Button
-                    variant="outline"
-                    onClick={() => void handleWalletSignOut()}
-                    className="h-11 rounded-full border-white/15 px-5 font-mono text-[10px] tracking-[0.12em] text-[#AEB8BE] hover:bg-white/10 hover:text-[#F3EEE5]"
-                  >
-                    SIGN OUT WALLET
-                  </Button>
+                {isAuthenticated ? (
+                  <>
+                    <Button
+                      disabled={isWalletActionLocked(walletConnecting)}
+                      onClick={openWalletPicker}
+                      className="h-11 rounded-full bg-[#F3EEE5] px-5 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-white"
+                    >
+                      {walletConnecting
+                        ? "CONNECTING…"
+                        : connected
+                          ? "CHANGE WALLET"
+                          : "ADD WALLET"}
+                    </Button>
+                    {connected && (
+                      <Button
+                        variant="outline"
+                        onClick={() => void handleWalletSignOut()}
+                        className="h-11 rounded-full border-white/15 px-5 font-mono text-[10px] tracking-[0.12em] text-[#AEB8BE] hover:bg-white/10 hover:text-[#F3EEE5]"
+                      >
+                        SIGN OUT WALLET
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-3 border-t border-white/10 pt-5">
+                    <div className="font-mono text-[9px] leading-5 tracking-[0.1em] text-[#AEB8BE]">CREATE OR ACCESS A VEYRA ACCOUNT BEFORE DISCOVERING WALLETS.</div>
+                    <Button onClick={startSignup} className="h-10 rounded-full bg-[#F0563A] px-4 font-mono text-[9px] tracking-[0.1em] text-[#111210] hover:bg-[#FF7257]">SIGN UP TO CONNECT</Button>
+                  </div>
                 )}
               </div>
             </div>
@@ -2513,7 +2536,7 @@ export default function Home() {
               OPEN SOURCE / MAINNET-READY / PRIVACY BY DEFAULT
             </div>
           </footer>
-          {walletPickerOpen && (
+          {isAuthenticated && walletPickerOpen && (
             <div
               className="fixed inset-0 z-50 grid place-items-center bg-[#111210]/80 p-4 backdrop-blur-sm"
               role="dialog"

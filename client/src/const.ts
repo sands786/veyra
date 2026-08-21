@@ -6,3 +6,8 @@ export const startLogin = () => {
   const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
   window.location.assign(`/sign-in?returnTo=${encodeURIComponent(returnTo)}`);
 };
+
+export const startSignup = () => {
+  const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  window.location.assign(`/sign-in?mode=register&returnTo=${encodeURIComponent(returnTo)}`);
+};
