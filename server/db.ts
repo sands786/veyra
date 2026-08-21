@@ -201,42 +201,70 @@ export async function touchUserLastSignedIn(userId: number) {
   await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, userId));
 }
 
+export function buildInitialWorkspaceIdentity(
+  userId: number,
+  userName?: string | null,
+  nonce = randomUUID(),
+) {
+  const workspaceName = `${userName?.trim() || "Private"} workspace`.slice(0, 160);
+  const baseSlug =
+    workspaceName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") || "private-workspace";
+  const suffix = `${userId}-${nonce.replace(/-/g, "").slice(0, 12)}`;
+  return {
+    name: workspaceName,
+    slug: `${baseSlug.slice(0, 160 - suffix.length - 1)}-${suffix}`,
+  };
+}
+
 export async function ensureWorkspaceForUser(
   userId: number,
   userName?: string | null
 ) {
   const db = await getDb();
   if (!db) return undefined;
-  const existing = await db
-    .select({ workspace: workspaces })
-    .from(workspaceMembers)
-    .innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id))
-    .where(eq(workspaceMembers.userId, userId))
-    .limit(1);
-  if (existing[0]?.workspace) return existing[0].workspace;
+  try {
+    return await db.transaction(async (tx) => {
+      const existing = await tx
+        .select({ workspace: workspaces })
+        .from(workspaceMembers)
+        .innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id))
+        .where(eq(workspaceMembers.userId, userId))
+        .limit(1);
+      if (existing[0]?.workspace) return existing[0].workspace;
 
-  const workspaceName = `${userName?.trim() || "Private"} workspace`;
-  const slug = `${
-    workspaceName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "") || "private-workspace"
-  }-${userId}`;
-  const created = await db
-    .insert(workspaces)
-    .values({ name: workspaceName, slug, ownerUserId: userId })
-    .$returningId();
-  const workspaceId = created[0]?.id;
-  if (!workspaceId) throw new Error("Could not create workspace");
-  await db
-    .insert(workspaceMembers)
-    .values({ workspaceId, userId, role: "owner" });
-  const rows = await db
-    .select()
-    .from(workspaces)
-    .where(eq(workspaces.id, workspaceId))
-    .limit(1);
-  return rows[0];
+      const identity = buildInitialWorkspaceIdentity(userId, userName);
+      const created = await tx
+        .insert(workspaces)
+        .values({
+          name: identity.name,
+          slug: identity.slug,
+          ownerUserId: userId,
+          defaultToken: "USDC",
+          network: "mainnet",
+          approvalThreshold: 1,
+        })
+        .$returningId();
+      const workspaceId = created[0]?.id;
+      if (!workspaceId) throw new Error("Workspace insert returned no identifier");
+
+      await tx
+        .insert(workspaceMembers)
+        .values({ workspaceId, userId, role: "owner" });
+      const rows = await tx
+        .select()
+        .from(workspaces)
+        .where(eq(workspaces.id, workspaceId))
+        .limit(1);
+      if (!rows[0]) throw new Error("Workspace record was not readable after creation");
+      return rows[0];
+    });
+  } catch (error) {
+    console.error("[Workspace] Initial workspace bootstrap failed", { userId, error });
+    throw new Error("Your private workspace could not be initialized. Select Retry to try again.");
+  }
 }
 
 export async function getWorkspaceForUser(userId: number) {
