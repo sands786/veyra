@@ -3,12 +3,14 @@ import { COOKIE_NAME } from "@shared/const";
 import { parse as parseCookieHeader } from "cookie";
 import { createHeartbeatJob, updateHeartbeatJob } from "./_core/heartbeat";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { createLocalOpenId, createVeyraSessionToken, hashAccountPassword, normalizeAccountEmail, VEYRA_SESSION_MS, verifyAccountPassword } from "./_core/localAuth";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { parseWorkspaceId } from "./workspaceSelection";
 import { buildPayrollCron } from "@shared/operations";
 import { resolveWorkspaceSelection } from "./workspaceResolver";
 import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyWorkspaceStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv, createLaunchpadProject, listWorkspaceLaunchpadProjects, createLaunchpadMilestone, listPrivateMarkets, getPrivateMarketInsights, listPrivateMarketQuotes, createPrivateMarketQuote, updatePrivateMarketQuoteStatus, getPrivateMarketRiskPolicy, upsertPrivateMarketRiskPolicy, exportPrivateMarketBook, listPrivateMarketAlerts, acknowledgePrivateMarketAlert, createPrivateMarket, updatePrivateMarketStatus, commitPrivateMarketBid, createLaunchpadAllocation, updateLaunchpadProjectStatus, updateLaunchpadMilestoneStatus, getPublicLaunchpadProject, getLaunchpadProjectOps, updateLaunchpadProjectOps, getLaunchpadReadiness, listLaunchpadActivity, listLaunchpadAllocations, listLaunchpadReleaseRequests, createLaunchpadReleaseRequest, decideLaunchpadReleaseRequest } from "./db";
+import { createLocalAccount, getLocalAccountByEmail, touchUserLastSignedIn } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null; req?: { headers?: Record<string, string | string[] | undefined> } }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -30,11 +32,34 @@ const walletAddress = z.string().trim().min(4).max(100).regex(/^0x[0-9a-fA-F]+$/
 const safeNoNote = z.undefined().optional();
 const amount = z.string().trim().min(1).max(80).regex(/^\d+(\.\d{1,18})?$/, "Enter a valid amount");
 const tokenSymbol = z.string().trim().min(2).max(20).regex(/^[A-Za-z0-9._-]+$/, "Enter a valid token symbol");
+const accountEmail = z.string().trim().email().max(320);
+const accountPassword = z.string().min(12).max(128);
 
 export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(({ ctx }) => ctx.user),
+    register: publicProcedure.input(z.object({ name: z.string().trim().min(2).max(120), email: accountEmail, password: accountPassword })).mutation(async ({ ctx, input }) => {
+      const email = normalizeAccountEmail(input.email);
+      const user = await createLocalAccount({
+        name: input.name,
+        email,
+        passwordHash: await hashAccountPassword(input.password),
+        openId: createLocalOpenId(email),
+      });
+      const token = await createVeyraSessionToken(user.openId);
+      ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: VEYRA_SESSION_MS });
+      return user;
+    }),
+    signIn: publicProcedure.input(z.object({ email: accountEmail, password: accountPassword })).mutation(async ({ ctx, input }) => {
+      const account = await getLocalAccountByEmail(normalizeAccountEmail(input.email));
+      const valid = account ? await verifyAccountPassword(input.password, account.account.passwordHash) : false;
+      if (!account || !valid) throw new Error("Invalid email or password");
+      await touchUserLastSignedIn(account.user.id);
+      const token = await createVeyraSessionToken(account.user.openId);
+      ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: VEYRA_SESSION_MS });
+      return account.user;
+    }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

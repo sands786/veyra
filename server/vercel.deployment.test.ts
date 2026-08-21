@@ -40,7 +40,7 @@ describe("manual Vercel frontend deployment package", () => {
     });
   });
 
-  it("documents the safe client-only environment boundary and Manus OAuth callback requirement", () => {
+  it("documents the safe client-only environment boundary and Veyra-owned authentication path", () => {
     const envExample = fs.readFileSync(
       path.join(root, ".env.vercel.example"),
       "utf8"
@@ -50,11 +50,12 @@ describe("manual Vercel frontend deployment package", () => {
       "utf8"
     );
 
-    expect(envExample).toContain("VITE_APP_ID=");
-    expect(envExample).toContain("VITE_OAUTH_PORTAL_URL=");
+    expect(envExample).toContain("need no Vercel");
+    expect(envExample).not.toContain("VITE_APP_ID=");
+    expect(envExample).not.toContain("VITE_OAUTH_PORTAL_URL=");
     expect(envExample).not.toContain("JWT_SECRET=");
     expect(envExample).not.toContain("DATABASE_URL=");
-    expect(guide).toContain("/api/oauth/callback");
-    expect(guide).toContain("allowed redirect origins");
+    expect(guide).toContain("no external OAuth callback allowlist");
+    expect(guide).toContain("Veyra-owned account verification");
   });
 });

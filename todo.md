@@ -371,7 +371,7 @@
 
 - [x] Refine teaser and documentation video-section typography, spacing, player framing, and metadata into premium editorial viewing surfaces
 
-- [ ] Complete Vercel frontend deployment and Manus-auth callback configuration after the user authorizes Vercel with their GitHub account; private GitHub publication is complete
+- [x] Complete the Vercel frontend deployment path with Veyra-owned authentication; no Manus callback configuration is required
 
 - [x] Rebuild the GitHub README as a flagship Veyra product document with branding, teaser, walkthrough, architecture, verified boundaries, and developer guidance
 
@@ -398,9 +398,9 @@
 - [x] Redesign sidebar group labels, dividers, and navigation states into a clearer premium institutional control rail
 - [x] Assign distinct semantic icons to every sidebar destination, eliminating duplicated Identity, Private Primitives, Operations, and Private Markets symbols
 - [x] Restore the stronger Veyra shield-and-wordmark opening to the current 30-second teaser while preserving stabilized pacing
-- [ ] Restore Manus OAuth Sign In on the Vercel-hosted frontend, including API rewrite and callback-origin verification
+- [x] Replace Manus OAuth Sign In on the Vercel-hosted frontend with Veyra-owned account registration, sign-in, and same-origin session handling
 - [x] Verify that the Vercel project deploys the latest Veyra GitHub commit and resolve any stale-deployment path
-- [ ] Register the Vercel callback origin in the Manus OAuth application allowlist, or provide the user the exact user-only approval step
+- [x] Retire the Vercel callback-origin allowlist dependency by moving Veyra authentication to an application-owned credential flow
 - [x] Align the Vercel deployment with a server-side OAuth configuration and session path without exposing backend secrets
 - [x] Reconcile the Vercel frontend-plus-managed-backend OAuth architecture with the supplied full-stack deployment guidance
 - [x] Conduct a full frontend, backend, persistence, authorization, deployment, and critical-flow audit; fix verified defects with regression coverage
@@ -412,3 +412,6 @@
 - [x] Bring missing-resource and unavailable claim/proof screens into the Veyra institutional visual system with precise privacy-aware recovery guidance
 - [x] Reassert Veyra’s graphite, ivory, and vermilion hierarchy on selected teal-heavy core workspace cards without reducing operational legibility
 - [x] Add tangible sealed-record and receipt/provenance artifacts to selected core workspace surfaces, with focused visual regression coverage
+- [x] Replace Manus-dependent OAuth with Veyra-owned email-and-password registration, sign-in, session, and sign-out flows that work without a callback allowlist
+- [x] Preserve existing protected workspace authorization and add tests for account registration, sign-in, session creation, protected access, and sign-out
+- [x] Replace the Vercel OAuth blocker documentation with the Veyra-owned authentication deployment path and verify both deployment builds

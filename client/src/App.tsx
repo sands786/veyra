@@ -14,6 +14,7 @@ import DemoMode from "./pages/DemoMode";
 import Documentation from "./pages/Documentation";
 import PrivatePrimitives from "./pages/PrivatePrimitives";
 import PrivateMarkets from "./pages/PrivateMarkets";
+import SignIn from "./pages/SignIn";
 
 function DemoModeIndicator() {
   const { isDemoMode, exitDemo } = useDemoMode();
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/private-primitives" component={PrivatePrimitives} />
       <Route path="/private-markets" component={PrivateMarkets} />
       <Route path="/markets" component={PrivateMarkets} />
+      <Route path="/sign-in" component={SignIn} />
       <Route path="/proof/:slug" component={Proof} />
       <Route path="/claim/:token" component={Claim} />
       <Route path="/404" component={NotFound} />

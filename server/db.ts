@@ -37,6 +37,7 @@ import {
   privateMarketQuotes,
   privateMarketRiskPolicies,
   privateMarketAlerts,
+  localAccounts,
   recipients,
   routeRecipients,
   users,
@@ -138,6 +139,66 @@ export async function getUserByOpenId(openId: string) {
     .where(eq(users.openId, openId))
     .limit(1);
   return result[0];
+}
+
+export async function createLocalAccount(input: {
+  name: string;
+  email: string;
+  passwordHash: string;
+  openId: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+
+  return db.transaction(async (tx) => {
+    const existing = await tx
+      .select({ id: localAccounts.id })
+      .from(localAccounts)
+      .where(eq(localAccounts.email, input.email))
+      .limit(1);
+    if (existing[0]) throw new Error("An account with this email already exists");
+
+    const inserted = await tx
+      .insert(users)
+      .values({
+        openId: input.openId,
+        name: input.name,
+        email: input.email,
+        loginMethod: "veyra-password",
+        lastSignedIn: new Date(),
+      })
+      .$returningId();
+    const userId = inserted[0]?.id;
+    if (!userId) throw new Error("Could not create user account");
+
+    await tx.insert(localAccounts).values({
+      userId,
+      email: input.email,
+      passwordHash: input.passwordHash,
+    });
+
+    const user = await tx.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (!user[0]) throw new Error("Could not load user account");
+    return user[0];
+  });
+}
+
+export async function getLocalAccountByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select({ account: localAccounts, user: users })
+    .from(localAccounts)
+    .innerJoin(users, eq(localAccounts.userId, users.id))
+    .where(eq(localAccounts.email, email))
+    .limit(1);
+  return result[0];
+}
+
+export async function touchUserLastSignedIn(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, userId));
 }
 
 export async function ensureWorkspaceForUser(
