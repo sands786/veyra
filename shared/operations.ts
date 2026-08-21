@@ -160,10 +160,25 @@ export function canRequestLaunchpadRelease(
   );
 }
 
+export type LaunchpadReleaseStatus = "pending" | "approved" | "rejected" | "settled";
+
 export function canDecideLaunchpadRelease(
-  status: "pending" | "approved" | "rejected" | "settled"
+  status: LaunchpadReleaseStatus
 ): boolean {
   return status === "pending";
+}
+
+export function canAdvanceLaunchpadReleaseStatus(
+  from: LaunchpadReleaseStatus,
+  to: LaunchpadReleaseStatus
+): boolean {
+  const transitions: Record<LaunchpadReleaseStatus, LaunchpadReleaseStatus[]> = {
+    pending: ["approved", "rejected"],
+    approved: ["settled"],
+    rejected: [],
+    settled: [],
+  };
+  return transitions[from].includes(to);
 }
 
 export function getLaunchpadInitialTab(): LaunchpadTab {

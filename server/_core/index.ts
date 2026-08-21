@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import crypto from "node:crypto";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
@@ -62,9 +63,43 @@ async function startServer() {
       await markPayrollScheduleTriggered(schedule.id, nextRunAt);
       res.json({ ok: true, scheduleId: schedule.id, nextRunAt, action: "wallet_authorization_required" });
     } catch (error) {
-      res.status(500).json({ error: String(error), context: { url: req.originalUrl }, timestamp: new Date().toISOString() });
+      const requestId = crypto.randomUUID();
+      console.error("[Scheduled payroll] execution failed", {
+        requestId,
+        url: req.originalUrl,
+        error,
+      });
+      res.status(500).json({
+        error: "scheduled-payroll-failed",
+        requestId,
+        timestamp: new Date().toISOString(),
+      });
     }
   });
+  // Browser mutations rely on an HttpOnly session cookie. Enforce same-origin
+  // and Fetch Metadata signals before tRPC so cross-site callers cannot replay
+  // cookie-authenticated state changes. Requests without browser signals remain
+  // compatible with internal jobs and CLI clients, which still pass tRPC auth.
+  app.use("/api/trpc", (req, res, next) => {
+    if (req.method !== "POST") {
+      next();
+      return;
+    }
+    const origin = req.headers.origin;
+    const forwardedProto = String(req.headers["x-forwarded-proto"] || "")
+      .split(",")[0]
+      .trim();
+    const protocol = forwardedProto || req.protocol;
+    const expectedOrigin = req.headers.host ? `${protocol}://${req.headers.host}` : undefined;
+    const fetchSite = String(req.headers["sec-fetch-site"] || "").toLowerCase();
+    const crossSite = fetchSite === "cross-site" || fetchSite === "cross-origin";
+    if ((origin && expectedOrigin && origin !== expectedOrigin) || crossSite) {
+      res.status(403).json({ error: "cross-site-request-blocked" });
+      return;
+    }
+    next();
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

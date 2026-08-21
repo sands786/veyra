@@ -6,6 +6,7 @@ import {
   buildLaunchpadPublicSummary,
   canAdvanceLaunchpadMilestoneStatus,
   canAdvanceLaunchpadProjectStatus,
+  canAdvanceLaunchpadReleaseStatus,
   canAdvancePaymentRouteStatus,
   canAdvancePrivateMarketStatus,
   canPublishShareableProof,
@@ -788,45 +789,47 @@ export async function createPaymentRoute(input: {
   const ownedIds = new Set(ownedRecipients.map(row => row.id));
   if (recipientIds.some(id => !ownedIds.has(id)))
     throw new Error("One or more recipients do not belong to this workspace");
-  const inserted = await db
-    .insert(paymentRoutes)
-    .values({
-      workspaceId: input.workspaceId,
-      createdByUserId: input.createdByUserId,
-      name: input.name,
-      token: input.token,
-      network: input.network,
-      totalAmount: input.totalAmount,
-    })
-    .$returningId();
-  const routeId = inserted[0]?.id;
-  if (!routeId) throw new Error("Could not create payment route");
-  if (input.recipientAmounts.length) {
-    await db
-      .insert(routeRecipients)
-      .values(
-        input.recipientAmounts.map(item => ({
-          routeId,
-          recipientId: item.recipientId,
-          amount: item.amount,
-        }))
-      );
-  }
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "payment_route",
-      entityId: routeId,
-      action: "created",
-    });
-  const rows = await db
-    .select()
-    .from(paymentRoutes)
-    .where(eq(paymentRoutes.id, routeId))
-    .limit(1);
-  return rows[0];
+  return db.transaction(async tx => {
+    const inserted = await tx
+      .insert(paymentRoutes)
+      .values({
+        workspaceId: input.workspaceId,
+        createdByUserId: input.createdByUserId,
+        name: input.name,
+        token: input.token,
+        network: input.network,
+        totalAmount: input.totalAmount,
+      })
+      .$returningId();
+    const routeId = inserted[0]?.id;
+    if (!routeId) throw new Error("Could not create payment route");
+    if (input.recipientAmounts.length) {
+      await tx
+        .insert(routeRecipients)
+        .values(
+          input.recipientAmounts.map(item => ({
+            routeId,
+            recipientId: item.recipientId,
+            amount: item.amount,
+          }))
+        );
+    }
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "payment_route",
+        entityId: routeId,
+        action: "created",
+      });
+    const rows = await tx
+      .select()
+      .from(paymentRoutes)
+      .where(eq(paymentRoutes.id, routeId))
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function updateRecipient(
@@ -1659,6 +1662,8 @@ export async function createShareableProof(input: {
   if (!route[0]) throw new Error("Route not found in workspace");
   if (!canPublishShareableProof(route[0].status))
     throw new Error("Public proofs require a settled route");
+  if (!route[0].proofReference?.trim())
+    throw new Error("Public proofs require a confirmed receipt reference");
   const existing = await db
     .select()
     .from(shareableProofs)
@@ -1953,7 +1958,8 @@ export async function commitPrivateMarketBid(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const market = await db
+  return db.transaction(async tx => {
+    const market = await tx
     .select()
     .from(privateMarkets)
     .where(
@@ -1962,6 +1968,7 @@ export async function commitPrivateMarketBid(input: {
         eq(privateMarkets.workspaceId, input.workspaceId)
       )
     )
+    .for("update")
     .limit(1);
   if (!market[0] || market[0].status !== "live")
     throw new Error("Private market is not open for sealed bids");
@@ -1971,7 +1978,7 @@ export async function commitPrivateMarketBid(input: {
     throw new Error("Bid amount must be a valid positive decimal");
   if (compareDecimalStrings(input.bidAmount, "0") <= 0)
     throw new Error("Bid amount must be greater than zero");
-  const policyRows = await db
+  const policyRows = await tx
     .select()
     .from(privateMarketRiskPolicies)
     .where(
@@ -2014,7 +2021,7 @@ export async function commitPrivateMarketBid(input: {
   if (compareDecimalStrings(projectedVolume, market[0].targetAmount) > 0)
     violations.push("Bid would exceed the market target capacity");
   if (violations.length) {
-    await db
+    await tx
       .insert(privateMarketAlerts)
       .values({
         workspaceId: input.workspaceId,
@@ -2026,7 +2033,7 @@ export async function commitPrivateMarketBid(input: {
       });
     throw new Error(`Bid blocked by risk policy: ${violations.join("; ")}`);
   }
-  const existing = await db
+  const existing = await tx
     .select()
     .from(privateMarketBids)
     .where(eq(privateMarketBids.commitmentHash, input.commitmentHash))
@@ -2050,7 +2057,7 @@ export async function commitPrivateMarketBid(input: {
       };
     throw new Error("Commitment hash has already been used in another market");
   }
-  const inserted = await db
+  const inserted = await tx
     .insert(privateMarketBids)
     .values({
       marketId: input.marketId,
@@ -2063,14 +2070,14 @@ export async function commitPrivateMarketBid(input: {
     .$returningId();
   const id = inserted[0]?.id;
   if (!id) throw new Error("Could not commit sealed bid");
-  await db
+  await tx
     .update(privateMarkets)
     .set({
       publicParticipants: market[0].publicParticipants + 1,
       publicVolume: addDecimalStrings(market[0].publicVolume, input.bidAmount),
     })
     .where(eq(privateMarkets.id, input.marketId));
-  await db
+  await tx
     .insert(auditEvents)
     .values({
       workspaceId: input.workspaceId,
@@ -2079,7 +2086,7 @@ export async function commitPrivateMarketBid(input: {
       entityId: id,
       action: "committed",
     });
-  const bid = await db
+  const bid = await tx
     .select({
       id: privateMarketBids.id,
       status: privateMarketBids.status,
@@ -2088,12 +2095,13 @@ export async function commitPrivateMarketBid(input: {
     .from(privateMarketBids)
     .where(eq(privateMarketBids.id, id))
     .limit(1);
-  const updatedMarket = await db
+  const updatedMarket = await tx
     .select()
     .from(privateMarkets)
     .where(eq(privateMarkets.id, input.marketId))
     .limit(1);
   return { bid: bid[0], market: updatedMarket[0] };
+  });
 }
 
 export async function createLaunchpadProject(input: {
@@ -2489,45 +2497,57 @@ export async function decideLaunchpadReleaseRequest(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const rows = await db
-    .select({ release: launchpadReleaseRequests, project: launchpadProjects })
-    .from(launchpadReleaseRequests)
-    .innerJoin(
-      launchpadProjects,
-      eq(launchpadReleaseRequests.projectId, launchpadProjects.id)
-    )
-    .where(
-      and(
-        eq(launchpadReleaseRequests.id, input.requestId),
-        eq(launchpadProjects.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const rows = await tx
+      .select({ release: launchpadReleaseRequests, project: launchpadProjects })
+      .from(launchpadReleaseRequests)
+      .innerJoin(
+        launchpadProjects,
+        eq(launchpadReleaseRequests.projectId, launchpadProjects.id)
       )
-    )
-    .limit(1);
-  if (!rows[0]) throw new Error("Release request not found in workspace");
-  await db
-    .update(launchpadReleaseRequests)
-    .set({
-      status: input.status,
-      decidedByUserId: input.actorUserId,
-      decidedAt: new Date(),
-      proofReference: input.proofReference,
-    })
-    .where(eq(launchpadReleaseRequests.id, input.requestId));
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.actorUserId,
-      entityType: "launchpad_release",
-      entityId: input.requestId,
-      action: input.status,
-    });
-  const release = await db
-    .select()
-    .from(launchpadReleaseRequests)
-    .where(eq(launchpadReleaseRequests.id, input.requestId))
-    .limit(1);
-  return release[0];
+      .where(
+        and(
+          eq(launchpadReleaseRequests.id, input.requestId),
+          eq(launchpadProjects.workspaceId, input.workspaceId)
+        )
+      )
+      .limit(1);
+    const current = rows[0]?.release;
+    if (!current) throw new Error("Release request not found in workspace");
+    if (!canAdvanceLaunchpadReleaseStatus(current.status, input.status)) {
+      throw new Error(`Cannot move release request from ${current.status} to ${input.status}`);
+    }
+
+    await tx
+      .update(launchpadReleaseRequests)
+      .set({
+        status: input.status,
+        decidedByUserId: input.actorUserId,
+        decidedAt: new Date(),
+        proofReference: input.proofReference,
+      })
+      .where(
+        and(
+          eq(launchpadReleaseRequests.id, input.requestId),
+          eq(launchpadReleaseRequests.status, current.status)
+        )
+      );
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.actorUserId,
+        entityType: "launchpad_release",
+        entityId: input.requestId,
+        action: input.status,
+      });
+    const release = await tx
+      .select()
+      .from(launchpadReleaseRequests)
+      .where(eq(launchpadReleaseRequests.id, input.requestId))
+      .limit(1);
+    return release[0];
+  });
 }
 
 export async function listWorkspaceLaunchpadProjects(workspaceId: number) {

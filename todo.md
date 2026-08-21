@@ -421,5 +421,10 @@
 - [x] Remove testnet selection and testnet-only product paths, then enforce a mainnet-only Veyra interface with updated transaction-boundary copy and regression coverage
 - [x] Redesign Veyra into a cohesive glass interface across workspace, authentication, and protocol pages while preserving every functional behavior and adding visual regression coverage
 - [x] Optimize client delivery, query behavior, and heavy media handling for smoother Veyra operations without changing features or security boundaries
-- [ ] Complete a fresh top-tier security audit of all Veyra source, schema, routes, dependencies, deployment boundaries, and runtime behavior; fix verified code-owned findings and revalidate the release
-- [ ] Harden launchpad release-request transitions so terminal decisions cannot be overwritten or audited repeatedly
+- [x] Complete a fresh top-tier security audit of all Veyra source, schema, routes, dependencies, deployment boundaries, and runtime behavior; fix verified code-owned findings and revalidate the release
+- [x] Harden launchpad release-request transitions so terminal decisions cannot be overwritten or audited repeatedly
+- [x] Serialize private-market bid acceptance and aggregate updates so concurrent sealed bids cannot overwrite public volume or participant counts
+- [x] Sanitize scheduled-payroll failure responses so database and internal error strings are never returned to the caller
+- [x] Require a non-empty receipt or proof reference before creating any active public proof link
+- [x] Make payment-route creation and draft editing atomic so route rows cannot outlive failed allocation or audit writes
+- [x] Add origin and Fetch Metadata protection for browser state-changing tRPC requests so cross-site callers cannot replay cookie-authenticated mutations

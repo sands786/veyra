@@ -14,6 +14,7 @@ import {
   summarizeLaunchpadReadiness,
   canAdvanceLaunchpadMilestoneStatus,
   canAdvanceLaunchpadProjectStatus,
+  canAdvanceLaunchpadReleaseStatus,
   canCreateRecipientClaim,
   canScheduleRoute,
   canSubmitLaunchpadAllocation,
@@ -71,6 +72,15 @@ describe("operations primitives", () => {
         "America/Los_Angeles"
       )
     ).toBe("0 7 2 * * 6");
+  });
+
+  it("enforces launchpad release decisions as a one-way lifecycle", () => {
+    expect(canAdvanceLaunchpadReleaseStatus("pending", "approved")).toBe(true);
+    expect(canAdvanceLaunchpadReleaseStatus("pending", "rejected")).toBe(true);
+    expect(canAdvanceLaunchpadReleaseStatus("approved", "settled")).toBe(true);
+    expect(canAdvanceLaunchpadReleaseStatus("approved", "rejected")).toBe(false);
+    expect(canAdvanceLaunchpadReleaseStatus("rejected", "approved")).toBe(false);
+    expect(canAdvanceLaunchpadReleaseStatus("settled", "approved")).toBe(false);
   });
 
   it("enforces private market lifecycle transitions and labels", () => {
