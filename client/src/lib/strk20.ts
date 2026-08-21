@@ -1,5 +1,3 @@
-import { num } from "starknet";
-
 export type VeilNetwork = "mainnet" | "sepolia";
 
 export const STRK_TOKEN = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
@@ -74,6 +72,11 @@ declare global {
     starknet_argentX?: VeilWallet;
     starknet_braavos?: VeilWallet;
   }
+}
+
+function bigintToHex(value: bigint): string {
+  if (value < BigInt(0)) throw new Error("Expected a non-negative Starknet felt value.");
+  return `0x${value.toString(16)}`;
 }
 
 function detectWallet(): VeilWallet | undefined {
@@ -154,7 +157,7 @@ export async function connectVeilWallet(selectedWallet?: VeilWallet): Promise<{ 
 export function buildShieldedRouteActions(intent: ShieldedRouteIntent): OnchainAction[] {
   if (intent.amountSmallestUnit <= BigInt(0)) throw new Error("Shielded route amount must be greater than zero.");
   if (!intent.token.trim()) throw new Error("Shielded route token is required.");
-  const amount = num.toHex(intent.amountSmallestUnit);
+  const amount = bigintToHex(intent.amountSmallestUnit);
   return [
     { type: "deposit", token: intent.token, amount },
     ...(intent.recipient ? [{ type: "transfer" as const, token: intent.token, amount, recipient: intent.recipient }] : []),
@@ -169,7 +172,7 @@ export function buildPayrollRegistryCreateCall(contractAddress: string, token: s
   const lowMask = (BigInt(1) << BigInt(128)) - BigInt(1);
   const low = amountSmallestUnit & lowMask;
   const high = amountSmallestUnit >> BigInt(128);
-  return { contractAddress, entrypoint: "create_route", calldata: [token, num.toHex(low), num.toHex(high), recipientCommitment] };
+  return { contractAddress, entrypoint: "create_route", calldata: [token, bigintToHex(low), bigintToHex(high), recipientCommitment] };
 }
 
 export function onchainCapability(wallet: VeilWallet | undefined, network: VeilNetwork) {
