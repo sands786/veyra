@@ -421,3 +421,5 @@
 - [x] Remove testnet selection and testnet-only product paths, then enforce a mainnet-only Veyra interface with updated transaction-boundary copy and regression coverage
 - [x] Redesign Veyra into a cohesive glass interface across workspace, authentication, and protocol pages while preserving every functional behavior and adding visual regression coverage
 - [x] Optimize client delivery, query behavior, and heavy media handling for smoother Veyra operations without changing features or security boundaries
+- [ ] Complete a fresh top-tier security audit of all Veyra source, schema, routes, dependencies, deployment boundaries, and runtime behavior; fix verified code-owned findings and revalidate the release
+- [ ] Harden launchpad release-request transitions so terminal decisions cannot be overwritten or audited repeatedly
