@@ -137,12 +137,7 @@ export default function Home() {
   // nonce cookie and must run only at the moment of navigation.
   const { user, loading, error, isAuthenticated, logout } = useAuth();
   const { isDemoMode } = useDemoMode();
-  const [selectedNetwork, setSelectedNetwork] = useState<VeilNetwork>(() => {
-    if (typeof window === "undefined") return "sepolia";
-    return window.localStorage.getItem("veilpay-network") === "mainnet"
-      ? "mainnet"
-      : "sepolia";
-  });
+  const selectedNetwork = "mainnet" as const;
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<number | null>(
     () => {
@@ -725,20 +720,6 @@ export default function Home() {
     });
   }
 
-  function changeNetwork(network: VeilNetwork) {
-    setSelectedNetwork(network);
-    window.localStorage.setItem("veilpay-network", network);
-    setConnected(false);
-    setWallet(undefined);
-    setWalletAddress("");
-    toast(`${networkLabel(network)} selected.`, {
-      description:
-        network === "sepolia"
-          ? "Use testnet for safe verification; it does not count as mainnet evidence."
-          : "Mainnet actions require deliberate wallet approval and real funds.",
-    });
-  }
-
   function viewContracts() {
     window.open(
       "https://strk20.starknet.io/build",
@@ -941,21 +922,9 @@ export default function Home() {
               </span>
               <span className="h-2 w-2 rounded-full bg-[#70D49D] shadow-[0_0_12px_#70D49D]" />
             </div>
-            <select
-              aria-label="Starknet network"
-              value={selectedNetwork}
-              onChange={event =>
-                changeNetwork(event.target.value as VeilNetwork)
-              }
-              className="mt-3 w-full bg-transparent font-display text-[15px] text-[#F3EEE5] outline-none"
-            >
-              <option value="sepolia">Starknet Sepolia</option>
-              <option value="mainnet">Starknet mainnet</option>
-            </select>
+            <div className="mt-3 font-display text-[15px] text-[#F3EEE5]">Starknet mainnet</div>
             <div className="mt-1 text-[12px] leading-5 text-[#AEB8BE]">
-              {selectedNetwork === "sepolia"
-                ? "Safe testnet verification path. No mainnet evidence."
-                : "Production path. Wallet approval required."}
+              Production path. Wallet approval required.
             </div>
             <button
               onClick={viewContracts}
@@ -1003,27 +972,7 @@ export default function Home() {
                   SIGN OUT
                 </Button>
               )}
-              <div
-                className="flex items-center gap-1 rounded-full border border-white/15 bg-[#151D21] p-1 font-mono text-[9px] tracking-[0.08em]"
-                aria-label="Select Starknet network"
-              >
-                <button
-                  type="button"
-                  onClick={() => changeNetwork("sepolia")}
-                  aria-pressed={selectedNetwork === "sepolia"}
-                  className={`rounded-full px-3 py-2 transition-colors ${selectedNetwork === "sepolia" ? "bg-[#70D49D] text-[#111210]" : "text-[#AEB8BE] hover:text-[#F3EEE5]"}`}
-                >
-                  TESTNET
-                </button>
-                <button
-                  type="button"
-                  onClick={() => changeNetwork("mainnet")}
-                  aria-pressed={selectedNetwork === "mainnet"}
-                  className={`rounded-full px-3 py-2 transition-colors ${selectedNetwork === "mainnet" ? "bg-[#F0563A] text-[#111210]" : "text-[#AEB8BE] hover:text-[#F3EEE5]"}`}
-                >
-                  MAINNET
-                </button>
-              </div>
+              <div className="rounded-full border border-[#F0563A]/40 bg-[#201815] px-3 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A]">STARKNET MAINNET</div>
               {isAuthenticated && (
                 <Button
                   disabled={isWalletActionLocked(walletConnecting)}

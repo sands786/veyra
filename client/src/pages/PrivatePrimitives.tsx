@@ -12,7 +12,7 @@ import { privateDisclosureFields, type PrivateDisclosureScope } from "@shared/op
 
 const primitives = [
   { id: "links", label: "PRIVATE LINKS", kicker: "WHISPER PAY PATTERN", icon: Link2, title: "Request payment without exposing the roster.", description: "Create a recipient-scoped link, share it through any channel, and keep the underlying route private.", points: ["Single-recipient scope", "Expiry-aware claim state", "No public recipient directory"] },
-  { id: "proofs", label: "SELECTIVE PROOF", kicker: "PRIVACY WALLET PATTERN", icon: EyeOff, title: "Prove settlement without revealing the payroll.", description: "Share an aggregate proof surface for auditors, partners, or a hackathon judge while keeping names and amounts private.", points: ["Aggregate status only", "Operator-controlled disclosure", "Testnet/mainnet evidence boundary"] },
+  { id: "proofs", label: "SELECTIVE PROOF", kicker: "PRIVACY WALLET PATTERN", icon: EyeOff, title: "Prove settlement without revealing the payroll.", description: "Share an aggregate proof surface for auditors, partners, or a hackathon judge while keeping names and amounts private.", points: ["Aggregate status only", "Operator-controlled disclosure", "Mainnet receipt evidence"] },
   { id: "milestones", label: "MILESTONE RELEASES", kicker: "MORROW PATTERN", icon: LockKeyhole, title: "Move capital when evidence is ready.", description: "Prepare, fund, evidence, and resolve each milestone as a governed release lane for private launchpad treasuries.", points: ["Evidence before release", "Multi-approver readiness", "Private allocation registry"] },
 ] as const;
 

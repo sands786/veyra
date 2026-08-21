@@ -12,7 +12,7 @@ const formatDate = (value?: Date | string | null) => value ? new Date(value).toL
 
 export default function PrivateMarkets() {
   const { isAuthenticated } = useAuth();
-  const [selectedNetwork] = useState<VeilNetwork>(() => typeof window !== "undefined" && window.localStorage.getItem("veilpay-network") === "mainnet" ? "mainnet" : "sepolia");
+  const selectedNetwork = "mainnet" as const;
   const [name, setName] = useState("Veyra private round");
   const [targetAmount, setTargetAmount] = useState("10000");
   const [bidAmount, setBidAmount] = useState("250");

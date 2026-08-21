@@ -34,6 +34,7 @@ const amount = z.string().trim().min(1).max(80).regex(/^\d+(\.\d{1,18})?$/, "Ent
 const tokenSymbol = z.string().trim().min(2).max(20).regex(/^[A-Za-z0-9._-]+$/, "Enter a valid token symbol");
 const accountEmail = z.string().trim().email().max(320);
 const accountPassword = z.string().min(12).max(128);
+const mainnetNetwork = z.literal("mainnet");
 
 export const appRouter = router({
   system: systemRouter,
@@ -102,12 +103,12 @@ export const appRouter = router({
       const membership = await workspaceFor(ctx);
       return listWorkspaceTreasuryBalances(membership.workspace.id);
     }),
-    recordBalance: protectedProcedure.input(z.object({ token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]), availableBalance: amount, source: z.string().trim().max(40).optional() })).mutation(async ({ ctx, input }) => {
+    recordBalance: protectedProcedure.input(z.object({ token: tokenSymbol, network: mainnetNetwork, availableBalance: amount, source: z.string().trim().max(40).optional() })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       if (!['owner', 'admin', 'operator'].includes(membership.memberRole)) throw new Error("Only workspace operators can record treasury balances");
       return recordTreasuryBalanceSnapshot({ workspaceId: membership.workspace.id, ...input });
     }),
-    simulate: protectedProcedure.input(z.object({ token: tokenSymbol, totalAmount: amount, approvalCount: z.number().int().min(0).max(20), network: z.enum(["mainnet", "sepolia"]).default("mainnet") })).query(async ({ ctx, input }) => {
+    simulate: protectedProcedure.input(z.object({ token: tokenSymbol, totalAmount: amount, approvalCount: z.number().int().min(0).max(20), network: mainnetNetwork.default("mainnet") })).query(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       return simulateTreasuryPolicy(membership.workspace.id, input);
     }),
@@ -115,7 +116,7 @@ export const appRouter = router({
       const membership = await workspaceFor(ctx);
       return listWorkspaceTreasuryPolicies(membership.workspace.id);
     }),
-    createPolicy: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]), maxRouteAmount: amount, dailyLimit: amount, approvalThreshold: z.number().int().min(1).max(20) })).mutation(async ({ ctx, input }) => {
+    createPolicy: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, network: mainnetNetwork, maxRouteAmount: amount, dailyLimit: amount, approvalThreshold: z.number().int().min(1).max(20) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
@@ -128,7 +129,7 @@ export const appRouter = router({
       const membership = await workspaceFor(ctx);
       return listWorkspaceLaunchpadProjects(membership.workspace.id);
     }),
-    createProject: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), description: z.string().trim().max(2000).optional(), token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]), targetAmount: amount, fundingEndsAt: z.coerce.date().optional() })).mutation(async ({ ctx, input }) => {
+    createProject: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), description: z.string().trim().max(2000).optional(), token: tokenSymbol, network: mainnetNetwork, targetAmount: amount, fundingEndsAt: z.coerce.date().optional() })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
@@ -261,14 +262,14 @@ export const appRouter = router({
       const membership = await workspaceFor(ctx);
       return listRouteRecipientIds(membership.workspace.id, input.routeId);
     }),
-    create: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]).default("mainnet"), totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
+    create: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, network: mainnetNetwork.default("mainnet"), totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
       if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot create payment routes");
       return createPaymentRoute({ workspaceId: membership.workspace.id, createdByUserId: actorId, ...input });
     }),
-    update: protectedProcedure.input(z.object({ id: z.number().int().positive(), name: z.string().trim().min(2).max(160), token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]).default("mainnet"), totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
+    update: protectedProcedure.input(z.object({ id: z.number().int().positive(), name: z.string().trim().min(2).max(160), token: tokenSymbol, network: mainnetNetwork.default("mainnet"), totalAmount: amount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
@@ -294,7 +295,7 @@ export const appRouter = router({
       const membership = await workspaceFor(ctx);
       return (await import("./db")).listRouteTransactions(membership.workspace.id, input.routeId);
     }),
-    recordSubmission: protectedProcedure.input(z.object({ routeId: z.number().int().positive(), network: z.enum(["mainnet", "sepolia"]), transactionHash: z.string().trim().regex(/^0x[0-9a-fA-F]+$/), status: z.enum(["submitted", "confirmed", "reverted", "unknown"]).default("submitted"), explorerUrl: z.string().url().optional() })).mutation(async ({ ctx, input }) => {
+    recordSubmission: protectedProcedure.input(z.object({ routeId: z.number().int().positive(), network: mainnetNetwork, transactionHash: z.string().trim().regex(/^0x[0-9a-fA-F]+$/), status: z.enum(["submitted", "confirmed", "reverted", "unknown"]).default("submitted"), explorerUrl: z.string().url().optional() })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
@@ -421,7 +422,7 @@ export const appRouter = router({
       const membership = await workspaceFor(ctx);
       return listPrivateMarkets(membership.workspace.id);
     }),
-    create: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, network: z.enum(["mainnet", "sepolia"]), targetAmount: amount, bidDeadline: z.coerce.date().optional() })).mutation(async ({ ctx, input }) => {
+    create: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, network: mainnetNetwork, targetAmount: amount, bidDeadline: z.coerce.date().optional() })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");

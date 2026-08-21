@@ -418,3 +418,4 @@
 - [ ] Resolve the confirmed stale Vercel deployment, which still serves the pre-migration generic 404 at /sign-in after the current GitHub revision was pushed
 - [x] Add an explicit Sign Up entry point for unauthenticated visitors and make wallet discovery and Connect Wallet controls visible only after successful Veyra authentication
 - [x] Repair the new-account workspace bootstrap failure that occurs when the backend inserts the first private workspace after authentication
+- [x] Remove testnet selection and testnet-only product paths, then enforce a mainnet-only Veyra interface with updated transaction-boundary copy and regression coverage
