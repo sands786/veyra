@@ -415,7 +415,7 @@
 - [x] Replace Manus-dependent OAuth with Veyra-owned email-and-password registration, sign-in, session, and sign-out flows that work without a callback allowlist
 - [x] Preserve existing protected workspace authorization and add tests for account registration, sign-in, session creation, protected access, and sign-out
 - [x] Replace the Vercel OAuth blocker documentation with the Veyra-owned authentication deployment path and verify both deployment builds
-- [ ] Resolve the confirmed stale Vercel deployment, which still serves the pre-migration generic 404 at /sign-in after the current GitHub revision was pushed
+- [x] Resolve the confirmed stale Vercel deployment, which still serves the pre-migration generic 404 at /sign-in after the current GitHub revision was pushed
 - [x] Add an explicit Sign Up entry point for unauthenticated visitors and make wallet discovery and Connect Wallet controls visible only after successful Veyra authentication
 - [x] Repair the new-account workspace bootstrap failure that occurs when the backend inserts the first private workspace after authentication
 - [x] Remove testnet selection and testnet-only product paths, then enforce a mainnet-only Veyra interface with updated transaction-boundary copy and regression coverage
@@ -434,3 +434,4 @@
 - [x] Make blockchain transaction recording and confirmation atomic with route lifecycle transitions
 - [x] Fail closed on unknown wallet chain IDs so mainnet actions cannot execute without verified Starknet mainnet identity
 - [x] Remove retired Manus sessionStorage/Bearer forwarding from the tRPC client so the local-auth security posture is explicit and stale tokens are never transmitted
+- [x] Replace the unresolved Vercel document-title placeholder with a stable Veyra fallback so production metadata never exposes template syntax
