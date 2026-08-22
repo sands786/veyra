@@ -25,4 +25,12 @@ describe("Veyra smooth-operation delivery contracts", () => {
     expect(home).toContain('preload="metadata"');
     expect(docs).toContain('preload="metadata"');
   });
+
+  it("fails closed when a wallet does not prove the requested Starknet network", () => {
+    const adapter = fs.readFileSync(path.join(root, "client", "src", "lib", "strk20.ts"), "utf8");
+
+    expect(adapter).toContain("if (!detected || detected !== network) {");
+    expect(adapter).toContain("networkCompatible: walletNetwork === network");
+    expect(adapter).toContain("canExecute: Boolean(wallet?.strk20InvokeTransaction) && walletNetwork === network");
+  });
 });

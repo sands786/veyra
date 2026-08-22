@@ -1284,47 +1284,54 @@ export async function updatePaymentRoute(input: {
     throw new Error(
       "All selected recipients must be active workspace recipients"
     );
-  await db
-    .update(paymentRoutes)
-    .set({
-      name: input.name,
-      token: input.token,
-      network: input.network,
-      totalAmount: input.totalAmount,
-    })
-    .where(
-      and(
-        eq(paymentRoutes.id, input.routeId),
-        eq(paymentRoutes.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    await tx
+      .update(paymentRoutes)
+      .set({
+        name: input.name,
+        token: input.token,
+        network: input.network,
+        totalAmount: input.totalAmount,
+      })
+      .where(
+        and(
+          eq(paymentRoutes.id, input.routeId),
+          eq(paymentRoutes.workspaceId, input.workspaceId)
+        )
+      );
+    await tx
+      .delete(routeRecipients)
+      .where(eq(routeRecipients.routeId, input.routeId));
+    await tx
+      .insert(routeRecipients)
+      .values(
+        input.recipientAmounts.map(item => ({
+          routeId: input.routeId,
+          recipientId: item.recipientId,
+          amount: item.amount,
+        }))
+      );
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.actorUserId,
+        entityType: "payment_route",
+        entityId: input.routeId,
+        action: "updated",
+      });
+    const rows = await tx
+      .select()
+      .from(paymentRoutes)
+      .where(
+        and(
+          eq(paymentRoutes.id, input.routeId),
+          eq(paymentRoutes.workspaceId, input.workspaceId)
+        )
       )
-    );
-  await db
-    .delete(routeRecipients)
-    .where(eq(routeRecipients.routeId, input.routeId));
-  await db
-    .insert(routeRecipients)
-    .values(
-      input.recipientAmounts.map(item => ({
-        routeId: input.routeId,
-        recipientId: item.recipientId,
-        amount: item.amount,
-      }))
-    );
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.actorUserId,
-      entityType: "payment_route",
-      entityId: input.routeId,
-      action: "updated",
-    });
-  const rows = await db
-    .select()
-    .from(paymentRoutes)
-    .where(eq(paymentRoutes.id, input.routeId))
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function listRouteRecipientIds(
@@ -1845,7 +1852,7 @@ export async function createPrivateMarket(input: {
   createdByUserId: number;
   name: string;
   token: string;
-  network: "mainnet" | "sepolia";
+  network: "mainnet";
   targetAmount: string;
   bidDeadline?: Date;
 }) {

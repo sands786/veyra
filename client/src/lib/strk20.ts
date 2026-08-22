@@ -1,8 +1,7 @@
-export type VeilNetwork = "mainnet" | "sepolia";
+export type VeilNetwork = "mainnet";
 
 export const STRK_TOKEN = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
 export const MAINNET_CHAIN_ID = "0x534e5f4d41494e";
-export const SEPOLIA_CHAIN_ID = "0x534e5f5345504f4c4941";
 
 export const NETWORKS: Record<VeilNetwork, { label: string; chainId: string; explorer: string; evidenceLabel: string }> = {
   mainnet: {
@@ -10,12 +9,6 @@ export const NETWORKS: Record<VeilNetwork, { label: string; chainId: string; exp
     chainId: MAINNET_CHAIN_ID,
     explorer: "https://voyager.online",
     evidenceLabel: "Production evidence",
-  },
-  sepolia: {
-    label: "Starknet Sepolia",
-    chainId: SEPOLIA_CHAIN_ID,
-    explorer: "https://sepolia.voyager.online",
-    evidenceLabel: "Testnet verification",
   },
 };
 
@@ -130,7 +123,6 @@ export function networkFromChainId(chainId?: string): VeilNetwork | undefined {
   if (!chainId) return undefined;
   const normalized = chainId.toLowerCase();
   if (normalized === MAINNET_CHAIN_ID.toLowerCase()) return "mainnet";
-  if (normalized === SEPOLIA_CHAIN_ID.toLowerCase()) return "sepolia";
   return undefined;
 }
 
@@ -140,8 +132,8 @@ export function chainIdForNetwork(network: VeilNetwork): string {
 
 export function assertWalletNetwork(wallet: VeilWallet, network: VeilNetwork): void {
   const detected = networkFromChainId(wallet.chainId);
-  if (detected && detected !== network) {
-    throw new Error(`Wallet is connected to ${NETWORKS[detected].label}; switch to ${NETWORKS[network].label} before signing.`);
+  if (!detected || detected !== network) {
+    throw new Error(`Wallet network could not be verified. Connect a wallet reporting ${NETWORKS[network].label} before signing.`);
   }
 }
 
@@ -181,9 +173,9 @@ export function onchainCapability(wallet: VeilWallet | undefined, network: VeilN
     network,
     walletConnected: Boolean(wallet?.address ?? wallet?.account?.address),
     walletNetwork,
-    networkCompatible: !walletNetwork || walletNetwork === network,
+    networkCompatible: walletNetwork === network,
     strk20Ready: Boolean(wallet?.strk20InvokeTransaction),
-    canExecute: Boolean(wallet?.strk20InvokeTransaction) && (!walletNetwork || walletNetwork === network),
+    canExecute: Boolean(wallet?.strk20InvokeTransaction) && walletNetwork === network,
   } as const;
 }
 
@@ -194,7 +186,7 @@ export async function submitShieldedRoute(wallet: VeilWallet, amountSmallestUnit
 }
 
 export function explorerUrl(txHash: string, networkOrChainId?: VeilNetwork | string) {
-  const network = networkOrChainId === "mainnet" || networkOrChainId === "sepolia" ? networkOrChainId : networkFromChainId(networkOrChainId) ?? "mainnet";
+  const network = networkOrChainId === "mainnet" || networkFromChainId(networkOrChainId) === "mainnet" ? "mainnet" : "mainnet";
   return `${NETWORKS[network].explorer}/tx/${txHash}`;
 }
 

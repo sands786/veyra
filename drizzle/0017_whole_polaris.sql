@@ -1,0 +1,1 @@
+ALTER TABLE `privateMarkets` MODIFY COLUMN `network` enum('mainnet','sepolia') NOT NULL DEFAULT 'mainnet';

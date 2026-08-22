@@ -14,8 +14,8 @@ const address = (value: unknown): ProtocolContractConfig | undefined => {
   return normalized && /^0x[0-9a-fA-F]+$/.test(normalized) ? { address: normalized } : undefined;
 };
 
-const env = (network: VeilNetwork) => {
-  const suffix = network === "mainnet" ? "MAINNET" : "SEPOLIA";
+const env = (_network: VeilNetwork) => {
+  const suffix = "MAINNET" as const;
   return {
     payroll: address(import.meta.env[`VITE_VEYRA_PAYROLL_CONTRACT_${suffix}`]),
     treasury: address(import.meta.env[`VITE_VEYRA_TREASURY_CONTRACT_${suffix}`]),

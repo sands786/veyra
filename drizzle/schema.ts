@@ -354,9 +354,9 @@ export const privateMarkets = mysqlTable("privateMarkets", {
   name: varchar("name", { length: 160 }).notNull(),
   slug: varchar("slug", { length: 160 }).notNull().unique(),
   token: varchar("token", { length: 80 }).notNull(),
-  network: mysqlEnum("network", ["mainnet", "sepolia"])
+  network: mysqlEnum("network", ["mainnet"])
     .notNull()
-    .default("sepolia"),
+    .default("mainnet"),
   targetAmount: varchar("targetAmount", { length: 80 }).notNull(),
   currentPrice: varchar("currentPrice", { length: 80 }).notNull().default("0"),
   publicVolume: varchar("publicVolume", { length: 80 }).notNull().default("0"),

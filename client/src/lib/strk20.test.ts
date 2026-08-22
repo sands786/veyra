@@ -3,7 +3,7 @@ import { buildPayrollRegistryCreateCall, buildShieldedRouteActions, disconnectVe
 
 describe("STRK20 on-chain adapter", () => {
   it("builds a deposit action for a valid shielded route intent", () => {
-    expect(buildShieldedRouteActions({ network: "sepolia", token: STRK_TOKEN, amountSmallestUnit: 2_840_000_000n })).toEqual([
+    expect(buildShieldedRouteActions({ network: "mainnet", token: STRK_TOKEN, amountSmallestUnit: 2_840_000_000n })).toEqual([
       { type: "deposit", token: STRK_TOKEN, amount: "0xa946f600" },
     ]);
   });
@@ -36,6 +36,6 @@ describe("STRK20 on-chain adapter", () => {
   it("reports whether a connected wallet can execute on the selected network", () => {
     const wallet = { address: "0x1234", chainId: MAINNET_CHAIN_ID, strk20InvokeTransaction: async () => ({ transaction_hash: "0xabc" }) };
     expect(onchainCapability(wallet, "mainnet")).toMatchObject({ walletConnected: true, walletNetwork: "mainnet", networkCompatible: true, strk20Ready: true, canExecute: true });
-    expect(onchainCapability(wallet, "sepolia")).toMatchObject({ networkCompatible: false, canExecute: false });
+    expect(onchainCapability({ address: "0x1234", chainId: "0xunknown", strk20InvokeTransaction: wallet.strk20InvokeTransaction }, "mainnet")).toMatchObject({ walletNetwork: undefined, networkCompatible: false, canExecute: false });
   });
 });
