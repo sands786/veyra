@@ -38,4 +38,14 @@ describe("security audit hardening contracts", () => {
     expect(block).toContain("canAdvanceLaunchpadReleaseStatus");
     expect(block).toContain("eq(launchpadReleaseRequests.status, current.status)");
   });
+
+  it("keeps route editing and blockchain lifecycle writes transaction-scoped", () => {
+    const source = fs.readFileSync(path.join(root, "server", "db.ts"), "utf8");
+    for (const name of ["updatePaymentRoute", "recordBlockchainTransaction", "confirmBlockchainTransaction"]) {
+      const start = source.indexOf(`export async function ${name}`);
+      const end = source.indexOf("\nexport async function ", start + 1);
+      const block = source.slice(start, end === -1 ? source.length : end);
+      expect(block).toContain("db.transaction(async tx =>");
+    }
+  });
 });

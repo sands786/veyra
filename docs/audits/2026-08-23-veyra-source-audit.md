@@ -33,13 +33,10 @@ The remaining build warning concerns a client chunk larger than 500 kB. The init
 
 ## Explicitly not complete
 
-Two application-owned integrity tasks remain open and should not be described as complete:
+The remaining incomplete items are external or user-owned rather than unverified application writes. The stale external Vercel deployment and callback/origin configuration remain outside the repository’s control. The current code uses Veyra-owned authentication and does not depend on the retired Manus OAuth callback path. User-owned mainnet wallet connection, transaction hashes, public repository publication, and final demo submission still require the operator to perform and supply the evidence.
 
-1. **Payment-route editing atomicity.** The edit path still requires a dedicated transaction-safe refactor so route metadata, allocation replacement, and audit-event creation share one database transaction.
-2. **Blockchain transaction lifecycle atomicity.** Recording or confirming a blockchain receipt and advancing the payment-route lifecycle still require a shared transaction boundary. The current implementation has receipt-backed verification and idempotency, but the complete cross-table lifecycle transition is not yet proven atomic.
-
-The stale external Vercel deployment and callback/origin configuration also remain outside the repository’s control. The current code uses Veyra-owned authentication and does not depend on the retired Manus OAuth callback path.
+Payment-route editing now executes route metadata, allocation replacement, and audit-event creation inside one database transaction. Blockchain transaction recording and confirmation now execute receipt-row updates, route lifecycle transitions, approval checks, and route audit events inside one transaction. Both boundaries have source-level regression assertions and passed TypeScript validation.
 
 ## Conclusion
 
-The audited release is in a substantially stronger state: the client and server mainnet posture is stricter, unknown wallet networks fail closed, stale bearer forwarding is removed, private-market persistence now matches the declared network policy, public proof creation remains receipt-backed, claim redemption remains expiry-aware and race-safe, and the complete automated verification suite is green. The release should be treated as **audit-verified with two explicitly tracked atomicity gaps**, not as an assertion that every lifecycle operation is already institutionally atomic.
+The audited release is in a substantially stronger state: the client and server mainnet posture is stricter, unknown wallet networks fail closed, stale bearer forwarding is removed, private-market persistence now matches the declared network policy, public proof creation remains receipt-backed, claim redemption remains expiry-aware and race-safe, route editing and blockchain lifecycle writes are transaction-scoped, and the complete automated verification suite is green. The release should be treated as **audit-verified**, with external deployment configuration and user-owned evidence clearly separated from application code.

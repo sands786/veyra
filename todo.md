@@ -428,9 +428,9 @@
 - [x] Require a non-empty receipt or proof reference before creating any active public proof link
 - [x] Make payment-route creation and draft editing atomic so route rows cannot outlive failed allocation or audit writes
 - [x] Add origin and Fetch Metadata protection for browser state-changing tRPC requests so cross-site callers cannot replay cookie-authenticated mutations
-- [ ] Complete one-by-one source audit of every tracked Veyra application, configuration, migration, and test file; fix verified defects and revalidate the complete release
+- [x] Complete one-by-one source audit of every tracked Veyra application, configuration, migration, and test file; fix verified defects and revalidate the complete release
 - [x] Remove the private-market Sepolia schema fallback and align the persisted network default with the mainnet-only contract
-- [ ] Make payment-route editing atomic so route metadata, allocations, and audit events cannot partially persist
-- [ ] Make blockchain transaction recording and confirmation atomic with route lifecycle transitions
+- [x] Make payment-route editing atomic so route metadata, allocations, and audit events cannot partially persist
+- [x] Make blockchain transaction recording and confirmation atomic with route lifecycle transitions
 - [x] Fail closed on unknown wallet chain IDs so mainnet actions cannot execute without verified Starknet mainnet identity
 - [x] Remove retired Manus sessionStorage/Bearer forwarding from the tRPC client so the local-auth security posture is explicit and stale tokens are never transmitted

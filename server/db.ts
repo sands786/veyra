@@ -997,56 +997,58 @@ export async function recordBlockchainTransaction(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const ownedRoute = await db
-    .select({ id: paymentRoutes.id, network: paymentRoutes.network })
-    .from(paymentRoutes)
-    .where(
-      and(
-        eq(paymentRoutes.id, input.routeId),
-        eq(paymentRoutes.workspaceId, input.workspaceId)
-      )
-    )
-    .limit(1);
-  if (!ownedRoute[0]) throw new Error("Route not found in workspace");
-  if (ownedRoute[0].network !== input.network)
-    throw new Error("Transaction network does not match the route network");
-  const existing = await db
-    .select()
-    .from(blockchainTransactions)
-    .where(eq(blockchainTransactions.transactionHash, input.transactionHash))
-    .limit(1);
-  if (existing[0]) {
-    if (
-      existing[0].routeId !== input.routeId ||
-      existing[0].network !== input.network
-    )
-      throw new Error(
-        "Transaction hash is already bound to another route or network"
-      );
-    return existing[0];
-  }
-  await db
-    .insert(blockchainTransactions)
-    .values({
+  return db.transaction(async tx => {
+    const ownedRoute = await tx
+      .select({ id: paymentRoutes.id, status: paymentRoutes.status, network: paymentRoutes.network })
+      .from(paymentRoutes)
+      .where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId)))
+      .for("update")
+      .limit(1);
+    if (!ownedRoute[0]) throw new Error("Route not found in workspace");
+    if (ownedRoute[0].network !== input.network)
+      throw new Error("Transaction network does not match the route network");
+    const existing = await tx
+      .select()
+      .from(blockchainTransactions)
+      .where(eq(blockchainTransactions.transactionHash, input.transactionHash))
+      .limit(1);
+    if (existing[0]) {
+      if (existing[0].routeId !== input.routeId || existing[0].network !== input.network)
+        throw new Error("Transaction hash is already bound to another route or network");
+      return existing[0];
+    }
+    await tx.insert(blockchainTransactions).values({
       routeId: input.routeId,
       network: input.network,
       transactionHash: input.transactionHash,
       status: input.status,
       explorerUrl: input.explorerUrl,
     });
-  if (input.status === "confirmed")
-    await transitionPaymentRoute(
-      input.workspaceId,
-      input.routeId,
-      input.actorUserId,
-      "settled"
-    );
-  const rows = await db
-    .select()
-    .from(blockchainTransactions)
-    .where(eq(blockchainTransactions.transactionHash, input.transactionHash))
-    .limit(1);
-  return rows[0];
+    if (input.status === "confirmed") {
+      if (!canAdvancePaymentRouteStatus(ownedRoute[0].status, "settled"))
+        throw new Error(`Invalid route transition: ${ownedRoute[0].status} -> settled`);
+      const workspace = await tx
+        .select({ approvalThreshold: workspaces.approvalThreshold })
+        .from(workspaces)
+        .where(eq(workspaces.id, input.workspaceId))
+        .limit(1);
+      const approved = await tx
+        .select({ id: routeApprovals.id })
+        .from(routeApprovals)
+        .where(and(eq(routeApprovals.workspaceId, input.workspaceId), eq(routeApprovals.routeId, input.routeId), eq(routeApprovals.status, "approved")));
+      const threshold = workspace[0]?.approvalThreshold ?? 1;
+      if (approved.length < threshold)
+        throw new Error(`Route requires ${threshold} approval(s) before settlement`);
+      await tx.update(paymentRoutes).set({ status: "settled" }).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId)));
+      await tx.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "payment_route", entityId: input.routeId, action: "status_settled" });
+    }
+    const rows = await tx
+      .select()
+      .from(blockchainTransactions)
+      .where(eq(blockchainTransactions.transactionHash, input.transactionHash))
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function listRouteTransactions(
@@ -1148,47 +1150,31 @@ export async function confirmBlockchainTransaction(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const rows = await db
-    .select({ tx: blockchainTransactions, route: paymentRoutes })
-    .from(blockchainTransactions)
-    .innerJoin(
-      paymentRoutes,
-      eq(blockchainTransactions.routeId, paymentRoutes.id)
-    )
-    .where(
-      and(
-        eq(blockchainTransactions.transactionHash, input.transactionHash),
-        eq(paymentRoutes.workspaceId, input.workspaceId)
-      )
-    )
-    .limit(1);
-  const current = rows[0];
-  if (!current) throw new Error("Transaction not found in workspace");
-  await db
-    .update(blockchainTransactions)
-    .set({
-      status: input.status,
-      confirmedAt: input.status === "confirmed" ? new Date() : null,
-    })
-    .where(eq(blockchainTransactions.id, current.tx.id));
-  const routeStatus =
-    input.status === "confirmed"
-      ? "settled"
-      : input.status === "reverted"
-        ? "failed"
-        : "routed";
-  await transitionPaymentRoute(
-    input.workspaceId,
-    current.route.id,
-    input.actorUserId,
-    routeStatus
-  );
-  const updated = await db
-    .select()
-    .from(blockchainTransactions)
-    .where(eq(blockchainTransactions.transactionHash, input.transactionHash))
-    .limit(1);
-  return updated[0];
+  return db.transaction(async tx => {
+    const rows = await tx
+      .select({ tx: blockchainTransactions, route: paymentRoutes })
+      .from(blockchainTransactions)
+      .innerJoin(paymentRoutes, eq(blockchainTransactions.routeId, paymentRoutes.id))
+      .where(and(eq(blockchainTransactions.transactionHash, input.transactionHash), eq(paymentRoutes.workspaceId, input.workspaceId)))
+      .for("update")
+      .limit(1);
+    const current = rows[0];
+    if (!current) throw new Error("Transaction not found in workspace");
+    const routeStatus = input.status === "confirmed" ? "settled" : input.status === "reverted" ? "failed" : "routed";
+    if (!canAdvancePaymentRouteStatus(current.route.status, routeStatus))
+      throw new Error(`Invalid route transition: ${current.route.status} -> ${routeStatus}`);
+    if (routeStatus === "settled") {
+      const workspace = await tx.select({ approvalThreshold: workspaces.approvalThreshold }).from(workspaces).where(eq(workspaces.id, input.workspaceId)).limit(1);
+      const approved = await tx.select({ id: routeApprovals.id }).from(routeApprovals).where(and(eq(routeApprovals.workspaceId, input.workspaceId), eq(routeApprovals.routeId, current.route.id), eq(routeApprovals.status, "approved")));
+      const threshold = workspace[0]?.approvalThreshold ?? 1;
+      if (approved.length < threshold) throw new Error(`Route requires ${threshold} approval(s) before settlement`);
+    }
+    await tx.update(blockchainTransactions).set({ status: input.status, confirmedAt: input.status === "confirmed" ? new Date() : null }).where(eq(blockchainTransactions.id, current.tx.id));
+    await tx.update(paymentRoutes).set({ status: routeStatus }).where(and(eq(paymentRoutes.id, current.route.id), eq(paymentRoutes.workspaceId, input.workspaceId)));
+    await tx.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "payment_route", entityId: current.route.id, action: `status_${routeStatus}` });
+    const updated = await tx.select().from(blockchainTransactions).where(eq(blockchainTransactions.transactionHash, input.transactionHash)).limit(1);
+    return updated[0];
+  });
 }
 
 export async function updatePaymentRoute(input: {
