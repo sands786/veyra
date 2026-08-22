@@ -104,7 +104,7 @@ async function startServer() {
     const originIsTrustedProxy = Boolean(origin && trustedProxyOrigins.has(origin));
     const fetchSite = String(req.headers["sec-fetch-site"] || "").toLowerCase();
     const crossSite = fetchSite === "cross-site" || fetchSite === "cross-origin";
-    if ((origin && expectedOrigin && origin !== expectedOrigin && !originIsTrustedProxy) || crossSite) {
+    if ((origin && expectedOrigin && origin !== expectedOrigin && !originIsTrustedProxy) || (crossSite && !originIsTrustedProxy)) {
       res.status(403).json({ error: "cross-site-request-blocked" });
       return;
     }
