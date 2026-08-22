@@ -435,3 +435,6 @@
 - [x] Fail closed on unknown wallet chain IDs so mainnet actions cannot execute without verified Starknet mainnet identity
 - [x] Remove retired Manus sessionStorage/Bearer forwarding from the tRPC client so the local-auth security posture is explicit and stale tokens are never transmitted
 - [x] Replace the unresolved Vercel document-title placeholder with a stable Veyra fallback so production metadata never exposes template syntax
+- [x] Polish Veyra user experience with smoother loading states, button feedback, navigation transitions, responsive spacing, and verified desktop/mobile behavior
+- [x] Fix Private Markets market-creation response-transform failure UX with safe actionable feedback and regression coverage
+- [x] Fix Private Markets and Launchpad response-transform failures and white loading/scroll flashes across the route shells

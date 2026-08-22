@@ -1,5 +1,6 @@
 // Copper Veil style reminder: editorial brutalism, graphite canvas, ivory surfaces, Veil Vermilion #F0563A, Space Grotesk + IBM Plex Mono, visible privacy state.
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin, startSignup } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -136,6 +137,7 @@ export default function Home() {
   // startLogin() during render (no href={startLogin()}) — it mints a one-time
   // nonce cookie and must run only at the moment of navigation.
   const { user, loading, error, isAuthenticated, logout } = useAuth();
+  const [, setLocation] = useLocation();
   const { isDemoMode } = useDemoMode();
   const selectedNetwork = "mainnet" as const;
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
@@ -429,7 +431,17 @@ export default function Home() {
     if (!Number.isInteger(nextId) || nextId <= 0) return;
     setActiveWorkspaceId(nextId);
     window.localStorage.setItem("veilpay-active-workspace", String(nextId));
-    window.location.reload();
+    void utils.workspace.list.invalidate();
+    void utils.workspace.overview.invalidate();
+    void utils.recipients.list.invalidate();
+    void utils.audit.list.invalidate();
+    void utils.routes.list.invalidate();
+    toast("Workspace switched.", { description: "Refreshing private workspace data." });
+  }
+
+  function navigateTo(path: string) {
+    setMobileOpen(false);
+    setLocation(path);
   }
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -790,7 +802,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#111210] text-[#F3EEE5] selection:bg-[#70D49D] selection:text-[#111210]">
+    <div className="page-shell min-h-screen overflow-hidden bg-[#111210] text-[#F3EEE5] selection:bg-[#70D49D] selection:text-[#111210]">
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.11] [background-image:radial-gradient(#F3EEE5_0.6px,transparent_0.6px)] [background-size:18px_18px]" />
       <div className="relative z-10 flex min-h-screen">
         <aside className="hidden w-[204px] shrink-0 border-r border-[#163B4A]/70 bg-[#111210]/95 px-5 py-6 lg:flex lg:flex-col">
@@ -871,7 +883,7 @@ export default function Home() {
               <div className="nav-group-label">PROTOCOL</div>
               <button
                 onClick={() => {
-                  window.location.href = "/launchpad";
+                  navigateTo("/launchpad");
                 }}
                 className="nav-item"
               >
@@ -879,7 +891,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => {
-                  window.location.href = "/private-primitives";
+                  navigateTo("/private-primitives");
                 }}
                 className="nav-item"
               >
@@ -887,7 +899,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => {
-                  window.location.href = "/private-markets";
+                  navigateTo("/private-markets");
                 }}
                 className="nav-item"
               >
@@ -898,7 +910,7 @@ export default function Home() {
               <div className="nav-group-label">RESOURCE</div>
               <button
                 onClick={() => {
-                  window.location.href = "/docs";
+                  navigateTo("/docs");
                 }}
                 className="nav-item"
               >
@@ -906,7 +918,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => {
-                  window.location.href = "/demo";
+                  navigateTo("/demo");
                 }}
                 className="nav-item"
               >
@@ -936,12 +948,14 @@ export default function Home() {
         </aside>
 
         <main className="min-w-0 flex-1">
-          <header className="relative flex items-center justify-between border-b border-white/10 px-5 py-4 sm:px-8 lg:justify-end lg:px-8">
+          <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/10 bg-[#111210]/80 px-5 py-4 backdrop-blur-xl supports-[backdrop-filter]:bg-[#111210]/65 sm:px-8 lg:justify-end lg:px-8">
             <div className="flex items-center gap-3 lg:hidden">
               <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                aria-label="Toggle menu"
-                className="rounded-lg border border-white/10 p-2"
+                onClick={() => setMobileOpen(open => !open)}
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-workspace-navigation"
+                className="rounded-lg border border-white/10 p-2 transition-colors hover:border-white/25 hover:bg-white/5"
               >
                 {mobileOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
@@ -990,7 +1004,7 @@ export default function Home() {
           </header>
 
           {mobileOpen && (
-            <div className="border-b border-white/10 bg-[#151D21] px-5 py-4 lg:hidden">
+            <div id="mobile-workspace-navigation" className="mobile-nav-panel border-b border-white/10 bg-[#151D21] px-5 py-4 lg:hidden">
               {isAuthenticated && (
                 <label className="mb-3 flex items-center justify-between gap-3 border-b border-white/10 pb-3 font-mono text-[10px] tracking-[0.12em] text-[#AEB8BE]">
                   WORKSPACE
@@ -1057,7 +1071,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => {
-                  window.location.href = "/launchpad";
+                  navigateTo("/launchpad");
                 }}
                 className="nav-item w-full"
               >
@@ -1065,7 +1079,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => {
-                  window.location.href = "/private-primitives";
+                  navigateTo("/private-primitives");
                 }}
                 className="nav-item w-full"
               >
@@ -1073,7 +1087,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => {
-                  window.location.href = "/private-markets";
+                  navigateTo("/private-markets");
                 }}
                 className="nav-item w-full"
               >
@@ -1081,7 +1095,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => {
-                  window.location.href = "/docs";
+                  navigateTo("/docs");
                 }}
                 className="nav-item w-full"
               >

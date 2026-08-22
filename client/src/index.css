@@ -67,11 +67,16 @@
   border-color: var(--border);
 }
 html {
+  min-height: 100%;
+  background: var(--veyra-obsidian);
+  color-scheme: dark;
   scroll-behavior: smooth;
   overscroll-behavior-y: contain;
 }
 body {
+  min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 86% 4%, rgb(240 86 58 / 16%), transparent 32%),
     radial-gradient(circle at 12% 92%, rgb(27 83 103 / 22%), transparent 38%),
@@ -82,6 +87,10 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+#root {
+  min-height: 100vh;
+  background-color: var(--veyra-obsidian);
 }
 
 /* Veyra glass system: presentation-only surfaces shared across every route. */
@@ -151,6 +160,34 @@ button {
 }
 button:active {
   transform: scale(0.97);
+}
+button:focus-visible,
+a[href]:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--veyra-vermilion);
+  outline-offset: 3px;
+}
+.route-loading-bar > div {
+  animation: route-progress 1.15s cubic-bezier(0.23, 1, 0.32, 1) infinite;
+}
+.route-loading-panel {
+  animation: route-panel-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.page-shell {
+  animation: page-shell-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes route-progress {
+  0% { transform: translateX(-120%); }
+  55%, 100% { transform: translateX(340%); }
+}
+@keyframes route-panel-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes page-shell-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .font-display {
   font-family: "Space Grotesk", sans-serif;
@@ -478,6 +515,14 @@ small {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+  }
+}
+@media (max-width: 640px) {
+  .route-loading-panel {
+    max-width: 22rem;
+  }
+  .page-shell {
+    animation-duration: 160ms;
   }
 }
 @layer base {

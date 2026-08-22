@@ -1867,14 +1867,14 @@ export async function createPrivateMarket(input: {
       entityId: id,
       action: "created",
     });
-  const rows = await db
-    .select()
+    const rows = await db
+    .select({ id: privateMarkets.id, slug: privateMarkets.slug })
     .from(privateMarkets)
     .where(eq(privateMarkets.id, id))
     .limit(1);
+  if (!rows[0]) throw new Error("Private market was created but could not be reloaded");
   return rows[0];
 }
-
 export async function updatePrivateMarketStatus(input: {
   workspaceId: number;
   actorUserId: number;
@@ -2135,14 +2135,14 @@ export async function createLaunchpadProject(input: {
       entityId: id,
       action: "created",
     });
-  const rows = await db
-    .select()
+    const rows = await db
+    .select({ id: launchpadProjects.id, slug: launchpadProjects.slug })
     .from(launchpadProjects)
     .where(eq(launchpadProjects.id, id))
     .limit(1);
+  if (!rows[0]) throw new Error("Launchpad project was created but could not be reloaded");
   return rows[0];
 }
-
 export async function getLaunchpadProjectOps(
   workspaceId: number,
   projectId: number

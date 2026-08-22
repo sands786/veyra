@@ -20,10 +20,16 @@ const SignIn = lazy(() => import("./pages/SignIn"));
 
 function RouteLoadingBoundary() {
   return (
-    <main className="grid min-h-screen place-items-center bg-[#111210] px-6 text-[#F3EEE5]">
-      <div className="rounded-[18px] border border-white/15 bg-[#151D21] px-6 py-5 text-center shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
+    <main className="route-loading-shell grid min-h-screen place-items-center bg-[#111210] px-6 text-[#F3EEE5]" aria-live="polite" aria-busy="true">
+      <div className="route-loading-panel w-full max-w-sm border border-white/15 bg-[#151D21] px-6 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
+        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full border border-[#F0563A]/40 bg-[#201815] text-[#F0563A]">
+          <span className="h-2 w-2 rounded-full bg-[#F0563A] shadow-[0_0_16px_#F0563A]" />
+        </div>
         <div className="font-mono text-[10px] tracking-[0.16em] text-[#F0563A]">VEYRA / SECURE ROUTE</div>
         <p className="mt-2 text-sm text-[#AEB8BE]">Preparing your private workspace…</p>
+        <div className="route-loading-bar mt-5 h-1 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
+          <div className="h-full w-1/3 rounded-full bg-[#F0563A]" />
+        </div>
       </div>
     </main>
   );
@@ -32,7 +38,7 @@ function RouteLoadingBoundary() {
 function DemoModeIndicator() {
   const { isDemoMode, exitDemo } = useDemoMode();
   if (!isDemoMode) return null;
-  return <div className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-[#F0563A]/40 bg-[#201815]/95 px-4 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] shadow-2xl backdrop-blur"><span>DEMO MODE / SIMULATED ONLY</span><button onClick={() => { window.location.href = "/demo"; }} className="underline">OPEN TOUR</button><button onClick={() => { exitDemo(); window.location.reload(); }} className="text-[#CFC7BC]">EXIT</button></div>;
+  return <div className="fixed bottom-4 left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-[#F0563A]/40 bg-[#201815]/95 px-4 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] shadow-2xl backdrop-blur" role="status"><span className="whitespace-nowrap">DEMO MODE / SIMULATED ONLY</span><button onClick={() => { window.location.href = "/demo"; }} className="rounded-full px-2 py-1 underline underline-offset-2 transition-colors hover:bg-[#F0563A]/15" aria-label="Open demo tour">OPEN TOUR</button><button onClick={() => { exitDemo(); window.location.reload(); }} className="rounded-full px-2 py-1 text-[#CFC7BC] transition-colors hover:bg-white/10" aria-label="Exit demo mode">EXIT</button></div>;
 }
 
 function Router() {
