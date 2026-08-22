@@ -438,3 +438,4 @@
 - [x] Polish Veyra user experience with smoother loading states, button feedback, navigation transitions, responsive spacing, and verified desktop/mobile behavior
 - [x] Fix Private Markets market-creation response-transform failure UX with safe actionable feedback and regression coverage
 - [x] Fix Private Markets and Launchpad response-transform failures and white loading/scroll flashes across the route shells
+- [x] Fix deployed Vercel account-registration response-transform failure and verify signup on mobile and desktop

@@ -36,10 +36,14 @@ const accountEmail = z.string().trim().email().max(320);
 const accountPassword = z.string().min(12).max(128);
 const mainnetNetwork = z.literal("mainnet");
 
+function authUserPayload(user: { id: number; openId: string; name: string | null; email: string | null; loginMethod: string | null; role: "user" | "admin" }) {
+  return { id: user.id, openId: user.openId, name: user.name, email: user.email, loginMethod: user.loginMethod, role: user.role };
+}
+
 export const appRouter = router({
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(({ ctx }) => ctx.user),
+    me: publicProcedure.query(({ ctx }) => ctx.user ? authUserPayload(ctx.user) : null),
     register: publicProcedure.input(z.object({ name: z.string().trim().min(2).max(120), email: accountEmail, password: accountPassword })).mutation(async ({ ctx, input }) => {
       const email = normalizeAccountEmail(input.email);
       const user = await createLocalAccount({
@@ -50,7 +54,7 @@ export const appRouter = router({
       });
       const token = await createVeyraSessionToken(user.openId);
       ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: VEYRA_SESSION_MS });
-      return user;
+      return authUserPayload(user);
     }),
     signIn: publicProcedure.input(z.object({ email: accountEmail, password: accountPassword })).mutation(async ({ ctx, input }) => {
       const account = await getLocalAccountByEmail(normalizeAccountEmail(input.email));
@@ -59,7 +63,7 @@ export const appRouter = router({
       await touchUserLastSignedIn(account.user.id);
       const token = await createVeyraSessionToken(account.user.openId);
       ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: VEYRA_SESSION_MS });
-      return account.user;
+      return authUserPayload(account.user);
     }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);

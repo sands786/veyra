@@ -66,7 +66,7 @@ describe("Veyra-owned auth router", () => {
     const { ctx, cookies } = context();
     const result = await appRouter.createCaller(ctx).auth.register({ name: "Veyra Operator", email: " Operator@Veyra.Test ", password: "correct horse battery staple" });
 
-    expect(result).toEqual(user);
+    expect(result).toEqual({ id: user.id, openId: user.openId, name: user.name, email: user.email, loginMethod: user.loginMethod, role: user.role });
     expect(dbMocks.createLocalAccount).toHaveBeenCalledWith(expect.objectContaining({ email: "operator@veyra.test", passwordHash: "scrypt$16384$8$1$fake$verifier" }));
     expect(cookies).toEqual([expect.objectContaining({ name: COOKIE_NAME, value: "session-local_operator", options: expect.objectContaining({ httpOnly: true, secure: true, maxAge: authMocks.VEYRA_SESSION_MS }) })]);
   });
@@ -82,7 +82,7 @@ describe("Veyra-owned auth router", () => {
     const { ctx, cookies } = context();
     const result = await appRouter.createCaller(ctx).auth.signIn({ email: "operator@veyra.test", password: "correct horse battery staple" });
 
-    expect(result).toEqual(user);
+    expect(result).toEqual({ id: user.id, openId: user.openId, name: user.name, email: user.email, loginMethod: user.loginMethod, role: user.role });
     expect(dbMocks.touchUserLastSignedIn).toHaveBeenCalledWith(user.id);
     expect(cookies[0]).toMatchObject({ name: COOKIE_NAME, value: "session-local_operator" });
   });
