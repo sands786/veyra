@@ -17,6 +17,8 @@ describe("security audit hardening contracts", () => {
     const source = fs.readFileSync(path.join(root, "server", "_core", "index.ts"), "utf8");
     expect(source).toContain('app.use("/api/trpc", (req, res, next) =>');
     expect(source).toContain('fetchSite === "cross-site"');
+    expect(source).toContain('const forwardedHost = String(req.headers["x-forwarded-host"] || "")');
+    expect(source).toContain('const expectedHost = forwardedHost || req.headers.host;');
     expect(source).toContain('error: "cross-site-request-blocked"');
   });
 

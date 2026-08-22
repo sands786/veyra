@@ -89,8 +89,12 @@ async function startServer() {
     const forwardedProto = String(req.headers["x-forwarded-proto"] || "")
       .split(",")[0]
       .trim();
+    const forwardedHost = String(req.headers["x-forwarded-host"] || "")
+      .split(",")[0]
+      .trim();
     const protocol = forwardedProto || req.protocol;
-    const expectedOrigin = req.headers.host ? `${protocol}://${req.headers.host}` : undefined;
+    const expectedHost = forwardedHost || req.headers.host;
+    const expectedOrigin = expectedHost ? `${protocol}://${expectedHost}` : undefined;
     const fetchSite = String(req.headers["sec-fetch-site"] || "").toLowerCase();
     const crossSite = fetchSite === "cross-site" || fetchSite === "cross-origin";
     if ((origin && expectedOrigin && origin !== expectedOrigin) || crossSite) {

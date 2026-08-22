@@ -439,3 +439,5 @@
 - [x] Fix Private Markets market-creation response-transform failure UX with safe actionable feedback and regression coverage
 - [x] Fix Private Markets and Launchpad response-transform failures and white loading/scroll flashes across the route shells
 - [x] Fix deployed Vercel account-registration response-transform failure and verify signup on mobile and desktop
+- [x] Resolve persistent live Vercel signup server/transform error after the first JSON-safe auth response fix; screenshot was from retired `mma-gold.vercel.app`, while corrected release is live at `veyra-gamma-gold.vercel.app`
+- [ ] Resolve signup transform failure still reproduced on the current `veyra-gamma-gold.vercel.app` deployment after the JSON-safe auth projection
