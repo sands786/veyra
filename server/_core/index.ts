@@ -95,12 +95,13 @@ async function startServer() {
     const protocol = forwardedProto || req.protocol;
     const expectedHost = forwardedHost || req.headers.host;
     const expectedOrigin = expectedHost ? `${protocol}://${expectedHost}` : undefined;
-    const trustedProxyOrigins = new Set(
-      (process.env.TRUSTED_BROWSER_ORIGINS || "https://veyra-gamma-gold.vercel.app")
+    const trustedProxyOrigins = new Set([
+      ...(process.env.TRUSTED_BROWSER_ORIGINS || "")
         .split(",")
         .map(value => value.trim())
         .filter(Boolean),
-    );
+      "https://veyra-gamma-gold.vercel.app",
+    ]);
     const originIsTrustedProxy = Boolean(origin && trustedProxyOrigins.has(origin));
     const fetchSite = String(req.headers["sec-fetch-site"] || "").toLowerCase();
     const crossSite = fetchSite === "cross-site" || fetchSite === "cross-origin";
