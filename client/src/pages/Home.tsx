@@ -959,10 +959,10 @@ export default function Home() {
               >
                 {mobileOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
-              <VeyraBrand compact />
+              <VeyraBrand compact mobileMarkOnly />
             </div>
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex min-w-0 items-center justify-end gap-2 sm:gap-3">
               {!isAuthenticated ? (
                 <>
                   <Button
@@ -986,7 +986,7 @@ export default function Home() {
                   SIGN OUT
                 </Button>
               )}
-              <div className="rounded-full border border-[#F0563A]/40 bg-[#201815] px-3 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A]">STARKNET MAINNET</div>
+              <div className="shrink-0 rounded-full border border-[#F0563A]/40 bg-[#201815] px-2 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] sm:px-3"><span className="sm:hidden">MAINNET</span><span className="hidden sm:inline">STARKNET MAINNET</span></div>
               {isAuthenticated && (
                 <Button
                   disabled={isWalletActionLocked(walletConnecting)}

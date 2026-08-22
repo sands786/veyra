@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { lazy, Suspense } from "react";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { DemoModeProvider, useDemoMode } from "./contexts/DemoModeContext";
@@ -37,8 +37,9 @@ function RouteLoadingBoundary() {
 
 function DemoModeIndicator() {
   const { isDemoMode, exitDemo } = useDemoMode();
+  const [, setLocation] = useLocation();
   if (!isDemoMode) return null;
-  return <div className="fixed bottom-4 left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-[#F0563A]/40 bg-[#201815]/95 px-4 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] shadow-2xl backdrop-blur" role="status"><span className="whitespace-nowrap">DEMO MODE / SIMULATED ONLY</span><button onClick={() => { window.location.href = "/demo"; }} className="rounded-full px-2 py-1 underline underline-offset-2 transition-colors hover:bg-[#F0563A]/15" aria-label="Open demo tour">OPEN TOUR</button><button onClick={() => { exitDemo(); window.location.reload(); }} className="rounded-full px-2 py-1 text-[#CFC7BC] transition-colors hover:bg-white/10" aria-label="Exit demo mode">EXIT</button></div>;
+  return <div className="fixed bottom-4 left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-[#F0563A]/40 bg-[#201815]/95 px-4 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] shadow-2xl backdrop-blur" role="status"><span className="whitespace-nowrap">DEMO MODE / SIMULATED ONLY</span><button onClick={() => setLocation("/demo")} className="rounded-full px-2 py-1 underline underline-offset-2 transition-colors hover:bg-[#F0563A]/15" aria-label="Open demo tour">OPEN TOUR</button><button onClick={() => { exitDemo(); setLocation("/"); }} className="rounded-full px-2 py-1 text-[#CFC7BC] transition-colors hover:bg-white/10" aria-label="Exit demo mode">EXIT</button></div>;
 }
 
 function Router() {

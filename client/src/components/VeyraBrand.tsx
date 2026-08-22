@@ -1,5 +1,6 @@
 type VeyraBrandProps = {
   compact?: boolean;
+  mobileMarkOnly?: boolean;
   className?: string;
 };
 
@@ -33,6 +34,7 @@ function CinematicVeyraMark({ className }: { className: string }) {
 /** The product brand lockup mirrors the teaser: shield, vermilion signal bar, white uppercase wordmark, emerald descriptor. */
 export function VeyraBrand({
   compact = false,
+  mobileMarkOnly = false,
   className = "",
 }: VeyraBrandProps) {
   const markSize = compact ? "h-8 w-7" : "h-11 w-9";
@@ -41,7 +43,7 @@ export function VeyraBrand({
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`} aria-label="Veyra">
       <CinematicVeyraMark className={`${markSize} shrink-0 drop-shadow-[0_0_18px_rgba(112,212,157,.22)]`} />
-      <span className={`font-display ${wordmarkSize} font-semibold leading-none tracking-[-0.055em] text-[#F3EEE5]`}>Veyra</span>
+      <span className={`${mobileMarkOnly ? "hidden sm:inline" : ""} font-display ${wordmarkSize} font-semibold leading-none tracking-[-0.055em] text-[#F3EEE5]`}>Veyra</span>
     </div>
   );
 }

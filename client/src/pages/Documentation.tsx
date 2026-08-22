@@ -15,7 +15,7 @@ import {
   Sparkles,
   WalletCards,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useDemoMode } from "@/contexts/DemoModeContext";
 import { VeyraBrand } from "@/components/VeyraBrand";
 import {
@@ -81,6 +81,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export default function Documentation() {
   const { isDemoMode, exitDemo } = useDemoMode();
+  const [, setLocation] = useLocation();
   const [activeChapter, setActiveChapter] = useState("overview");
   const [simulationStep, setSimulationStep] = useState(2);
   const [revealPrivate, setRevealPrivate] = useState(false);
@@ -146,7 +147,7 @@ export default function Documentation() {
               <button
                 onClick={() => {
                   exitDemo();
-                  window.location.href = "/";
+                  setLocation("/");
                 }}
                 className="w-full border border-[#F0563A]/40 px-3 py-2 text-left font-mono text-[9px] uppercase tracking-[0.12em] text-[#F0563A]"
               >
