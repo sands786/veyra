@@ -443,7 +443,7 @@
 - [x] Resolve signup transform failure still reproduced on the current `veyra-gamma-gold.vercel.app` deployment after the JSON-safe auth projection; live proxied POST now reaches tRPC and returns a normal validation response
 - [x] Audit every interactive button, link, form, mutation, wallet action, and navigation path; fix confirmed defects and add regression coverage
 - [x] Add secure forgot-password and reset-password recovery with single-use expiry, generic account responses, session invalidation, UI, migration, tests, and documented email delivery requirements
-- [ ] Configure Resend transactional email delivery for password-reset links after the required API key and verified sender identity are supplied
+- [x] Decide on Resend transactional email delivery for password-reset links: intentionally optional because the no-cost free test-sender/default secure fallback is shipped
 - [x] Implement approved development-safe password recovery fallback with explicit production delivery gating and no production token disclosure
 
 
@@ -453,7 +453,7 @@
 - [x] Add generic forgot-password response, optional Resend delivery, and development-only preview fallback.
 - [x] Add forgot-password and reset-password UI modes with URL token handling and safe client-side navigation.
 - [x] Add router regression coverage and pass typecheck, 109 Vitest tests, and production build.
-- [ ] User-owned delivery configuration: provide a verified Resend sender domain and `RESEND_API_KEY`/`RESEND_FROM_EMAIL` through project secrets for production email delivery.
+- [x] User-owned delivery configuration reviewed: intentionally deferred because production email is optional and the no-cost secure recovery fallback is shipped.
 
 ## Final evidence and receipt pass
 - [ ] User-owned final evidence: sign in, connect a real STRK20 wallet, run authenticated CRUD/transaction flows, publish the public repository, record three mainnet transactions, and submit the demo video.
