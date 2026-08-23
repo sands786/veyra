@@ -16,11 +16,19 @@ The official wallet-standard request path is capability-based. Veyra may request
 
 A wallet can expose a generic Starknet wallet API and still reject `wallet_strk20InvokeTransaction` with `NOT_REGISTERED`. This response means the STRK20 privacy flow has not been registered or initialized for the connected wallet, asset, or privacy-pool deployment; it does not create a transaction hash and must not advance a route to submitted or confirmed. Veyra now surfaces this distinction explicitly and remains fail-closed.
 
-The official Starknet launch material describes the first live STRK20 phase as wallet-enabled privacy through supported integrations including Ready X and Xverse. A Braavos connection should therefore be treated as compatible only when it explicitly supports the required STRK20 action and the relevant registration flow; a generic `request` method alone is not sufficient evidence.
+The official Starknet launch material describes the first live STRK20 phase as wallet-enabled privacy through Ready X and Xverse. A Braavos connection should therefore be treated as compatible only when it explicitly supports the required STRK20 action and the relevant registration flow; a generic `request` method alone is not sufficient evidence. A Braavos `Not implemented` response means it connected but did not create a private-action transaction.
+
+## Wallet-native transaction path
+
+For a real first-phase STRK20 transaction, the user must use the Privacy or Shield flow inside Ready X or Xverse on Starknet Mainnet. The user selects a supported asset, reviews the exact wallet-provided amount, fee, network, and privacy-pool details, and approves the wallet-native shielding action. After it confirms, a private transfer may be created through the same supported wallet flow. The user must provide Veyra only the resulting public transaction hash for receipt verification.
+
+Veyra's route-builder private-action request remains fail-closed until an official developer-facing STRK20 wallet API/SDK release, verified privacy-pool deployment configuration, and compatible wallet action support are available. Veyra must not route around this limitation with a public ERC-20 transfer or an unverified contract call.
 
 ## User-owned completion steps
 
-The user must provide or deploy the verified Mainnet privacy-pool contract using the pinned official STRK20 source and release. The user must configure the public deployment values in the deployment environment, connect a Starknet Mainnet wallet, and approve a small intended action only after inspecting the wallet request. The user must then record the returned hash, confirm the contract and token on Starkscan, wait for a receipt, and run Veyra receipt verification. Only the verified receipt should move a transaction to confirmed or settle an eligible route.
+For wallet-native evidence, the user must connect Ready X or Xverse on Starknet Mainnet, complete a small intended Shield action only after inspecting the wallet request, record the returned hash, confirm the contract and token on Starkscan, wait for a receipt, and run Veyra receipt verification. Only the verified receipt should be recorded as confirmed evidence.
+
+For a future Veyra-owned contract integration, the user must separately provide or deploy the verified Mainnet privacy-pool contract using the pinned official STRK20 source and release, then configure the public deployment values in the environment. This is not a prerequisite for using the official wallet-native Ready X/Xverse flow.
 
 Never provide a seed phrase, private key, password, recovery code, or wallet backup to Veyra or any third party. Never use a testnet address in the Mainnet configuration. Never treat a proof card, saved route, submitted hash, or UI badge as proof of settlement without a verified Mainnet receipt.
 
@@ -34,3 +42,4 @@ For each real transaction, retain the following public evidence: network (`Stark
 2. [STRK20: Make all ERC-20 tokens private](https://www.starknet.io/blog/make-all-erc-20-tokens-private-with-strk20/)
 3. [Official Starknet privacy repository](https://github.com/starkware-libs/starknet-privacy)
 4. [Starknet ERC-20 guidance](https://docs.starknet.io/build/starkzap/erc20)
+5. [Privacy is now live on Starknet: supported wallet phase](https://www.starknet.io/blog/privacy-live-on-starknet/)

@@ -618,3 +618,8 @@
 
 - [x] Confirm that the official first-phase wallet privacy flow is exposed through Ready X and Xverse, while broader wallet and developer API support remains a future expansion.
 - [x] Align Veyra’s unsupported-action guidance and regression coverage with that verified wallet-support boundary without weakening Mainnet execution safeguards.
+
+## Wallet-native Mainnet evidence path
+
+- [ ] Receive a user-approved Ready X or Xverse STRK20 privacy transaction hash created through the supported wallet-native shield/transfer flow.
+- [ ] Verify the submitted hash and receipt on Starknet Mainnet, then record only public evidence in Veyra’s proof materials.
