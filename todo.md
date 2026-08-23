@@ -565,3 +565,17 @@
 - [x] Diagnose the reported Starknet Mainnet STRK20 `NOT_REGISTERED` wallet response and identify it as a protocol registration/SDK readiness boundary rather than a chain-ID capability failure.
 - [x] Apply only a verified safe correction: add explicit NOT_REGISTERED guidance stating that no transaction was created and preserve fail-closed Mainnet execution; do not enable unverified contract execution.
 - [x] Re-run regression, TypeScript, production build, formatting, and diff-hygiene verification after the investigation.
+
+## Institutional Web3 brand and full-product audit
+
+- [x] Audit current Veyra routes, visible controls, forms, wallet states, Demo Mode boundaries, loading/error/empty states, and responsive surfaces; the server-authoritative workspace header, event-driven auth triggers, and Mainnet gates were verified.
+- [x] Refine Veyra’s institutional Web3 brand system with semantic brand lockup labeling, a recurring Copper Veil motif, and preserved privacy-outcome product language without changing core financial semantics.
+- [x] Fix confirmed defects from the audit: Demo Mode mobile header clipping, missing semantic brand labeling, and targeted non-submit button type safety; preserve fail-closed wallet behavior.
+- [x] Add regression coverage for the verified brand and responsive fixes and re-run the complete production verification suite.
+
+## Institutional audit findings
+
+- [x] Verify workspace switching is server-authoritative through the validated `x-workspace-id` request header and membership-scoped resolver; no refactor was necessary.
+- [x] Verify every authentication trigger is event-driven and no stale OAuth helper remains.
+- [x] Audit secondary pages for consistent institutional brand chrome, landmarks, focus states, and query retry/empty behavior; no new blocking defect was confirmed.
+- [x] Audit mobile navigation semantics and icon-only control labels; confirmed the Home menu semantics and fixed the Demo Mode mobile control rail clipping.

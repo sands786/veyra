@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, CircleDollarSign, Copy, Fingerprint, LockKeyhole, Play, RotateCcw, Shield, WalletCards } from "lucide-react";
+import {
+  Check,
+  CircleDollarSign,
+  Copy,
+  Fingerprint,
+  LockKeyhole,
+  Play,
+  RotateCcw,
+  Shield,
+  WalletCards,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -7,20 +17,42 @@ import { DEMO_TABS, nextDemoState } from "@shared/demo";
 import { useDemoMode } from "@/contexts/DemoModeContext";
 import { WorkspaceReturnButton } from "@/components/WorkspaceReturnButton";
 
-type DemoTab = "payroll" | "operations" | "treasury" | "claims" | "launchpad" | "proof";
+type DemoTab =
+  | "payroll"
+  | "operations"
+  | "treasury"
+  | "claims"
+  | "launchpad"
+  | "proof";
 
 const tabs = DEMO_TABS satisfies ReadonlyArray<{ id: DemoTab; label: string }>;
 
 const demoProjects = [
-  { name: "Stealth protocol round", status: "LIVE", target: "250000 USDC", progress: 68 },
-  { name: "Private builder grants", status: "DRAFT", target: "75000 STRK", progress: 12 },
+  {
+    name: "Stealth protocol round",
+    status: "LIVE",
+    target: "250000 USDC",
+    progress: 68,
+  },
+  {
+    name: "Private builder grants",
+    status: "DRAFT",
+    target: "75000 STRK",
+    progress: 12,
+  },
 ];
 
 export default function DemoMode() {
   const { enterDemo, exitDemo } = useDemoMode();
   const [tab, setTab] = useState<DemoTab>("payroll");
-  useEffect(() => { enterDemo(); }, [enterDemo]);
-  const [events, setEvents] = useState<string[]>(["Demo workspace initialized", "Privacy boundary verified", "STRK20 adapter simulated"]);
+  useEffect(() => {
+    enterDemo();
+  }, [enterDemo]);
+  const [events, setEvents] = useState<string[]>([
+    "Demo workspace initialized",
+    "Privacy boundary verified",
+    "STRK20 adapter simulated",
+  ]);
   const [connected, setConnected] = useState(false);
   const [running, setRunning] = useState(false);
   const [amount, setAmount] = useState("2840");
@@ -32,43 +64,737 @@ export default function DemoMode() {
 
   const selected = demoProjects[selectedProject];
   const log = (message: string) => {
-    setEvents((current) => [message, ...current].slice(0, 8));
+    setEvents(current => [message, ...current].slice(0, 8));
     toast(message);
   };
   const runAction = (message: string) => {
     setRunning(true);
-    window.setTimeout(() => { setRunning(false); log(message); }, 450);
+    window.setTimeout(() => {
+      setRunning(false);
+      log(message);
+    }, 450);
   };
   const reset = () => {
-    setConnected(false); setRunning(false); setAmount("2840"); setSelectedProject(0); setClaimStatus("UNREDEEMED"); setReleaseStatus("PENDING"); setProofPublished(false); setSimulationError(null); setEvents(["Demo workspace reset", "No production data was changed"]); toast("Demo workspace reset.");
+    setConnected(false);
+    setRunning(false);
+    setAmount("2840");
+    setSelectedProject(0);
+    setClaimStatus("UNREDEEMED");
+    setReleaseStatus("PENDING");
+    setProofPublished(false);
+    setSimulationError(null);
+    setEvents(["Demo workspace reset", "No production data was changed"]);
+    toast("Demo workspace reset.");
   };
   const demoHash = useMemo(() => `0xdemo${"a1b2c3d4e5f6"}`, []);
 
-  return <main className="min-h-screen bg-[#111210] pb-28 text-[#F3EEE5] sm:pb-24"><header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[#F0563A]/30 bg-[#111210]/95 px-5 py-4 backdrop-blur sm:px-8"><div className="flex items-center gap-3"><WorkspaceReturnButton onBeforeNavigate={exitDemo} className="text-[#AEB8BE] hover:bg-white/5 hover:text-[#F3EEE5]" /><span className="rounded-full border border-[#F0563A]/50 bg-[#F0563A]/10 px-3 py-1 font-mono text-[9px] tracking-[0.12em] text-[#F0563A]">DEMO MODE / SIMULATED ONLY</span></div><div className="flex items-center gap-2"><Button variant="outline" onClick={() => setSimulationError(`${tab.toUpperCase()} simulated adapter rejected a request`) } className="h-9 rounded-full border-[#F0563A]/40 px-3 font-mono text-[9px] text-[#F0563A]"><CircleDollarSign size={12} className="mr-2" /> SIMULATE ERROR</Button><Button variant="outline" onClick={reset} className="h-9 rounded-full border-white/15 px-3 font-mono text-[9px] text-[#CFC7BC]"><RotateCcw size={12} className="mr-2" /> RESET</Button><Button onClick={() => { setConnected((value) => !value); log(connected ? "Demo wallet disconnected" : "Demo wallet connected"); }} className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[9px] text-[#111210] hover:bg-[#FF7257]"><WalletCards size={13} className="mr-2" /> {connected ? "0xDEMO…BEEF" : "CONNECT DEMO WALLET"}</Button><button onClick={() => toast(connected ? "Demo wallet action retried successfully." : "Demo wallet connection failed. Retry the simulated connection.")} className="hidden font-mono text-[9px] text-[#F0563A] sm:block">{connected ? "RETRY WALLET" : "WALLET ERROR PATH"}</button></div></header><div className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 lg:px-12"><div className="grid gap-6 lg:grid-cols-[.7fr_1.3fr]"><section><div className="eyebrow">VEYRA / GUIDED PRODUCT TOUR</div><h1 className="mt-4 max-w-xl font-display text-[clamp(3.5rem,8vw,7.5rem)] font-bold leading-[.84] tracking-[-.09em]">Touch every<br /><span className="text-[#F0563A]">privacy surface.</span></h1><p className="mt-6 max-w-xl text-sm leading-7 text-[#BDB5A9]">Demo Mode uses local deterministic state to show the product’s complete operating loop. It never calls production mutations, never stores a private key, and never creates a real Starknet transaction.</p><div className="mt-6 grid gap-3 sm:grid-cols-3"><div className="rounded-[14px] border border-white/10 bg-[#151D21] p-4"><Fingerprint size={16} className="text-[#F0563A]" /><div className="mt-4 font-display text-2xl">06</div><div className="font-mono text-[9px] text-[#7F8F97]">SURFACES</div></div><div className="rounded-[14px] border border-white/10 bg-[#151D21] p-4"><Shield size={16} className="text-[#70D49D]" /><div className="mt-4 font-display text-2xl">00</div><div className="font-mono text-[9px] text-[#7F8F97]">REAL TXNS</div></div><div className="rounded-[14px] border border-white/10 bg-[#151D21] p-4"><CircleDollarSign size={16} className="text-[#F0563A]" /><div className="mt-4 font-display text-2xl">100%</div><div className="font-mono text-[9px] text-[#7F8F97]">LOCAL STATE</div></div></div></section><section className="rounded-[20px] border border-white/10 bg-[#151D21] p-5 sm:p-7"><div className="flex flex-wrap gap-2 border-b border-white/10 pb-4">{tabs.map((item) => <button key={item.id} onClick={() => setTab(item.id)} className={`rounded-full px-3 py-2 font-mono text-[9px] tracking-[0.1em] ${tab === item.id ? "bg-[#F3EEE5] text-[#111210]" : "border border-white/15 text-[#AEB8BE] hover:text-[#F3EEE5]"}`}>{item.label}</button>)}</div>{simulationError && <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[#F0563A]/40 bg-[#F0563A]/[0.08] p-3 font-mono text-[9px] text-[#F0563A]"><span>SIMULATED ERROR / {simulationError}</span><button onClick={() => { setSimulationError(null); log("Simulation recovered after retry"); }} className="underline">RETRY</button></div>}<div className="mt-7 min-h-[330px]">{tab === "payroll" && <DemoPayrollStateful amount={amount} setAmount={setAmount} running={running} onRun={() => runAction("Private payroll route simulated")}/>} {tab === "operations" && <DemoOperations running={running} onRun={() => runAction("Weekly payroll schedule paused and resumed")}/>} {tab === "treasury" && <DemoTreasury running={running} onRun={() => runAction("Treasury policy dry-run passed")}/>} {tab === "claims" && <DemoClaims status={claimStatus} onRun={() => { setClaimStatus(nextDemoState(claimStatus, "redeem-claim")); runAction("Private claim link redeemed") }}/>} {tab === "launchpad" && <DemoLaunchpad selected={selected} selectedProject={selectedProject} setSelectedProject={setSelectedProject} releaseStatus={releaseStatus} onRelease={() => { setReleaseStatus(nextDemoState(releaseStatus, "approve-release")); runAction("Milestone release approved in demo governance") }}/>} {tab === "proof" && <DemoProof published={proofPublished} hash={demoHash} onPublish={() => { nextDemoState("READY", "publish-proof"); setProofPublished(true); runAction("Aggregate public proof published") }}/>}</div></section></div><MainnetBoundary /><section className="mt-6 rounded-[16px] border border-white/10 bg-[#151D21] p-5"><div className="flex items-center justify-between gap-3"><div><div className="font-mono text-[9px] tracking-[0.14em] text-[#AEB8BE]">SIMULATION LEDGER</div><p className="mt-2 text-sm text-[#CFC7BC]">Every action is local, reversible, and visibly labeled as simulated.</p></div><Play size={18} className="text-[#F0563A]" /></div><div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{events.map((event, index) => <div key={`${event}-${index}`} className="rounded-[10px] border border-white/5 bg-[#163B4A] p-3 font-mono text-[9px] text-[#AEB8BE]"><Check size={12} className="mb-2 text-[#70D49D]" />{event}</div>)}</div></section></div></main>;
+  return (
+    <main className="min-h-screen bg-[#111210] pb-28 text-[#F3EEE5] sm:pb-24">
+      <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-[#F0563A]/30 bg-[#111210]/95 px-5 py-4 backdrop-blur sm:px-8">
+        <div className="flex items-center gap-3">
+          <WorkspaceReturnButton
+            onBeforeNavigate={exitDemo}
+            className="text-[#AEB8BE] hover:bg-white/5 hover:text-[#F3EEE5]"
+          />
+          <span className="rounded-full border border-[#F0563A]/50 bg-[#F0563A]/10 px-3 py-1 font-mono text-[9px] tracking-[0.12em] text-[#F0563A]">
+            DEMO MODE / SIMULATED ONLY
+          </span>
+        </div>
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+          <Button
+            variant="outline"
+            onClick={() =>
+              setSimulationError(
+                `${tab.toUpperCase()} simulated adapter rejected a request`
+              )
+            }
+            className="h-9 rounded-full border-[#F0563A]/40 px-3 font-mono text-[9px] text-[#F0563A]"
+          >
+            <CircleDollarSign size={12} className="mr-2" /> SIMULATE ERROR
+          </Button>
+          <Button
+            variant="outline"
+            onClick={reset}
+            className="h-9 rounded-full border-white/15 px-3 font-mono text-[9px] text-[#CFC7BC]"
+          >
+            <RotateCcw size={12} className="mr-2" /> RESET
+          </Button>
+          <Button
+            onClick={() => {
+              setConnected(value => !value);
+              log(
+                connected ? "Demo wallet disconnected" : "Demo wallet connected"
+              );
+            }}
+            className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[9px] text-[#111210] hover:bg-[#FF7257]"
+          >
+            <WalletCards size={13} className="mr-2" />{" "}
+            {connected ? "0xDEMO…BEEF" : "CONNECT DEMO WALLET"}
+          </Button>
+          <button
+            type="button"
+            onClick={() =>
+              toast(
+                connected
+                  ? "Demo wallet action retried successfully."
+                  : "Demo wallet connection failed. Retry the simulated connection."
+              )
+            }
+            className="hidden font-mono text-[9px] text-[#F0563A] sm:block"
+          >
+            {connected ? "RETRY WALLET" : "WALLET ERROR PATH"}
+          </button>
+        </div>
+      </header>
+      <div className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 lg:px-12">
+        <div className="grid gap-6 lg:grid-cols-[.7fr_1.3fr]">
+          <section>
+            <div className="eyebrow">VEYRA / GUIDED PRODUCT TOUR</div>
+            <h1 className="mt-4 max-w-xl font-display text-[clamp(3.5rem,8vw,7.5rem)] font-bold leading-[.84] tracking-[-.09em]">
+              Touch every
+              <br />
+              <span className="text-[#F0563A]">privacy surface.</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-sm leading-7 text-[#BDB5A9]">
+              Demo Mode uses local deterministic state to show the product’s
+              complete operating loop. It never calls production mutations,
+              never stores a private key, and never creates a real Starknet
+              transaction.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[14px] border border-white/10 bg-[#151D21] p-4">
+                <Fingerprint size={16} className="text-[#F0563A]" />
+                <div className="mt-4 font-display text-2xl">06</div>
+                <div className="font-mono text-[9px] text-[#7F8F97]">
+                  SURFACES
+                </div>
+              </div>
+              <div className="rounded-[14px] border border-white/10 bg-[#151D21] p-4">
+                <Shield size={16} className="text-[#70D49D]" />
+                <div className="mt-4 font-display text-2xl">00</div>
+                <div className="font-mono text-[9px] text-[#7F8F97]">
+                  REAL TXNS
+                </div>
+              </div>
+              <div className="rounded-[14px] border border-white/10 bg-[#151D21] p-4">
+                <CircleDollarSign size={16} className="text-[#F0563A]" />
+                <div className="mt-4 font-display text-2xl">100%</div>
+                <div className="font-mono text-[9px] text-[#7F8F97]">
+                  LOCAL STATE
+                </div>
+              </div>
+            </div>
+          </section>
+          <section className="rounded-[20px] border border-white/10 bg-[#151D21] p-5 sm:p-7">
+            <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4">
+              {tabs.map(item => (
+                <button
+                  type="button"
+                  key={item.id}
+                  onClick={() => setTab(item.id)}
+                  className={`rounded-full px-3 py-2 font-mono text-[9px] tracking-[0.1em] ${tab === item.id ? "bg-[#F3EEE5] text-[#111210]" : "border border-white/15 text-[#AEB8BE] hover:text-[#F3EEE5]"}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            {simulationError && (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[#F0563A]/40 bg-[#F0563A]/[0.08] p-3 font-mono text-[9px] text-[#F0563A]">
+                <span>SIMULATED ERROR / {simulationError}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSimulationError(null);
+                    log("Simulation recovered after retry");
+                  }}
+                  className="underline"
+                >
+                  RETRY
+                </button>
+              </div>
+            )}
+            <div className="mt-7 min-h-[330px]">
+              {tab === "payroll" && (
+                <DemoPayrollStateful
+                  amount={amount}
+                  setAmount={setAmount}
+                  running={running}
+                  onRun={() => runAction("Private payroll route simulated")}
+                />
+              )}{" "}
+              {tab === "operations" && (
+                <DemoOperations
+                  running={running}
+                  onRun={() =>
+                    runAction("Weekly payroll schedule paused and resumed")
+                  }
+                />
+              )}{" "}
+              {tab === "treasury" && (
+                <DemoTreasury
+                  running={running}
+                  onRun={() => runAction("Treasury policy dry-run passed")}
+                />
+              )}{" "}
+              {tab === "claims" && (
+                <DemoClaims
+                  status={claimStatus}
+                  onRun={() => {
+                    setClaimStatus(nextDemoState(claimStatus, "redeem-claim"));
+                    runAction("Private claim link redeemed");
+                  }}
+                />
+              )}{" "}
+              {tab === "launchpad" && (
+                <DemoLaunchpad
+                  selected={selected}
+                  selectedProject={selectedProject}
+                  setSelectedProject={setSelectedProject}
+                  releaseStatus={releaseStatus}
+                  onRelease={() => {
+                    setReleaseStatus(
+                      nextDemoState(releaseStatus, "approve-release")
+                    );
+                    runAction("Milestone release approved in demo governance");
+                  }}
+                />
+              )}{" "}
+              {tab === "proof" && (
+                <DemoProof
+                  published={proofPublished}
+                  hash={demoHash}
+                  onPublish={() => {
+                    nextDemoState("READY", "publish-proof");
+                    setProofPublished(true);
+                    runAction("Aggregate public proof published");
+                  }}
+                />
+              )}
+            </div>
+          </section>
+        </div>
+        <MainnetBoundary />
+        <section className="mt-6 rounded-[16px] border border-white/10 bg-[#151D21] p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="font-mono text-[9px] tracking-[0.14em] text-[#AEB8BE]">
+                SIMULATION LEDGER
+              </div>
+              <p className="mt-2 text-sm text-[#CFC7BC]">
+                Every action is local, reversible, and visibly labeled as
+                simulated.
+              </p>
+            </div>
+            <Play size={18} className="text-[#F0563A]" />
+          </div>
+          <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {events.map((event, index) => (
+              <div
+                key={`${event}-${index}`}
+                className="rounded-[10px] border border-white/5 bg-[#163B4A] p-3 font-mono text-[9px] text-[#AEB8BE]"
+              >
+                <Check size={12} className="mb-2 text-[#70D49D]" />
+                {event}
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </main>
+  );
 }
 
-function MainnetBoundary() { return <section className="mt-6 rounded-[16px] border border-[#F0563A]/25 bg-[#201815] p-5 sm:p-7"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="font-mono text-[9px] tracking-[0.14em] text-[#F0563A]">STARKNET MAINNET / EXECUTION BOUNDARY</div><h2 className="mt-2 font-display text-3xl tracking-[-0.06em]">Demo state is not settlement.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#BDB5A9]">This guided tour remains local and never creates a transaction. Production settlement requires a connected wallet, user approval, and a confirmed Starknet mainnet receipt.</p></div><div className="rounded-[10px] border border-[#F0563A]/30 bg-[#F0563A]/[0.08] px-3 py-2 font-mono text-[9px] text-[#F0563A]">MAINNET ONLY</div></div></section>; }
+function MainnetBoundary() {
+  return (
+    <section className="mt-6 rounded-[16px] border border-[#F0563A]/25 bg-[#201815] p-5 sm:p-7">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="font-mono text-[9px] tracking-[0.14em] text-[#F0563A]">
+            STARKNET MAINNET / EXECUTION BOUNDARY
+          </div>
+          <h2 className="mt-2 font-display text-3xl tracking-[-0.06em]">
+            Demo state is not settlement.
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#BDB5A9]">
+            This guided tour remains local and never creates a transaction.
+            Production settlement requires a connected wallet, user approval,
+            and a confirmed Starknet mainnet receipt.
+          </p>
+        </div>
+        <div className="rounded-[10px] border border-[#F0563A]/30 bg-[#F0563A]/[0.08] px-3 py-2 font-mono text-[9px] text-[#F0563A]">
+          MAINNET ONLY
+        </div>
+      </div>
+    </section>
+  );
+}
 
-function DemoPayroll({ amount, setAmount, running, onRun }: { amount: string; setAmount: (value: string) => void; running: boolean; onRun: () => void }) { return <DemoCard title="PRIVATE PAYROLL" subtitle="Build, shield, and prepare a route without signing a transaction."><div className="grid gap-3 sm:grid-cols-2"><label className="field-label">ROUTE NAME<Input defaultValue="March contractor run" className="field-input mt-2" /></label><label className="field-label">TOTAL AMOUNT<Input value={amount} onChange={(event) => setAmount(event.target.value)} className="field-input mt-2" /></label></div><div className="mt-5 grid gap-2 text-sm text-[#CFC7BC]"><div>03 simulated recipients / roster stays private</div><div>USDC / shielded / approval threshold 2</div></div><div className="mt-5 grid gap-2 sm:grid-cols-2"><button onClick={() => toast("Demo recipient added to the private roster.")} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]">ADD RECIPIENT</button><button onClick={() => toast("Draft route edited locally.")} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]">EDIT ROUTE</button><button onClick={() => toast("Route transitioned to SHIELDED.")} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]">ADVANCE STATUS</button><button onClick={() => toast("Demo receipt confirmed.")} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]">CONFIRM RECEIPT</button></div><Button disabled={running} onClick={onRun} className="mt-6 h-11 rounded-[10px] bg-[#F3EEE5] font-mono text-[10px] text-[#111210]">{running ? "SIMULATING…" : "SIMULATE SHIELDED ROUTE"}</Button></DemoCard>; }
-function DemoOperations({ running, onRun }: { running: boolean; onRun: () => void }) { return <DemoCard title="OPERATIONS" subtitle="Exercise scheduling, governance, approvals, and monitoring states."><div className="grid gap-3 sm:grid-cols-3"><DemoMetric label="CADENCE" value="WEEKLY" /><DemoMetric label="APPROVALS" value="2 / 2" /><DemoMetric label="HEALTH" value="NOMINAL" /></div><DemoActionButton label="PAUSE / RESUME SCHEDULE" running={running} onSuccess={onRun} /></DemoCard>; }
-function DemoTreasury({ running, onRun }: { running: boolean; onRun: () => void }) { return <DemoCard title="TREASURY GUARDRAILS" subtitle="Test network constraints, daily limits, policy templates, and dry-run results."><div className="rounded-[12px] border border-[#70D49D]/20 bg-[#70D49D]/[0.05] p-4 text-sm text-[#CFC7BC]">Policy check passed: 2,840 USDC is below the 10,000 USDC daily limit on mainnet.</div><DemoActionButton label="RUN POLICY DRY-RUN" running={running} onSuccess={onRun} /></DemoCard>; }
-function DemoClaims({ status, onRun }: { status: string; onRun: () => void }) { return <DemoCard title="PRIVATE CLAIMS" subtitle="Preview expiring private links and redemption without exposing a roster."><div className="flex items-center justify-between rounded-[12px] border border-white/10 bg-[#163B4A] p-4"><span className="font-mono text-[10px] text-[#AEB8BE]">claim-demo-7f2a…</span><span className="font-mono text-[9px] text-[#70D49D]">{status}</span></div><DemoActionButton label={status === "REDEEMED" ? "CLAIM REDEEMED" : "REDEEM PRIVATE LINK"} disabled={status === "REDEEMED"} onSuccess={onRun} /></DemoCard>; }
-function DemoLaunchpad({ selected, selectedProject, setSelectedProject, releaseStatus, onRelease }: { selected: typeof demoProjects[number]; selectedProject: number; setSelectedProject: (value: number) => void; releaseStatus: string; onRelease: () => void }) { const [allocationReserved, setAllocationReserved] = useState(false); return <DemoCard title="PRIVATE LAUNCHPAD" subtitle="Move from project room to milestone governance and shielded allocation."><div className="grid gap-2 sm:grid-cols-2">{demoProjects.map((project, index) => <button key={project.name} onClick={() => setSelectedProject(index)} className={`rounded-[12px] border p-4 text-left ${selectedProject === index ? "border-[#F0563A]/50 bg-[#F0563A]/[0.08]" : "border-white/10 bg-[#163B4A]"}`}><div className="text-sm">{project.name}</div><div className="mt-2 font-mono text-[9px] text-[#AEB8BE]">{project.status} / {project.target}</div></button>)}</div><div className="mt-5 rounded-[12px] border border-white/10 bg-[#163B4A] p-4"><div className="flex items-center justify-between"><span className="text-sm">{selected.name}</span><span className="font-mono text-[9px] text-[#70D49D]">{selected.progress}% READY</span></div><div className="mt-3 h-2 rounded-full bg-[#111210]"><div className="h-full rounded-full bg-[#F0563A]" style={{ width: `${selected.progress}%` }} /></div></div><div className="mt-4 grid gap-2 sm:grid-cols-2"><button onClick={() => setAllocationReserved(true)} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]">{allocationReserved ? "ALLOCATION RESERVED" : "RESERVE SHIELDED ALLOCATION"}</button><button onClick={() => toast("Readiness checks refreshed: metadata, milestones, allocations.")} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]">REFRESH READINESS</button></div><DemoActionButton label={releaseStatus === "APPROVED" ? "RELEASE APPROVED" : "SIMULATE MILESTONE RELEASE"} disabled={releaseStatus === "APPROVED"} onSuccess={onRelease} /></DemoCard>; }
-function DemoProof({ published, hash, onPublish }: { published: boolean; hash: string; onPublish: () => void }) { return <DemoCard title="PUBLIC PROOF" subtitle="Publish only aggregate metadata; keep recipients and allocation identities private."><div className="rounded-[12px] border border-white/10 bg-[#163B4A] p-4"><div className="flex items-center gap-2 font-mono text-[9px] text-[#70D49D]"><LockKeyhole size={13} /> {published ? "PROOF PUBLISHED" : "READY TO PUBLISH"}</div><div className="mt-3 font-mono text-[9px] text-[#AEB8BE]">{hash}</div></div><DemoActionButton label={published ? "AGGREGATE PROOF LIVE" : "PUBLISH DEMO PROOF"} disabled={published} onSuccess={onPublish} /></DemoCard>; }
-function DemoCard({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) { return <div><div className="font-mono text-[9px] tracking-[0.14em] text-[#F0563A]">{title}</div><h2 className="mt-2 font-display text-3xl tracking-[-0.06em]">{subtitle}</h2><DemoSurfaceRetry label={title} /><div className="mt-7">{children}</div></div>; }
-function DemoSurfaceRetry({ label }: { label: string }) { const [error, setError] = useState(false); return error ? <div className="mt-4 flex items-center justify-between rounded-[9px] border border-[#F0563A]/40 bg-[#F0563A]/[0.08] p-3 font-mono text-[9px] text-[#F0563A]"><span>{label} SIMULATED FAILURE</span><button onClick={() => setError(false)} className="underline">RETRY</button></div> : <button onClick={() => setError(true)} className="mt-4 font-mono text-[9px] text-[#7F8F97] underline">SIMULATE {label} ERROR</button>; }
-function DemoActionButton({ label, running = false, disabled = false, onSuccess }: { label: string; running?: boolean; disabled?: boolean; onSuccess: () => void }) { const [state, setState] = useState<"ready" | "error" | "success">("ready"); if (state === "error") return <div className="mt-6 flex items-center justify-between rounded-[10px] border border-[#F0563A]/40 bg-[#F0563A]/[0.08] p-3 font-mono text-[9px] text-[#F0563A]"><span>{label} FAILED / SIMULATED</span><button onClick={() => { setState("success"); onSuccess(); }} className="underline">RETRY ACTION</button></div>; return <Button disabled={disabled || running || state === "success"} onClick={() => setState("error")} className="mt-6 h-11 rounded-[10px] bg-[#F0563A] font-mono text-[10px] text-[#111210]">{running ? "PROCESSING…" : state === "success" ? `${label} COMPLETE` : label}</Button>; }
-function DemoMetric({ label, value }: { label: string; value: string }) { return <div className="rounded-[10px] border border-white/10 bg-[#163B4A] p-4"><div className="font-mono text-[9px] text-[#7F8F97]">{label}</div><div className="mt-3 font-display text-xl">{value}</div></div>; }
+function DemoPayroll({
+  amount,
+  setAmount,
+  running,
+  onRun,
+}: {
+  amount: string;
+  setAmount: (value: string) => void;
+  running: boolean;
+  onRun: () => void;
+}) {
+  return (
+    <DemoCard
+      title="PRIVATE PAYROLL"
+      subtitle="Build, shield, and prepare a route without signing a transaction."
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="field-label">
+          ROUTE NAME
+          <Input
+            defaultValue="March contractor run"
+            className="field-input mt-2"
+          />
+        </label>
+        <label className="field-label">
+          TOTAL AMOUNT
+          <Input
+            value={amount}
+            onChange={event => setAmount(event.target.value)}
+            className="field-input mt-2"
+          />
+        </label>
+      </div>
+      <div className="mt-5 grid gap-2 text-sm text-[#CFC7BC]">
+        <div>03 simulated recipients / roster stays private</div>
+        <div>USDC / shielded / approval threshold 2</div>
+      </div>
+      <div className="mt-5 grid gap-2 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => toast("Demo recipient added to the private roster.")}
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]"
+        >
+          ADD RECIPIENT
+        </button>
+        <button
+          type="button"
+          onClick={() => toast("Draft route edited locally.")}
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]"
+        >
+          EDIT ROUTE
+        </button>
+        <button
+          type="button"
+          onClick={() => toast("Route transitioned to SHIELDED.")}
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]"
+        >
+          ADVANCE STATUS
+        </button>
+        <button
+          type="button"
+          onClick={() => toast("Demo receipt confirmed.")}
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]"
+        >
+          CONFIRM RECEIPT
+        </button>
+      </div>
+      <Button
+        disabled={running}
+        onClick={onRun}
+        className="mt-6 h-11 rounded-[10px] bg-[#F3EEE5] font-mono text-[10px] text-[#111210]"
+      >
+        {running ? "SIMULATING…" : "SIMULATE SHIELDED ROUTE"}
+      </Button>
+    </DemoCard>
+  );
+}
+function DemoOperations({
+  running,
+  onRun,
+}: {
+  running: boolean;
+  onRun: () => void;
+}) {
+  return (
+    <DemoCard
+      title="OPERATIONS"
+      subtitle="Exercise scheduling, governance, approvals, and monitoring states."
+    >
+      <div className="grid gap-3 sm:grid-cols-3">
+        <DemoMetric label="CADENCE" value="WEEKLY" />
+        <DemoMetric label="APPROVALS" value="2 / 2" />
+        <DemoMetric label="HEALTH" value="NOMINAL" />
+      </div>
+      <DemoActionButton
+        label="PAUSE / RESUME SCHEDULE"
+        running={running}
+        onSuccess={onRun}
+      />
+    </DemoCard>
+  );
+}
+function DemoTreasury({
+  running,
+  onRun,
+}: {
+  running: boolean;
+  onRun: () => void;
+}) {
+  return (
+    <DemoCard
+      title="TREASURY GUARDRAILS"
+      subtitle="Test network constraints, daily limits, policy templates, and dry-run results."
+    >
+      <div className="rounded-[12px] border border-[#70D49D]/20 bg-[#70D49D]/[0.05] p-4 text-sm text-[#CFC7BC]">
+        Policy check passed: 2,840 USDC is below the 10,000 USDC daily limit on
+        mainnet.
+      </div>
+      <DemoActionButton
+        label="RUN POLICY DRY-RUN"
+        running={running}
+        onSuccess={onRun}
+      />
+    </DemoCard>
+  );
+}
+function DemoClaims({ status, onRun }: { status: string; onRun: () => void }) {
+  return (
+    <DemoCard
+      title="PRIVATE CLAIMS"
+      subtitle="Preview expiring private links and redemption without exposing a roster."
+    >
+      <div className="flex items-center justify-between rounded-[12px] border border-white/10 bg-[#163B4A] p-4">
+        <span className="font-mono text-[10px] text-[#AEB8BE]">
+          claim-demo-7f2a…
+        </span>
+        <span className="font-mono text-[9px] text-[#70D49D]">{status}</span>
+      </div>
+      <DemoActionButton
+        label={status === "REDEEMED" ? "CLAIM REDEEMED" : "REDEEM PRIVATE LINK"}
+        disabled={status === "REDEEMED"}
+        onSuccess={onRun}
+      />
+    </DemoCard>
+  );
+}
+function DemoLaunchpad({
+  selected,
+  selectedProject,
+  setSelectedProject,
+  releaseStatus,
+  onRelease,
+}: {
+  selected: (typeof demoProjects)[number];
+  selectedProject: number;
+  setSelectedProject: (value: number) => void;
+  releaseStatus: string;
+  onRelease: () => void;
+}) {
+  const [allocationReserved, setAllocationReserved] = useState(false);
+  return (
+    <DemoCard
+      title="PRIVATE LAUNCHPAD"
+      subtitle="Move from project room to milestone governance and shielded allocation."
+    >
+      <div className="grid gap-2 sm:grid-cols-2">
+        {demoProjects.map((project, index) => (
+          <button
+            key={project.name}
+            onClick={() => setSelectedProject(index)}
+            className={`rounded-[12px] border p-4 text-left ${selectedProject === index ? "border-[#F0563A]/50 bg-[#F0563A]/[0.08]" : "border-white/10 bg-[#163B4A]"}`}
+          >
+            <div className="text-sm">{project.name}</div>
+            <div className="mt-2 font-mono text-[9px] text-[#AEB8BE]">
+              {project.status} / {project.target}
+            </div>
+          </button>
+        ))}
+      </div>
+      <div className="mt-5 rounded-[12px] border border-white/10 bg-[#163B4A] p-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm">{selected.name}</span>
+          <span className="font-mono text-[9px] text-[#70D49D]">
+            {selected.progress}% READY
+          </span>
+        </div>
+        <div className="mt-3 h-2 rounded-full bg-[#111210]">
+          <div
+            className="h-full rounded-full bg-[#F0563A]"
+            style={{ width: `${selected.progress}%` }}
+          />
+        </div>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <button
+          onClick={() => setAllocationReserved(true)}
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]"
+        >
+          {allocationReserved
+            ? "ALLOCATION RESERVED"
+            : "RESERVE SHIELDED ALLOCATION"}
+        </button>
+        <button
+          onClick={() =>
+            toast(
+              "Readiness checks refreshed: metadata, milestones, allocations."
+            )
+          }
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]"
+        >
+          REFRESH READINESS
+        </button>
+      </div>
+      <DemoActionButton
+        label={
+          releaseStatus === "APPROVED"
+            ? "RELEASE APPROVED"
+            : "SIMULATE MILESTONE RELEASE"
+        }
+        disabled={releaseStatus === "APPROVED"}
+        onSuccess={onRelease}
+      />
+    </DemoCard>
+  );
+}
+function DemoProof({
+  published,
+  hash,
+  onPublish,
+}: {
+  published: boolean;
+  hash: string;
+  onPublish: () => void;
+}) {
+  return (
+    <DemoCard
+      title="PUBLIC PROOF"
+      subtitle="Publish only aggregate metadata; keep recipients and allocation identities private."
+    >
+      <div className="rounded-[12px] border border-white/10 bg-[#163B4A] p-4">
+        <div className="flex items-center gap-2 font-mono text-[9px] text-[#70D49D]">
+          <LockKeyhole size={13} />{" "}
+          {published ? "PROOF PUBLISHED" : "READY TO PUBLISH"}
+        </div>
+        <div className="mt-3 font-mono text-[9px] text-[#AEB8BE]">{hash}</div>
+      </div>
+      <DemoActionButton
+        label={published ? "AGGREGATE PROOF LIVE" : "PUBLISH DEMO PROOF"}
+        disabled={published}
+        onSuccess={onPublish}
+      />
+    </DemoCard>
+  );
+}
+function DemoCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="font-mono text-[9px] tracking-[0.14em] text-[#F0563A]">
+        {title}
+      </div>
+      <h2 className="mt-2 font-display text-3xl tracking-[-0.06em]">
+        {subtitle}
+      </h2>
+      <DemoSurfaceRetry label={title} />
+      <div className="mt-7">{children}</div>
+    </div>
+  );
+}
+function DemoSurfaceRetry({ label }: { label: string }) {
+  const [error, setError] = useState(false);
+  return error ? (
+    <div className="mt-4 flex items-center justify-between rounded-[9px] border border-[#F0563A]/40 bg-[#F0563A]/[0.08] p-3 font-mono text-[9px] text-[#F0563A]">
+      <span>{label} SIMULATED FAILURE</span>
+      <button onClick={() => setError(false)} className="underline">
+        RETRY
+      </button>
+    </div>
+  ) : (
+    <button
+      onClick={() => setError(true)}
+      className="mt-4 font-mono text-[9px] text-[#7F8F97] underline"
+    >
+      SIMULATE {label} ERROR
+    </button>
+  );
+}
+function DemoActionButton({
+  label,
+  running = false,
+  disabled = false,
+  onSuccess,
+}: {
+  label: string;
+  running?: boolean;
+  disabled?: boolean;
+  onSuccess: () => void;
+}) {
+  const [state, setState] = useState<"ready" | "error" | "success">("ready");
+  if (state === "error")
+    return (
+      <div className="mt-6 flex items-center justify-between rounded-[10px] border border-[#F0563A]/40 bg-[#F0563A]/[0.08] p-3 font-mono text-[9px] text-[#F0563A]">
+        <span>{label} FAILED / SIMULATED</span>
+        <button
+          onClick={() => {
+            setState("success");
+            onSuccess();
+          }}
+          className="underline"
+        >
+          RETRY ACTION
+        </button>
+      </div>
+    );
+  return (
+    <Button
+      disabled={disabled || running || state === "success"}
+      onClick={() => setState("error")}
+      className="mt-6 h-11 rounded-[10px] bg-[#F0563A] font-mono text-[10px] text-[#111210]"
+    >
+      {running
+        ? "PROCESSING…"
+        : state === "success"
+          ? `${label} COMPLETE`
+          : label}
+    </Button>
+  );
+}
+function DemoMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[10px] border border-white/10 bg-[#163B4A] p-4">
+      <div className="font-mono text-[9px] text-[#7F8F97]">{label}</div>
+      <div className="mt-3 font-display text-xl">{value}</div>
+    </div>
+  );
+}
 
-function DemoPayrollStateful({ amount, setAmount, running, onRun }: { amount: string; setAmount: (value: string) => void; running: boolean; onRun: () => void }) {
-  const [recipients, setRecipients] = useState(["Alice / 0xDEMO…A1", "Bob / 0xDEMO…B2"]);
+function DemoPayrollStateful({
+  amount,
+  setAmount,
+  running,
+  onRun,
+}: {
+  amount: string;
+  setAmount: (value: string) => void;
+  running: boolean;
+  onRun: () => void;
+}) {
+  const [recipients, setRecipients] = useState([
+    "Alice / 0xDEMO…A1",
+    "Bob / 0xDEMO…B2",
+  ]);
   const [routeStatus, setRouteStatus] = useState("DRAFT");
   const [receiptStatus, setReceiptStatus] = useState("NOT SUBMITTED");
-  return <DemoCard title="PRIVATE PAYROLL" subtitle="Build, shield, edit, and confirm a route without signing a transaction.">
-    <div className="grid gap-3 sm:grid-cols-2"><label className="field-label">ROUTE NAME<Input defaultValue="March contractor run" className="field-input mt-2" /></label><label className="field-label">TOTAL AMOUNT<Input value={amount} onChange={(event) => setAmount(event.target.value)} className="field-input mt-2" /></label></div>
-    <div className="mt-5 rounded-[12px] border border-white/10 bg-[#163B4A] p-4"><div className="flex items-center justify-between"><span className="font-mono text-[9px] text-[#AEB8BE]">PRIVATE RECIPIENTS</span><span className="font-mono text-[9px] text-[#70D49D]">{recipients.length} ACTIVE</span></div><div className="mt-3 space-y-2">{recipients.map((recipient) => <div key={recipient} className="flex items-center justify-between gap-2 font-mono text-[9px] text-[#CFC7BC]"><span>{recipient}</span><button onClick={() => setRecipients((current) => current.filter((item) => item !== recipient))} className="text-[#F0563A]">REMOVE</button></div>)}</div><button onClick={() => setRecipients((current) => [...current, `Contributor ${current.length + 1} / 0xDEMO…C${current.length + 1}`])} className="mt-3 font-mono text-[9px] text-[#F0563A]">+ ADD RECIPIENT</button></div>
-    <div className="mt-4 grid gap-2 sm:grid-cols-3"><DemoMetric label="ROUTE STATUS" value={routeStatus} /><DemoMetric label="RECEIPT" value={receiptStatus} /><DemoMetric label="ASSET" value="USDC" /></div>
-    <div className="mt-5 grid gap-2 sm:grid-cols-2"><button onClick={() => setRouteStatus("EDITED")} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]">EDIT ROUTE</button><button onClick={() => setRouteStatus("SHIELDED")} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]">ADVANCE STATUS</button><button onClick={() => setReceiptStatus("SUBMITTED")} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]">SUBMIT RECEIPT</button><button onClick={() => setReceiptStatus("CONFIRMED")} className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#70D49D]">CONFIRM RECEIPT</button></div>
-    <Button disabled={running} onClick={() => { setRouteStatus("SHIELDED"); setReceiptStatus("SUBMITTED"); onRun(); }} className="mt-6 h-11 rounded-[10px] bg-[#F3EEE5] font-mono text-[10px] text-[#111210]">{running ? "SIMULATING…" : "SIMULATE SHIELDED ROUTE"}</Button>
-  </DemoCard>;
+  return (
+    <DemoCard
+      title="PRIVATE PAYROLL"
+      subtitle="Build, shield, edit, and confirm a route without signing a transaction."
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="field-label">
+          ROUTE NAME
+          <Input
+            defaultValue="March contractor run"
+            className="field-input mt-2"
+          />
+        </label>
+        <label className="field-label">
+          TOTAL AMOUNT
+          <Input
+            value={amount}
+            onChange={event => setAmount(event.target.value)}
+            className="field-input mt-2"
+          />
+        </label>
+      </div>
+      <div className="mt-5 rounded-[12px] border border-white/10 bg-[#163B4A] p-4">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[9px] text-[#AEB8BE]">
+            PRIVATE RECIPIENTS
+          </span>
+          <span className="font-mono text-[9px] text-[#70D49D]">
+            {recipients.length} ACTIVE
+          </span>
+        </div>
+        <div className="mt-3 space-y-2">
+          {recipients.map(recipient => (
+            <div
+              key={recipient}
+              className="flex items-center justify-between gap-2 font-mono text-[9px] text-[#CFC7BC]"
+            >
+              <span>{recipient}</span>
+              <button
+                onClick={() =>
+                  setRecipients(current =>
+                    current.filter(item => item !== recipient)
+                  )
+                }
+                className="text-[#F0563A]"
+              >
+                REMOVE
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() =>
+            setRecipients(current => [
+              ...current,
+              `Contributor ${current.length + 1} / 0xDEMO…C${current.length + 1}`,
+            ])
+          }
+          className="mt-3 font-mono text-[9px] text-[#F0563A]"
+        >
+          + ADD RECIPIENT
+        </button>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <DemoMetric label="ROUTE STATUS" value={routeStatus} />
+        <DemoMetric label="RECEIPT" value={receiptStatus} />
+        <DemoMetric label="ASSET" value="USDC" />
+      </div>
+      <div className="mt-5 grid gap-2 sm:grid-cols-2">
+        <button
+          onClick={() => setRouteStatus("EDITED")}
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]"
+        >
+          EDIT ROUTE
+        </button>
+        <button
+          onClick={() => setRouteStatus("SHIELDED")}
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]"
+        >
+          ADVANCE STATUS
+        </button>
+        <button
+          onClick={() => setReceiptStatus("SUBMITTED")}
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#CFC7BC]"
+        >
+          SUBMIT RECEIPT
+        </button>
+        <button
+          onClick={() => setReceiptStatus("CONFIRMED")}
+          className="rounded-[9px] border border-white/15 px-3 py-2 font-mono text-[9px] text-[#70D49D]"
+        >
+          CONFIRM RECEIPT
+        </button>
+      </div>
+      <Button
+        disabled={running}
+        onClick={() => {
+          setRouteStatus("SHIELDED");
+          setReceiptStatus("SUBMITTED");
+          onRun();
+        }}
+        className="mt-6 h-11 rounded-[10px] bg-[#F3EEE5] font-mono text-[10px] text-[#111210]"
+      >
+        {running ? "SIMULATING…" : "SIMULATE SHIELDED ROUTE"}
+      </Button>
+    </DemoCard>
+  );
 }

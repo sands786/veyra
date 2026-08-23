@@ -993,6 +993,7 @@ export default function Home() {
               Production path. Wallet approval required.
             </div>
             <button
+              type="button"
               onClick={viewContracts}
               className="mt-4 flex items-center gap-1 font-mono text-[10px] tracking-[0.12em] text-[#F0563A] hover:text-[#FF7257]"
             >
@@ -1005,6 +1006,7 @@ export default function Home() {
           <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/10 bg-[#111210]/80 px-5 py-4 backdrop-blur-xl supports-[backdrop-filter]:bg-[#111210]/65 sm:px-8 lg:justify-end lg:px-8">
             <div className="flex items-center gap-3 lg:hidden">
               <button
+                type="button"
                 onClick={() => setMobileOpen(open => !open)}
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileOpen}
