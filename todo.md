@@ -607,3 +607,9 @@
 
 - [x] Preserve prototype-defined injected wallet event handlers through the official wallet-standard adapter lifecycle so Braavos can initialize its account and network listeners.
 - [x] Add a realistic Braavos prototype-provider regression and pass the complete TypeScript, production-build, formatting, and diff-hygiene suite.
+
+## Braavos unsupported STRK20 action response
+
+- [x] Classify the live Braavos `Not implemented` response for `wallet_strk20InvokeTransaction` separately from connection and registration errors.
+- [x] Improve Veyra’s actionable unsupported-wallet messaging without substituting a generic invoke/transfer for a private STRK20 action.
+- [x] Add regression coverage, run full verification, and publish the safe diagnostic correction.

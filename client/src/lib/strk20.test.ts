@@ -17,10 +17,13 @@ import {
 } from "./strk20";
 
 describe("STRK20 on-chain adapter", () => {
-  it("classifies NOT_REGISTERED without implying a transaction was created", () => {
+  it("classifies STRK20 registration and unsupported-wallet failures without implying a transaction was created", () => {
     expect(
       describeStrk20SubmissionError(new Error("NOT_REGISTERED"))
     ).toContain("No transaction was created");
+    expect(
+      describeStrk20SubmissionError(new Error("Error: Not implemented"))
+    ).toContain("does not implement the requested STRK20 private action");
     expect(describeStrk20SubmissionError(new Error("User rejected"))).toBe(
       undefined
     );
