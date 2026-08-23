@@ -19,9 +19,8 @@ export const users = mysqlTable("users", {
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-      lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
-    sessionVersion: int("sessionVersion").notNull().default(1),
-
+  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+  sessionVersion: int("sessionVersion").notNull().default(1),
 });
 
 export const localAccounts = mysqlTable(
@@ -34,10 +33,10 @@ export const localAccounts = mysqlTable(
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
-  (table) => [
+  table => [
     uniqueIndex("local_accounts_user_unique").on(table.userId),
     uniqueIndex("local_accounts_email_unique").on(table.email),
-  ],
+  ]
 );
 
 export const passwordResetTokens = mysqlTable(
@@ -53,7 +52,7 @@ export const passwordResetTokens = mysqlTable(
   table => [
     uniqueIndex("password_reset_tokens_hash_unique").on(table.tokenHash),
     index("password_reset_tokens_user_idx").on(table.userId),
-  ],
+  ]
 );
 
 export const workspaces = mysqlTable("workspaces", {
@@ -64,9 +63,7 @@ export const workspaces = mysqlTable("workspaces", {
   defaultToken: varchar("defaultToken", { length: 80 })
     .notNull()
     .default("USDC"),
-  network: mysqlEnum("network", ["mainnet"])
-    .notNull()
-    .default("mainnet"),
+  network: mysqlEnum("network", ["mainnet"]).notNull().default("mainnet"),
   approvalThreshold: int("approvalThreshold").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -96,33 +93,40 @@ export const recipients = mysqlTable("recipients", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export const paymentRoutes = mysqlTable("paymentRoutes", {
-  id: int("id").autoincrement().primaryKey(),
-  workspaceId: int("workspaceId").notNull(),
-  createdByUserId: int("createdByUserId").notNull(),
-  name: varchar("name", { length: 160 }).notNull(),
-  token: varchar("token", { length: 80 }).notNull(),
-  network: mysqlEnum("network", ["mainnet"])
-    .notNull()
-    .default("mainnet"),
-  totalAmount: varchar("totalAmount", { length: 80 }).notNull(),
-  privacyMode: mysqlEnum("privacyMode", ["shielded", "public"])
-    .notNull()
-    .default("shielded"),
-  status: mysqlEnum("status", [
-    "draft",
-    "shielded",
-    "routed",
-    "settled",
-    "failed",
-    "cancelled",
-  ])
-    .notNull()
-    .default("draft"),
-  proofReference: varchar("proofReference", { length: 255 }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+export const paymentRoutes = mysqlTable(
+  "paymentRoutes",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    workspaceId: int("workspaceId").notNull(),
+    createdByUserId: int("createdByUserId").notNull(),
+    clientRequestId: varchar("clientRequestId", { length: 72 }),
+    name: varchar("name", { length: 160 }).notNull(),
+    token: varchar("token", { length: 80 }).notNull(),
+    network: mysqlEnum("network", ["mainnet"]).notNull().default("mainnet"),
+    totalAmount: varchar("totalAmount", { length: 80 }).notNull(),
+    privacyMode: mysqlEnum("privacyMode", ["shielded", "public"])
+      .notNull()
+      .default("shielded"),
+    status: mysqlEnum("status", [
+      "draft",
+      "shielded",
+      "routed",
+      "settled",
+      "failed",
+      "cancelled",
+    ])
+      .notNull()
+      .default("draft"),
+    proofReference: varchar("proofReference", { length: 255 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => ({
+    workspaceRequestUnique: uniqueIndex(
+      "paymentRoutes_workspace_request_unique"
+    ).on(table.workspaceId, table.clientRequestId),
+  })
+);
 
 export const routeRecipients = mysqlTable(
   "routeRecipients",
@@ -228,9 +232,7 @@ export const treasuryPolicies = mysqlTable("treasuryPolicies", {
   createdByUserId: int("createdByUserId").notNull(),
   name: varchar("name", { length: 160 }).notNull(),
   token: varchar("token", { length: 80 }).notNull(),
-  network: mysqlEnum("network", ["mainnet"])
-    .notNull()
-    .default("mainnet"),
+  network: mysqlEnum("network", ["mainnet"]).notNull().default("mainnet"),
   maxRouteAmount: varchar("maxRouteAmount", { length: 80 }).notNull(),
   dailyLimit: varchar("dailyLimit", { length: 80 }).notNull(),
   approvalThreshold: int("approvalThreshold").notNull().default(1),
@@ -265,9 +267,7 @@ export const launchpadProjects = mysqlTable("launchpadProjects", {
   slug: varchar("slug", { length: 160 }).notNull().unique(),
   description: text("description"),
   token: varchar("token", { length: 80 }).notNull(),
-  network: mysqlEnum("network", ["mainnet"])
-    .notNull()
-    .default("mainnet"),
+  network: mysqlEnum("network", ["mainnet"]).notNull().default("mainnet"),
   targetAmount: varchar("targetAmount", { length: 80 }).notNull(),
   raisedAmount: varchar("raisedAmount", { length: 80 }).notNull().default("0"),
   privacyMode: mysqlEnum("privacyMode", ["shielded", "public"])
@@ -380,9 +380,7 @@ export const privateMarkets = mysqlTable("privateMarkets", {
   name: varchar("name", { length: 160 }).notNull(),
   slug: varchar("slug", { length: 160 }).notNull().unique(),
   token: varchar("token", { length: 80 }).notNull(),
-  network: mysqlEnum("network", ["mainnet"])
-    .notNull()
-    .default("mainnet"),
+  network: mysqlEnum("network", ["mainnet"]).notNull().default("mainnet"),
   targetAmount: varchar("targetAmount", { length: 80 }).notNull(),
   currentPrice: varchar("currentPrice", { length: 80 }).notNull().default("0"),
   publicVolume: varchar("publicVolume", { length: 80 }).notNull().default("0"),

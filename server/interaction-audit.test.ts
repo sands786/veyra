@@ -124,6 +124,18 @@ describe("Veyra interaction contracts", () => {
     expect(home).toContain("await submitShieldedRoute(");
     expect(home).toContain("The wallet returned no transaction hash.");
     expect(home).toMatch(/No\s+public-transfer fallback\s+is available\./);
+    expect(home).toContain(
+      "const claimedRouteTransaction = transactionsQuery.data?.find("
+    );
+    expect(home).toContain(
+      "A private transaction is already recorded for this route."
+    );
+    expect(home).toContain("PRIVATE TRANSACTION SUBMITTED — VERIFY RECEIPT");
+    expect(home).toContain("VERIFY RECEIPT");
+    expect(home).toContain("RECOVER A RETURNED WALLET HASH / NO NEW SIGNATURE");
+    expect(home).toContain("VERIFY & RECORD EXISTING HASH");
+    expect(home).toContain("safeLocalStorageSet(");
+    expect(home).toContain("claimWalletActionPending");
   });
 
   it("routes workspace headers through safe storage", () => {

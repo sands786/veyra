@@ -761,6 +761,7 @@ export async function archiveRecipient(
 export async function createPaymentRoute(input: {
   workspaceId: number;
   createdByUserId: number;
+  clientRequestId?: string;
   name: string;
   token: string;
   network: "mainnet";
@@ -781,6 +782,19 @@ export async function createPaymentRoute(input: {
       .for("update")
       .limit(1);
     if (!workspace[0]) throw new Error("Workspace not found");
+    if (input.clientRequestId) {
+      const existing = await tx
+        .select()
+        .from(paymentRoutes)
+        .where(
+          and(
+            eq(paymentRoutes.workspaceId, input.workspaceId),
+            eq(paymentRoutes.clientRequestId, input.clientRequestId)
+          )
+        )
+        .limit(1);
+      if (existing[0]) return existing[0];
+    }
     const activePolicy = (
       await tx
         .select()
@@ -848,6 +862,7 @@ export async function createPaymentRoute(input: {
       .values({
         workspaceId: input.workspaceId,
         createdByUserId: input.createdByUserId,
+        clientRequestId: input.clientRequestId,
         name: input.name,
         token: input.token,
         network: input.network,
@@ -1090,6 +1105,29 @@ export async function recordBlockchainTransaction(input: {
       status: input.status,
       explorerUrl: input.explorerUrl,
     });
+    if (!["draft", "shielded", "routed"].includes(ownedRoute[0].status))
+      throw new Error(
+        "Route cannot accept a submitted transaction in its current state"
+      );
+    if (ownedRoute[0].status === "draft") {
+      await tx
+        .update(paymentRoutes)
+        .set({ status: "shielded" })
+        .where(eq(paymentRoutes.id, input.routeId));
+    }
+    if (ownedRoute[0].status !== "routed") {
+      await tx
+        .update(paymentRoutes)
+        .set({ status: "routed" })
+        .where(eq(paymentRoutes.id, input.routeId));
+    }
+    await tx.insert(auditEvents).values({
+      workspaceId: input.workspaceId,
+      actorUserId: input.actorUserId,
+      entityType: "payment_route",
+      entityId: input.routeId,
+      action: "transaction_submitted",
+    });
     const rows = await tx
       .select()
       .from(blockchainTransactions)
@@ -1097,6 +1135,29 @@ export async function recordBlockchainTransaction(input: {
       .limit(1);
     return rows[0];
   });
+}
+
+export async function recoverBlockchainTransaction(input: {
+  workspaceId: number;
+  actorUserId: number;
+  routeId: number;
+  network: "mainnet";
+  transactionHash: string;
+  explorerUrl?: string;
+}) {
+  const receipt = await verifyStarknetReceipt(
+    input.transactionHash,
+    input.network
+  );
+  if (receipt.status === "unknown")
+    throw new Error(
+      "The supplied hash does not yet have a verifiable Starknet receipt"
+    );
+  const transaction = await recordBlockchainTransaction({
+    ...input,
+    status: "submitted",
+  });
+  return { transaction, receipt };
 }
 
 export async function listRouteTransactions(

@@ -10,7 +10,7 @@ import { buildPayrollCron } from "@shared/operations";
 import { resolveWorkspaceSelection } from "./workspaceResolver";
 import { ENV } from "./_core/env";
 import { passwordResetBaseUrl } from "./passwordReset";
-import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, listRouteRecipientReview, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyWorkspaceStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv, createLaunchpadProject, listWorkspaceLaunchpadProjects, createLaunchpadMilestone, listPrivateMarkets, getPrivateMarketInsights, listPrivateMarketQuotes, createPrivateMarketQuote, updatePrivateMarketQuoteStatus, getPrivateMarketRiskPolicy, upsertPrivateMarketRiskPolicy, exportPrivateMarketBook, listPrivateMarketAlerts, acknowledgePrivateMarketAlert, createPrivateMarket, updatePrivateMarketStatus, commitPrivateMarketBid, createLaunchpadAllocation, updateLaunchpadProjectStatus, updateLaunchpadMilestoneStatus, getPublicLaunchpadProject, getLaunchpadProjectOps, updateLaunchpadProjectOps, getLaunchpadReadiness, listLaunchpadActivity, listLaunchpadAllocations, listLaunchpadReleaseRequests, createLaunchpadReleaseRequest, decideLaunchpadReleaseRequest } from "./db";
+import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, listRouteRecipientReview, getWorkspaceByIdForUser, recordBlockchainTransaction, recoverBlockchainTransaction, confirmBlockchainTransaction, verifyWorkspaceStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv, createLaunchpadProject, listWorkspaceLaunchpadProjects, createLaunchpadMilestone, listPrivateMarkets, getPrivateMarketInsights, listPrivateMarketQuotes, createPrivateMarketQuote, updatePrivateMarketQuoteStatus, getPrivateMarketRiskPolicy, upsertPrivateMarketRiskPolicy, exportPrivateMarketBook, listPrivateMarketAlerts, acknowledgePrivateMarketAlert, createPrivateMarket, updatePrivateMarketStatus, commitPrivateMarketBid, createLaunchpadAllocation, updateLaunchpadProjectStatus, updateLaunchpadMilestoneStatus, getPublicLaunchpadProject, getLaunchpadProjectOps, updateLaunchpadProjectOps, getLaunchpadReadiness, listLaunchpadActivity, listLaunchpadAllocations, listLaunchpadReleaseRequests, createLaunchpadReleaseRequest, decideLaunchpadReleaseRequest } from "./db";
 import { consumePasswordResetToken, createLocalAccount, createPasswordResetRecord, getLocalAccountByEmail, touchUserLastSignedIn } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null; req?: { headers?: Record<string, string | string[] | undefined> } }) {
@@ -300,7 +300,7 @@ export const appRouter = router({
       const membership = await workspaceFor(ctx);
       return listRouteRecipientReview(membership.workspace.id, input.routeId);
     }),
-    create: protectedProcedure.input(z.object({ name: z.string().trim().min(2).max(160), token: tokenSymbol, network: mainnetNetwork.default("mainnet"), totalAmount: positiveAmount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount: positiveAmount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
+    create: protectedProcedure.input(z.object({ clientRequestId: z.string().uuid().optional(), name: z.string().trim().min(2).max(160), token: tokenSymbol, network: mainnetNetwork.default("mainnet"), totalAmount: positiveAmount, recipientAmounts: z.array(z.object({ recipientId: z.number().int().positive(), amount: positiveAmount })).min(1).max(500) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);
       const actorId = ctx.user?.id;
       if (!actorId) throw new Error("Authentication required");
@@ -339,6 +339,13 @@ export const appRouter = router({
       if (!actorId) throw new Error("Authentication required");
       if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot record transactions");
       return recordBlockchainTransaction({ workspaceId: membership.workspace.id, actorUserId: actorId, ...input });
+    }),
+    recoverSubmission: protectedProcedure.input(z.object({ routeId: z.number().int().positive(), network: mainnetNetwork, transactionHash: z.string().trim().regex(/^0x[0-9a-fA-F]+$/), explorerUrl: z.string().url().optional() })).mutation(async ({ ctx, input }) => {
+      const membership = await workspaceFor(ctx);
+      const actorId = ctx.user?.id;
+      if (!actorId) throw new Error("Authentication required");
+      if (!["owner", "admin", "operator"].includes(membership.memberRole)) throw new Error("Viewer access cannot recover transactions");
+      return recoverBlockchainTransaction({ workspaceId: membership.workspace.id, actorUserId: actorId, ...input });
     }),
     confirm: protectedProcedure.input(z.object({ transactionHash: z.string().trim().regex(/^0x[0-9a-fA-F]+$/) })).mutation(async ({ ctx, input }) => {
       const membership = await workspaceFor(ctx);

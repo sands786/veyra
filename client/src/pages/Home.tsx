@@ -5,7 +5,11 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin, startSignup } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { prepareRouteEdit } from "@/lib/routeEdit";
-import { safeLocalStorageGet, safeLocalStorageSet } from "@/lib/safeStorage";
+import {
+  safeLocalStorageGet,
+  safeLocalStorageRemove,
+  safeLocalStorageSet,
+} from "@/lib/safeStorage";
 import {
   ArrowUpRight,
   BarChart3,
@@ -44,7 +48,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
-  buildPayrollRegistryCreateCall,
   connectVeilWallet,
   describeStrk20SubmissionError,
   disconnectVeilWallet,
@@ -62,7 +65,6 @@ import {
   type VeilNetwork,
   type VeilWallet,
 } from "@/lib/strk20";
-import { protocolContracts } from "@/lib/onchainConfig";
 import {
   canCreateRecipientClaim,
   canScheduleRoute,
@@ -75,23 +77,6 @@ import { copyText } from "@/lib/clipboard";
 import { useDemoMode } from "@/contexts/DemoModeContext";
 import { VeyraBrand } from "@/components/VeyraBrand";
 import * as QRCode from "qrcode";
-
-async function buildRecipientCommitment(
-  recipientIds: number[],
-  amount: string,
-  routeName: string
-): Promise<string> {
-  const payload = `${routeName.trim()}|${amount}|${[...recipientIds].sort((a, b) => a - b).join(",")}`;
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(payload)
-  );
-  const bytes = Array.from(new Uint8Array(digest));
-  return `0x${bytes
-    .map(byte => byte.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, 62)}`;
-}
 
 const walletInstallLinks = [
   { name: "Argent X", href: "https://www.argent.xyz/argent-x/" },
@@ -157,6 +142,12 @@ export default function Home() {
     }
   );
   const [editingRouteId, setEditingRouteId] = useState<number | null>(null);
+  const [routeCreateRequestId, setRouteCreateRequestId] = useState(() =>
+    crypto.randomUUID()
+  );
+  const [claimWalletActionPending, setClaimWalletActionPending] =
+    useState(false);
+  const [recoveryHash, setRecoveryHash] = useState("");
   const workspaceListQuery = trpc.workspace.list.useQuery(undefined, {
     enabled: isAuthenticated,
     retry: false,
@@ -218,9 +209,32 @@ export default function Home() {
         setMutationError(error.message);
         setRetryAction(() => () => recordTransactionMutation.mutate(input));
       },
-      onSuccess: async () => {
+      onSuccess: async (_result, input) => {
         await utils.routes.list.invalidate();
         await utils.workspace.overview.invalidate();
+        await utils.transactions.listRoute.invalidate({
+          routeId: input.routeId,
+        });
+      },
+    });
+  const recoverTransactionMutation =
+    trpc.transactions.recoverSubmission.useMutation({
+      onError: (error, input) => {
+        setMutationError(error.message);
+        setRetryAction(() => () => recoverTransactionMutation.mutate(input));
+      },
+      onSuccess: async (_result, input) => {
+        safeLocalStorageRemove(`veyra-submission-${input.routeId}`);
+        setRecoveryHash("");
+        await Promise.all([
+          utils.routes.list.invalidate(),
+          utils.workspace.overview.invalidate(),
+          utils.transactions.listRoute.invalidate({ routeId: input.routeId }),
+        ]);
+        toast("Existing wallet hash recorded.", {
+          description:
+            "No new wallet action was requested. Verify the receipt before treating settlement as confirmed.",
+        });
       },
     });
   const archiveRecipientMutation = trpc.recipients.archive.useMutation({
@@ -415,6 +429,19 @@ export default function Home() {
     isValidStarknetAddress(recipientReview[0]?.fulfilledWalletAddress ?? "")
       ? recipientReview[0]
       : undefined;
+  const claimedRouteTransaction = transactionsQuery.data?.find(
+    transaction =>
+      transaction.status === "submitted" || transaction.status === "confirmed"
+  );
+  useEffect(() => {
+    if (!selectedRouteId) {
+      setRecoveryHash("");
+      return;
+    }
+    setRecoveryHash(
+      safeLocalStorageGet(`veyra-submission-${selectedRouteId}`) ?? ""
+    );
+  }, [selectedRouteId]);
   const displayActivity = isAuthenticated
     ? liveRoutes.map(route => ({
         id: `VP-${String(route.id).padStart(3, "0")}`,
@@ -703,6 +730,7 @@ export default function Home() {
     if (stage === 1) {
       try {
         const routeInput = {
+          clientRequestId: routeCreateRequestId,
           name: routeName.trim() || "Untitled private route",
           token: tokenSymbol,
           network: selectedNetwork,
@@ -718,7 +746,8 @@ export default function Home() {
               ...routeInput,
             })
           : await createRouteMutation.mutateAsync(routeInput);
-        setEditingRouteId(null);
+        setEditingRouteId(savedRoute.id);
+        setSelectedRouteId(savedRoute.id);
       } catch (error) {
         toast("Route could not be saved.", {
           description: String(error).slice(0, 140),
@@ -739,49 +768,43 @@ export default function Home() {
           selectedRecipients[0]?.walletAddress,
           tokenAddress ?? ""
         );
-        const transactionHashes = tx.transaction_hash
-          ? [tx.transaction_hash]
-          : [];
-        const payrollRegistry = protocolContracts(selectedNetwork).payroll;
-        if (payrollRegistry && wallet.execute) {
-          try {
-            const commitment = await buildRecipientCommitment(
-              activeRecipientIds,
-              normalizedAmount,
-              routeName
-            );
-            const registryCall = buildPayrollRegistryCreateCall(
-              payrollRegistry.address,
-              tokenAddress ?? "",
-              amountSmallestUnit,
-              commitment
-            );
-            const registryTx = await wallet.execute([registryCall]);
-            if (registryTx.transaction_hash)
-              transactionHashes.push(registryTx.transaction_hash);
-          } catch (error) {
-            toast(
-              "Private transfer submitted; registry receipt is still pending.",
-              { description: String(error).slice(0, 140) }
-            );
-          }
+        if (!tx.transaction_hash) {
+          toast("No private transaction was submitted.", {
+            description:
+              "The wallet returned no transaction hash. The saved route remains ready to sign.",
+          });
+          return;
         }
-        if (savedRoute?.id) {
-          for (const transactionHash of transactionHashes) {
-            await recordTransactionMutation.mutateAsync({
-              routeId: savedRoute.id,
-              network: selectedNetwork,
-              transactionHash,
-              status: "submitted",
-              explorerUrl: explorerUrl(transactionHash, selectedNetwork),
-            });
-          }
+        if (!savedRoute?.id) {
+          throw new Error(
+            "A saved route is required before recording a wallet hash"
+          );
+        }
+        safeLocalStorageSet(
+          `veyra-submission-${savedRoute.id}`,
+          tx.transaction_hash
+        );
+        try {
+          await recordTransactionMutation.mutateAsync({
+            routeId: savedRoute.id,
+            network: selectedNetwork,
+            transactionHash: tx.transaction_hash,
+            status: "submitted",
+            explorerUrl: explorerUrl(tx.transaction_hash, selectedNetwork),
+          });
+          safeLocalStorageRemove(`veyra-submission-${savedRoute.id}`);
+        } catch (recordError) {
+          setStage(2);
+          toast("Wallet action submitted; Veyra must recover its record.", {
+            description:
+              "No second signature is needed. Open the saved route in Claims and record the returned hash before verifying its receipt.",
+          });
+          return;
         }
         setStage(2);
+        setRouteCreateRequestId(crypto.randomUUID());
         toast("Private route submitted.", {
-          description: tx.transaction_hash
-            ? `${networkLabel(selectedNetwork)} · View on Voyager: ${explorerUrl(tx.transaction_hash, selectedNetwork)}`
-            : "Waiting for confirmation.",
+          description: `${networkLabel(selectedNetwork)} · Receipt verification is required before settlement is confirmed.`,
         });
         return;
       } catch (error) {
@@ -819,6 +842,22 @@ export default function Home() {
       });
       return;
     }
+    if (claimedRouteTransaction) {
+      toast("A private transaction is already recorded for this route.", {
+        description:
+          claimedRouteTransaction.status === "confirmed"
+            ? "The receipt is confirmed. Do not request another wallet signature."
+            : "Verify the recorded receipt before requesting any additional wallet action.",
+      });
+      return;
+    }
+    if (claimWalletActionPending) {
+      toast("A wallet action is already awaiting a result.", {
+        description:
+          "Do not sign again. Wait for the wallet response or recover the returned hash.",
+      });
+      return;
+    }
     if (!connected || !wallet) {
       toast("Connect a STRK20-capable wallet to continue.", {
         description:
@@ -844,6 +883,7 @@ export default function Home() {
       });
       return;
     }
+    setClaimWalletActionPending(true);
     try {
       const tx = await submitShieldedRoute(
         wallet,
@@ -859,13 +899,28 @@ export default function Home() {
         });
         return;
       }
-      await recordTransactionMutation.mutateAsync({
-        routeId: selectedRouteId,
-        network: selectedNetwork,
-        transactionHash: tx.transaction_hash,
-        status: "submitted",
-        explorerUrl: explorerUrl(tx.transaction_hash, selectedNetwork),
-      });
+      safeLocalStorageSet(
+        `veyra-submission-${selectedRouteId}`,
+        tx.transaction_hash
+      );
+      try {
+        await recordTransactionMutation.mutateAsync({
+          routeId: selectedRouteId,
+          network: selectedNetwork,
+          transactionHash: tx.transaction_hash,
+          status: "submitted",
+          explorerUrl: explorerUrl(tx.transaction_hash, selectedNetwork),
+        });
+        safeLocalStorageRemove(`veyra-submission-${selectedRouteId}`);
+      } catch (recordError) {
+        setStage(2);
+        setRecoveryHash(tx.transaction_hash);
+        toast("Wallet action submitted; Veyra must recover its record.", {
+          description:
+            "No second signature is needed. Verify the returned hash from this route instead.",
+        });
+        return;
+      }
       setStage(2);
       await Promise.all([
         utils.workspace.overview.invalidate(),
@@ -879,6 +934,8 @@ export default function Home() {
         description:
           describeStrk20SubmissionError(error) ?? String(error).slice(0, 180),
       });
+    } finally {
+      setClaimWalletActionPending(false);
     }
   }
 
@@ -2673,17 +2730,100 @@ export default function Home() {
                         disabled={
                           recordTransactionMutation.isPending ||
                           routeRecipientReviewQuery.isLoading ||
-                          !claimedRecipient
+                          !claimedRecipient ||
+                          Boolean(claimedRouteTransaction) ||
+                          claimWalletActionPending ||
+                          Boolean(recoveryHash.trim())
                         }
                         onClick={() => void submitClaimedRecipientRoute()}
                         className="mt-3 h-10 w-full rounded-[9px] bg-[#F0563A] font-mono text-[9px] tracking-[0.08em] text-[#111210] hover:bg-[#FF7257]"
                       >
-                        {!connected
-                          ? "CONNECT WALLET TO REVIEW"
-                          : !wallet?.strk20InvokeTransaction
-                            ? "STRK20 WALLET REQUIRED"
-                            : "REVIEW & SUBMIT PRIVATE TRANSACTION"}
+                        {claimedRouteTransaction
+                          ? claimedRouteTransaction.status === "confirmed"
+                            ? "PRIVATE TRANSACTION CONFIRMED"
+                            : "PRIVATE TRANSACTION SUBMITTED — VERIFY RECEIPT"
+                          : recoveryHash.trim()
+                            ? "RECOVER EXISTING HASH FIRST"
+                            : claimWalletActionPending
+                              ? "WALLET ACTION IN PROGRESS"
+                              : !connected
+                                ? "CONNECT WALLET TO REVIEW"
+                                : !wallet?.strk20InvokeTransaction
+                                  ? "STRK20 WALLET REQUIRED"
+                                  : "REVIEW & SUBMIT PRIVATE TRANSACTION"}
                       </Button>
+                      {claimedRouteTransaction && (
+                        <div className="mt-3 rounded-[9px] border border-[#70D49D]/30 bg-[#70D49D]/[0.06] p-3 font-mono text-[9px] text-[#CFC7BC]">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-[#70D49D]">
+                              {claimedRouteTransaction.status.toUpperCase()} /
+                              RECEIPT REQUIRED
+                            </span>
+                            {claimedRouteTransaction.status !== "confirmed" && (
+                              <button
+                                type="button"
+                                disabled={confirmTransactionMutation.isPending}
+                                onClick={() =>
+                                  confirmTransactionMutation.mutate({
+                                    transactionHash:
+                                      claimedRouteTransaction.transactionHash,
+                                  })
+                                }
+                                className="text-[#F3EEE5] hover:text-[#F0563A]"
+                              >
+                                VERIFY RECEIPT
+                              </button>
+                            )}
+                          </div>
+                          <div className="mt-2 truncate text-[#AEB8BE]">
+                            {claimedRouteTransaction.transactionHash}
+                          </div>
+                        </div>
+                      )}
+                      {!claimedRouteTransaction && (
+                        <div className="mt-3 rounded-[9px] border border-white/10 bg-[#111210] p-3">
+                          <div className="font-mono text-[8px] tracking-[0.1em] text-[#AEB8BE]">
+                            RECOVER A RETURNED WALLET HASH / NO NEW SIGNATURE
+                          </div>
+                          <Input
+                            value={recoveryHash}
+                            onChange={event =>
+                              setRecoveryHash(event.target.value.trim())
+                            }
+                            placeholder="0x…"
+                            className="mt-2 h-9 border-white/10 bg-[#0C1012] font-mono text-[9px] text-[#F3EEE5]"
+                          />
+                          <Button
+                            type="button"
+                            disabled={
+                              recoverTransactionMutation.isPending ||
+                              !/^0x[0-9a-fA-F]+$/.test(recoveryHash)
+                            }
+                            onClick={() =>
+                              recoverTransactionMutation.mutate({
+                                routeId: selectedRouteId,
+                                network: selectedNetwork,
+                                transactionHash: recoveryHash,
+                                explorerUrl: explorerUrl(
+                                  recoveryHash,
+                                  selectedNetwork
+                                ),
+                              })
+                            }
+                            className="mt-2 h-8 w-full rounded-[8px] border border-white/15 bg-transparent font-mono text-[8px] text-[#F3EEE5] hover:border-[#F0563A]/60"
+                          >
+                            {recoverTransactionMutation.isPending
+                              ? "VERIFYING HASH…"
+                              : "VERIFY & RECORD EXISTING HASH"}
+                          </Button>
+                          <p className="mt-2 font-mono text-[8px] leading-4 text-[#7F8F97]">
+                            Use only the hash returned by this route’s wallet
+                            action. Veyra verifies its Starknet receipt before
+                            recording it and never requests another signature
+                            here.
+                          </p>
+                        </div>
+                      )}
                       <p className="mt-2 font-mono text-[8px] leading-4 text-[#7F8F97]">
                         Uses the official STRK20 wallet action only. No
                         public-transfer fallback is available. A transaction is

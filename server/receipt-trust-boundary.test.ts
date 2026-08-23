@@ -12,12 +12,18 @@ describe("receipt trust boundary", () => {
     const end = routers.indexOf("\n    }),", start);
     const block = routers.slice(start, end === -1 ? routers.length : end);
 
-    expect(block).toContain('status: z.literal("submitted").default("submitted")');
-    expect(block).not.toContain('z.enum(["submitted", "confirmed", "reverted", "unknown"])');
+    expect(block).toContain(
+      'status: z.literal("submitted").default("submitted")'
+    );
+    expect(block).not.toContain(
+      'z.enum(["submitted", "confirmed", "reverted", "unknown"])'
+    );
   });
 
   it("keeps the persistence helper limited to unverified submissions", () => {
-    const start = db.indexOf("export async function recordBlockchainTransaction");
+    const start = db.indexOf(
+      "export async function recordBlockchainTransaction"
+    );
     const end = db.indexOf("\nexport async function ", start + 1);
     const block = db.slice(start, end === -1 ? db.length : end);
 
@@ -35,5 +41,53 @@ describe("receipt trust boundary", () => {
     expect(block.indexOf("verifyWorkspaceStarknetReceipt")).toBeLessThan(
       block.indexOf("confirmBlockchainTransaction")
     );
+  });
+
+  it("permits recovery only through a server-verified receipt before recording", () => {
+    const start = routers.indexOf("recoverSubmission:");
+    const end = routers.indexOf("\n    }),", start);
+    const block = routers.slice(start, end === -1 ? routers.length : end);
+
+    expect(block).toContain("recoverBlockchainTransaction");
+    expect(db).toContain("export async function recoverBlockchainTransaction");
+    const recoveryStart = db.indexOf(
+      "export async function recoverBlockchainTransaction"
+    );
+    const recoveryEnd = db.indexOf(
+      "\nexport async function ",
+      recoveryStart + 1
+    );
+    const recovery = db.slice(
+      recoveryStart,
+      recoveryEnd === -1 ? db.length : recoveryEnd
+    );
+    expect(recovery.indexOf("verifyStarknetReceipt")).toBeGreaterThan(-1);
+    expect(recovery.indexOf("verifyStarknetReceipt")).toBeLessThan(
+      recovery.indexOf("recordBlockchainTransaction")
+    );
+  });
+
+  it("makes repeated route creation and submission recording retry-safe", () => {
+    const routeStart = db.indexOf("export async function createPaymentRoute");
+    const routeEnd = db.indexOf("\nexport async function ", routeStart + 1);
+    const route = db.slice(routeStart, routeEnd === -1 ? db.length : routeEnd);
+    const transactionStart = db.indexOf(
+      "export async function recordBlockchainTransaction"
+    );
+    const transactionEnd = db.indexOf(
+      "\nexport async function ",
+      transactionStart + 1
+    );
+    const transaction = db.slice(
+      transactionStart,
+      transactionEnd === -1 ? db.length : transactionEnd
+    );
+
+    expect(route).toContain("clientRequestId?: string;");
+    expect(route).toContain(
+      "eq(paymentRoutes.clientRequestId, input.clientRequestId)"
+    );
+    expect(transaction).toContain('action: "transaction_submitted"');
+    expect(transaction).toContain('set({ status: "routed" })');
   });
 });

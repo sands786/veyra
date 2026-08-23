@@ -693,3 +693,19 @@
 
 - [x] Make the sender route-selection path to Claim review explicit after a recipient redeems a claim link, so users do not mistake the blank Route Builder for the approval surface.
 - [x] Reverify the saved-route claim-review picker and guarded submit boundary through interaction regression coverage, typechecking, full tests, and a production build without creating a duplicate route or submitting a transaction.
+
+## Claimed-route duplicate-submission and delivery investigation
+
+- [x] Verify the reported first claimed-route Mainnet hash `0x00c254e48eabc23bc3f0f25343c98876d8351ff3fe9fe63b9808b4126b9f59c3` as a successful public Mainnet STRK20 privacy-pool receipt without inferring settlement or recipient delivery.
+- [x] Prevent the claimed-route submit control from requesting a second wallet signature after Veyra has recorded a submitted transaction for that route.
+- [x] Determine that the successful claimed-route wallet hash was not persisted in Veyra and add durable post-signature hash retention plus verified recovery before any further submit control is exposed.
+- [ ] Reconcile the recipient wallet’s Shielded Starknet state separately; public receipt evidence cannot prove private-note discovery or delivery.
+- [ ] Use the exact claimed saved route’s new no-signature recovery control to verify and record the already returned hash before any receipt confirmation attempt.
+
+## Evidence-driven private-payment production hardening
+
+- [x] Audit the claim creation, redemption, sender review, STRK20 request, hash persistence, receipt verification, duplicate prevention, and recipient-discovery boundaries one by one.
+- [x] Compare Veyra’s wallet invocation and transaction-recording behavior with verified Starknet/STRK20 public implementation guidance and document the non-negotiable wallet limitations.
+- [x] Correct verified code-owned persistence, duplicate-prevention, and receipt-state defects with atomic persistence and retry-safe state transitions.
+- [x] Add focused tests for every corrected private-payment failure path and rerun the complete production verification suite.
+- [x] Publish an evidence-based hardening report that separates corrected SaaS behavior from user-owned wallet and privacy-pool outcomes.
