@@ -579,3 +579,7 @@
 - [x] Verify every authentication trigger is event-driven and no stale OAuth helper remains.
 - [x] Audit secondary pages for consistent institutional brand chrome, landmarks, focus states, and query retry/empty behavior; no new blocking defect was confirmed.
 - [x] Audit mobile navigation semantics and icon-only control labels; confirmed the Home menu semantics and fixed the Demo Mode mobile control rail clipping.
+
+## Repeated live STRK20 registration response
+- [x] Verify the registration boundary against the official STRK20 launch and SDK documentation: the connected wallet must use a supported, initialized privacy-pool flow; generic Starknet wallet capability is insufficient.
+- [x] Keep Veyra fail-closed and provide a precise operator-facing recovery path; never substitute an unverified contract or generic execute call.
