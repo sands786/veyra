@@ -602,3 +602,8 @@
 - [x] Trace Braavos-specific provider discovery and connection behavior independently from the working Ready X account flow.
 - [x] Keep Ready X’s confirmed STRK20 `NOT_REGISTERED` response documented as a protocol-registration prerequisite; do not mislabel it as a wallet connection failure.
 - [x] Apply only a verified Braavos compatibility correction, then run the full regression and deployment verification suite.
+
+## Braavos prototype event-handler compatibility
+
+- [x] Preserve prototype-defined injected wallet event handlers through the official wallet-standard adapter lifecycle so Braavos can initialize its account and network listeners.
+- [x] Add a realistic Braavos prototype-provider regression and pass the complete TypeScript, production-build, formatting, and diff-hygiene suite.

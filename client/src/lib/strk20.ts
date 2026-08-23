@@ -85,6 +85,10 @@ export type VeilWallet = {
   selectedAccount?: { address?: string; chainId?: string };
   chainId?: string;
   selectedChainId?: string;
+  on?: (
+    event: string,
+    listener: (...args: unknown[]) => void
+  ) => (() => void) | void;
   /** Native STRK20 wallet-api method, when the wallet exposes it directly. */
   strk20InvokeTransaction?: (
     actions: OnchainAction[]
@@ -201,13 +205,11 @@ async function requestInvoke(
  * for private actions.
  */
 function withWalletStandardMethods(wallet: VeilWallet): VeilWallet {
-  if (
-    wallet.request &&
-    typeof (wallet as VeilWallet & { on?: unknown }).on === "function"
-  ) {
+  if (wallet.request && typeof wallet.on === "function") {
     try {
       const injected = {
         ...wallet,
+        on: wallet.on.bind(wallet),
         request: async (request: {
           type: string;
           params?: Record<string, unknown>;
@@ -238,6 +240,7 @@ function withWalletStandardMethods(wallet: VeilWallet): VeilWallet {
         icon: standard.icon || wallet.icon,
         address: account?.address ?? wallet.address,
         chainId: chainId ?? wallet.chainId,
+        on: wallet.on.bind(wallet),
         request: standardRequest,
         connect: async () => {
           const result = await standardConnect.connect({});

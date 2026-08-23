@@ -13,6 +13,7 @@ import {
   STRK_TOKEN,
   submitShieldedRoute,
   type StarknetWalletOption,
+  type VeilWallet,
 } from "./strk20";
 
 describe("STRK20 on-chain adapter", () => {
@@ -244,6 +245,27 @@ describe("STRK20 on-chain adapter", () => {
         ],
       },
     });
+  });
+
+  it("preserves a Braavos prototype event method for the official injected adapter", async () => {
+    const provider = Object.create({
+      on: () => () => undefined,
+    }) as VeilWallet;
+    provider.id = "braavos";
+    provider.name = "Braavos";
+    provider.icon = "data:image/svg+xml;base64,AA==";
+    provider.request = async request => {
+      if (request.type === "wallet_requestAccounts") return ["0x1234"];
+      if (request.type === "wallet_requestChainId") return "SN_MAIN";
+      return { transaction_hash: "0xabc" };
+    };
+    const result = await connectVeilWallet(provider);
+    expect(result).toMatchObject({
+      address: "0x1234",
+      live: true,
+      network: "mainnet",
+    });
+    expect(result.wallet?.on).toBeTypeOf("function");
   });
 
   it("submits through the official wallet_strk20InvokeTransaction request", async () => {
