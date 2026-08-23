@@ -46,6 +46,7 @@ import { toast } from "sonner";
 import {
   buildPayrollRegistryCreateCall,
   connectVeilWallet,
+  describeStrk20SubmissionError,
   disconnectVeilWallet,
   discoverStarknetWallets,
   explorerUrl,
@@ -770,7 +771,8 @@ export default function Home() {
         return;
       } catch (error) {
         toast("STRK20 action was not submitted.", {
-          description: String(error).slice(0, 140),
+          description:
+            describeStrk20SubmissionError(error) ?? String(error).slice(0, 180),
         });
         return;
       }

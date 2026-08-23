@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildPayrollRegistryCreateCall,
   buildShieldedRouteActions,
+  describeStrk20SubmissionError,
   connectVeilWallet,
   disconnectVeilWallet,
   ETH_TOKEN,
@@ -15,6 +16,15 @@ import {
 } from "./strk20";
 
 describe("STRK20 on-chain adapter", () => {
+  it("classifies NOT_REGISTERED without implying a transaction was created", () => {
+    expect(
+      describeStrk20SubmissionError(new Error("NOT_REGISTERED"))
+    ).toContain("No transaction was created");
+    expect(describeStrk20SubmissionError(new Error("User rejected"))).toBe(
+      undefined
+    );
+  });
+
   it("builds a deposit action for a valid shielded route intent", () => {
     expect(
       buildShieldedRouteActions({

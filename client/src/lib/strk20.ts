@@ -128,6 +128,16 @@ function addressFromWallet(wallet?: VeilWallet): string | undefined {
   return wallet?.address ?? wallet?.account?.address;
 }
 
+export function describeStrk20SubmissionError(
+  error: unknown
+): string | undefined {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/not_registered/i.test(message)) {
+    return "The connected wallet or STRK20 privacy pool reports NOT_REGISTERED. No transaction was created. Complete STRK20 registration/shielding in a supported wallet, or configure the verified Mainnet SDK/pool deployment before retrying.";
+  }
+  return undefined;
+}
+
 function transactionHashFromWalletResponse(value: unknown): string {
   if (
     typeof value !== "object" ||

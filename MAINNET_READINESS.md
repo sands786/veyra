@@ -12,6 +12,12 @@ A Veyra-owned contract integration requires a verified Mainnet privacy-pool depl
 
 The official wallet-standard request path is capability-based. Veyra may request `wallet_strk20InvokeTransaction` only through a wallet that explicitly exposes that STRK20 action. Generic `execute` is not used as a substitute for private actions, because it would not prove that the wallet and privacy SDK understand the required proof, pool, token, and action semantics.
 
+## NOT_REGISTERED response
+
+A wallet can expose a generic Starknet wallet API and still reject `wallet_strk20InvokeTransaction` with `NOT_REGISTERED`. This response means the STRK20 privacy flow has not been registered or initialized for the connected wallet, asset, or privacy-pool deployment; it does not create a transaction hash and must not advance a route to submitted or confirmed. Veyra now surfaces this distinction explicitly and remains fail-closed.
+
+The official Starknet launch material describes the first live STRK20 phase as wallet-enabled privacy through supported integrations including Ready X and Xverse. A Braavos connection should therefore be treated as compatible only when it explicitly supports the required STRK20 action and the relevant registration flow; a generic `request` method alone is not sufficient evidence.
+
 ## User-owned completion steps
 
 The user must provide or deploy the verified Mainnet privacy-pool contract using the pinned official STRK20 source and release. The user must configure the public deployment values in the deployment environment, connect a Starknet Mainnet wallet, and approve a small intended action only after inspecting the wallet request. The user must then record the returned hash, confirm the contract and token on Starkscan, wait for a receipt, and run Veyra receipt verification. Only the verified receipt should move a transaction to confirmed or settle an eligible route.

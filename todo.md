@@ -559,3 +559,9 @@
 - [x] Fix reported Braavos/Mainnet wallet chain-ID normalization so genuine Mainnet wallets pass strict network verification
 - [x] Resolve persistent STRK20 capability error reported with Braavos/Mainnet wallet without weakening the fail-closed execution boundary
 - [x] Integrate the official StarknetInjectedWallet wrapper for legacy Braavos-compatible injection and verify wallet-standard request hydration with the full 143-test, TypeScript, and production-build suite
+
+## Live NOT_REGISTERED submission investigation
+
+- [x] Diagnose the reported Starknet Mainnet STRK20 `NOT_REGISTERED` wallet response and identify it as a protocol registration/SDK readiness boundary rather than a chain-ID capability failure.
+- [x] Apply only a verified safe correction: add explicit NOT_REGISTERED guidance stating that no transaction was created and preserve fail-closed Mainnet execution; do not enable unverified contract execution.
+- [x] Re-run regression, TypeScript, production build, formatting, and diff-hygiene verification after the investigation.
