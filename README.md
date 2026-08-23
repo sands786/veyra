@@ -13,6 +13,7 @@
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="docs/THREAT_MODEL.md">Threat model</a> ·
   <a href="docs/DECISIONS.md">Decision record</a> ·
+  <a href="MAINNET_READINESS.md">Mainnet readiness</a> ·
   <a href="#film-library">Film library</a>
 </p>
 

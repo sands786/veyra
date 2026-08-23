@@ -541,13 +541,18 @@
 - [x] Audit finding: prevent a production route from advancing to shielded/routed stages when the connected wallet cannot submit the required STRK20 transaction
 - [x] Fix reported Braavos wallet capability detection so supported Starknet Mainnet submission is recognized without weakening the fail-closed guard
 - [x] Fix reported Mainnet asset-integrity gap: prevent a visible USDC route from invoking a hardcoded STRK token action
-- [ ] Require configured public STRK20 contract addresses and verified entrypoints before any Braavos-compatible Mainnet execution path
+- [x] Require configured public STRK20 contract addresses and verified entrypoints before any Veyra-owned registry execution path; keep official wallet actions capability-gated
 - [x] Mainnet readiness: verify the official STRK20 contract interface and deployment details from authoritative sources
 - [x] Mainnet readiness: implement the official wallet-standard STRK20 execution request path; keep unknown contract calls fail-closed
-- [ ] Mainnet readiness: complete production configuration, regression coverage, and user-owned transaction evidence
+- [x] Mainnet readiness: complete safe production configuration and regression coverage; retain user-owned transaction evidence as a separate prerequisite
 
 - [x] Mainnet adapter: support the official `wallet_strk20InvokeTransaction` wallet-standard request path for Braavos-compatible wallets
 - [x] Audit finding: prevent proof-card preparation from advancing a submitted route to confirmed without receipt verification
 - [x] Audit finding: prevent the current single-recipient action from silently signing a multi-recipient route with incorrect allocations
 - [x] Mainnet UI: expose only verified STRK and ETH Mainnet assets through the executable route selector
 - [x] Add verified Starknet Mainnet ETH token mapping and exact 18-decimal route support alongside STRK
+
+- [x] Complete safe Mainnet readiness configuration and explicit protocol readiness diagnostics
+- [x] Add production evidence-capture fields for verified Mainnet transaction hashes and Starkscan receipts
+- [x] Document user-owned contract deployment/configuration and wallet approval prerequisites without exposing credentials
+- [x] Re-run full tests, typecheck, build, dependency audit, runtime checks, and publish the final safe release

@@ -15,3 +15,15 @@ The repository root README lists the Privacy Pool class hash `0x52107fadffab71bd
 ## Starknet.js wallet-standard verification — 2026-08-23
 
 The temporary Starknet.js 10.5.0 package inspection confirms the official wallet-standard helper calls `walletWSF.features["starknet:walletApi"].request({ type: "wallet_strk20InvokeTransaction", params: { actions } })`. It also exposes `strk20PrepareInvoke`, `strk20Balances`, and `addInvokeTransaction`. `WalletAccountV6.strk20InvokeTransaction()` delegates to that helper. This confirms Veyra’s current direct property check (`wallet.strk20InvokeTransaction`) is insufficient for standard injected Braavos wallets: the app must wrap a wallet-standard object or call the official request feature. The route still requires a verified STRK20 pool contract, proving/discovery services, and matching SDK revision before it can be safely enabled.
+
+## Authoritative Mainnet token and STRK20 support evidence
+
+- Official Starknet chain information: https://docs.starknet.io/learn/cheatsheets/chain-info
+  - Mainnet STRK token: 0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d
+  - Mainnet ETH token: 0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7
+- Official STRK20 announcement: https://www.starknet.io/blog/make-all-erc-20-tokens-private-with-strk20/
+  - States that STRK20 supports any ERC-20 on Starknet and uses a single privacy pool; Veyra can therefore expose verified Starknet ETH and STRK mappings, subject to the wallet/pool’s actual support.
+- Official Starknet ERC-20 guidance: https://docs.starknet.io/build/starkzap/erc20
+  - Recommends token presets and precision-safe amount handling; Veyra now uses verified token mappings and exact 18-decimal conversion for STRK and ETH.
+- Official STRK20 repository audit: https://github.com/starkware-libs/starknet-privacy
+  - The checked source and release artifacts expose the SDK/wallet request seam, but do not provide a verified Veyra-specific Mainnet privacy deployment address. Veyra must not invent one or substitute a class hash for an address.
