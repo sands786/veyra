@@ -255,13 +255,72 @@ export async function requestWalletQrConnection(
   }
 }
 
+function chainIdFromValue(value: unknown): string | undefined {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (Array.isArray(value)) return chainIdFromValue(value[0]);
+  if (typeof value === "number" && Number.isSafeInteger(value))
+    return String(value);
+  if (typeof value !== "object" || value === null) return undefined;
+  const record = value as Record<string, unknown>;
+  for (const key of [
+    "chainId",
+    "chain_id",
+    "network",
+    "networkId",
+    "network_id",
+  ]) {
+    const candidate = record[key];
+    if (typeof candidate === "string" && candidate.trim())
+      return candidate.trim();
+    if (typeof candidate === "number" && Number.isSafeInteger(candidate))
+      return String(candidate);
+  }
+  const account = Array.isArray(record.accounts)
+    ? record.accounts[0]
+    : record.account;
+  return chainIdFromValue(account);
+}
+
+function addressFromValue(value: unknown): string | undefined {
+  if (Array.isArray(value)) return addressFromValue(value[0]);
+  if (typeof value !== "object" || value === null) return undefined;
+  const record = value as Record<string, unknown>;
+  for (const key of ["address", "accountAddress", "account_address"]) {
+    const candidate = record[key];
+    if (typeof candidate === "string" && candidate.trim())
+      return candidate.trim();
+  }
+  const account = Array.isArray(record.accounts)
+    ? record.accounts[0]
+    : record.account;
+  return addressFromValue(account);
+}
+
+function mergeWalletConnection(
+  wallet: VeilWallet,
+  connectionResult: unknown
+): VeilWallet {
+  const address = addressFromValue(connectionResult);
+  const chainId = chainIdFromValue(connectionResult);
+  return {
+    ...wallet,
+    ...(address ? { address } : {}),
+    ...(chainId ? { chainId } : {}),
+  };
+}
+
 export function networkFromChainId(chainId?: string): VeilNetwork | undefined {
   if (!chainId) return undefined;
   const normalized = chainId.trim().toLowerCase();
+  const normalizedHex = /^\d+$/.test(normalized)
+    ? `0x${BigInt(normalized).toString(16)}`
+    : normalized;
   if (
-    normalized === MAINNET_CHAIN_ID.toLowerCase() ||
-    normalized === "sn_main" ||
-    normalized === "starknet-mainnet"
+    normalizedHex === MAINNET_CHAIN_ID.toLowerCase() ||
+    normalizedHex === "sn_main" ||
+    normalizedHex === "sn_mainnet" ||
+    normalizedHex === "starknet-mainnet" ||
+    normalizedHex === "starknet_mainnet"
   )
     return "mainnet";
   return undefined;
@@ -291,9 +350,11 @@ export async function connectVeilWallet(selectedWallet?: VeilWallet): Promise<{
 }> {
   const wallet = selectedWallet ?? detectWallet();
   if (!wallet) return { live: false };
-  if (wallet.enable) await wallet.enable();
-  else await wallet.connect?.({ mode: "browser" });
-  const enhancedWallet = withWalletStandardMethods(wallet);
+  const connectionResult = wallet.enable
+    ? await wallet.enable()
+    : await wallet.connect?.({ mode: "browser" });
+  const connectedWallet = mergeWalletConnection(wallet, connectionResult);
+  const enhancedWallet = withWalletStandardMethods(connectedWallet);
   const address = addressFromWallet(enhancedWallet);
   return {
     wallet: enhancedWallet,

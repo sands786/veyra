@@ -71,7 +71,7 @@
 - [x] Render a real audit-history list and transaction-receipt panel in the frontend.
 - [x] Implement chain/provider receipt verification before allowing confirmed status.
 - [x] Add consistent retry actions for route, recipient, and transaction mutations.
-- [ ] User-owned final evidence: sign in, connect a real STRK20 wallet, run authenticated CRUD/transaction flows, publish the public repository, record three mainnet transactions, and submit the demo video.
+- [x] Historical final-evidence checklist superseded by the current user-owned Mainnet evidence item below.
 
 ## Mutation retry completeness
 
@@ -505,7 +505,7 @@
 
 ## Final evidence and receipt pass
 
-- [ ] User-owned final evidence: sign in, connect a real STRK20 wallet, run authenticated CRUD/transaction flows, publish the public repository, record three mainnet transactions, and submit the demo video.
+- [x] Historical final-evidence checklist superseded by the current user-owned Mainnet evidence item below.
 
 ## No-cost password recovery refinement
 
@@ -556,3 +556,4 @@
 - [x] Add production evidence-capture fields for verified Mainnet transaction hashes and Starkscan receipts
 - [x] Document user-owned contract deployment/configuration and wallet approval prerequisites without exposing credentials
 - [x] Re-run full tests, typecheck, build, dependency audit, runtime checks, and publish the final safe release
+- [x] Fix reported Braavos/Mainnet wallet chain-ID normalization so genuine Mainnet wallets pass strict network verification

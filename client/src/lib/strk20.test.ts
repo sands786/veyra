@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildPayrollRegistryCreateCall,
   buildShieldedRouteActions,
+  connectVeilWallet,
   disconnectVeilWallet,
   ETH_TOKEN,
   MAINNET_CHAIN_ID,
@@ -111,9 +112,25 @@ describe("STRK20 on-chain adapter", () => {
     });
   });
 
-  it("recognizes the official SN_MAIN chain alias", () => {
+  it("recognizes official Mainnet aliases and decimal felt chain IDs", () => {
     expect(networkFromChainId("SN_MAIN")).toBe("mainnet");
     expect(networkFromChainId(MAINNET_CHAIN_ID)).toBe("mainnet");
+    expect(networkFromChainId(BigInt(MAINNET_CHAIN_ID).toString())).toBe(
+      "mainnet"
+    );
+  });
+
+  it("hydrates address and chain ID from a wallet enable response", async () => {
+    const result = await connectVeilWallet({
+      enable: async () => ({
+        accounts: [{ address: "0x1234", chainId: "SN_MAIN" }],
+      }),
+    });
+    expect(result).toMatchObject({
+      address: "0x1234",
+      live: true,
+      network: "mainnet",
+    });
   });
 
   it("reports standard wallet-api request support as executable only on Mainnet", () => {
