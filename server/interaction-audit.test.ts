@@ -8,6 +8,9 @@ const home = readFileSync(resolve(root, "client/src/pages/Home.tsx"), "utf8");
 const launchpad = readFileSync(resolve(root, "client/src/pages/Launchpad.tsx"), "utf8");
 const signIn = readFileSync(resolve(root, "client/src/pages/SignIn.tsx"), "utf8");
 const demo = readFileSync(resolve(root, "client/src/pages/DemoMode.tsx"), "utf8");
+const main = readFileSync(resolve(root, "client/src/main.tsx"), "utf8");
+const db = readFileSync(resolve(root, "server/db.ts"), "utf8");
+const routers = readFileSync(resolve(root, "server/routers.ts"), "utf8");
 
 
 describe("Veyra interaction contracts", () => {
@@ -52,11 +55,37 @@ describe("Veyra interaction contracts", () => {
     expect(signIn).toContain('type="button" onClick={() => changeMode("register")}');
   });
 
+  it("routes workspace headers through safe storage", () => {
+    expect(main).toContain("safeLocalStorageGet");
+    expect(main).not.toContain('localStorage.getItem("veilpay-active-workspace")');
+  });
+
   it("labels Demo Mode as local-only and provides deterministic recovery actions", () => {
     expect(demo).toContain("DEMO MODE / SIMULATED ONLY");
     expect(demo).toContain("SIMULATE ERROR");
     expect(demo).toContain("RESET");
     expect(demo).toContain("onBeforeNavigate={exitDemo}");
     expect(demo).not.toContain('window.location.reload()');
+  });
+
+  it("fails recipient mutations before writing false audit events", () => {
+    for (const name of ["archiveRecipient", "updateRecipient", "restoreRecipient"]) {
+      const start = db.indexOf(`export async function ${name}`);
+      const end = db.indexOf("\nexport async function ", start + 1);
+      const block = db.slice(start, end === -1 ? db.length : end);
+      expect(block).toContain("result[0]?.affectedRows !== 1");
+      expect(block).toContain("Recipient not found in workspace");
+      expect(block).toContain("db.transaction(async tx =>");
+    }
+  });
+
+  it("keeps alert acknowledgement actor-attributed and workspace-scoped", () => {
+    expect(routers).toContain("actorUserId: actorId, alertId: input.alertId");
+    const start = db.indexOf("export async function acknowledgePrivateMarketAlert");
+    const block = db.slice(start, db.indexOf("\nexport async function ", start + 1));
+    expect(block).toContain("actorUserId: number;");
+    expect(block).toContain("eq(privateMarketAlerts.workspaceId, input.workspaceId)");
+    expect(block).toContain('entityType: "private_market_alert"');
+    expect(block).toContain("db.transaction(async tx =>");
   });
 });

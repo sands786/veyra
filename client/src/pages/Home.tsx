@@ -5,6 +5,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin, startSignup } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { prepareRouteEdit } from "@/lib/routeEdit";
+import { safeLocalStorageGet, safeLocalStorageSet } from "@/lib/safeStorage";
 import {
   ArrowUpRight,
   BarChart3,
@@ -144,9 +145,7 @@ export default function Home() {
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<number | null>(
     () => {
       if (typeof window === "undefined") return null;
-      const stored = Number(
-        window.localStorage.getItem("veilpay-active-workspace")
-      );
+      const stored = Number(safeLocalStorageGet("veilpay-active-workspace"));
       return Number.isInteger(stored) && stored > 0 ? stored : null;
     }
   );
@@ -419,7 +418,7 @@ export default function Home() {
     const firstWorkspace = workspaceListQuery.data?.[0];
     if (!activeWorkspaceId && firstWorkspace) {
       setActiveWorkspaceId(firstWorkspace.workspace.id);
-      window.localStorage.setItem(
+      safeLocalStorageSet(
         "veilpay-active-workspace",
         String(firstWorkspace.workspace.id)
       );
@@ -430,7 +429,7 @@ export default function Home() {
     const nextId = Number(value);
     if (!Number.isInteger(nextId) || nextId <= 0) return;
     setActiveWorkspaceId(nextId);
-    window.localStorage.setItem("veilpay-active-workspace", String(nextId));
+    safeLocalStorageSet("veilpay-active-workspace", String(nextId));
     void utils.workspace.list.invalidate();
     void utils.workspace.overview.invalidate();
     void utils.recipients.list.invalidate();

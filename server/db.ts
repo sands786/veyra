@@ -16,6 +16,11 @@ import {
   hasExactRouteAllocations,
   shouldReuseLaunchpadAllocation,
   summarizeLaunchpadReadiness,
+  addDecimalStringsExact,
+  subtractDecimalStringsExact,
+  multiplyDecimalStringsExact,
+  decimalRatioAsNumber,
+  compareDecimalTimesInteger,
 } from "@shared/operations";
 import {
   auditEvents,
@@ -219,7 +224,7 @@ export async function consumePasswordResetToken(input: { tokenHash: string; pass
     const reset = token[0];
     if (!reset || reset.usedAt || reset.expiresAt <= now) return null;
     const updated = await tx.update(passwordResetTokens).set({ usedAt: now }).where(and(eq(passwordResetTokens.id, reset.id), isNull(passwordResetTokens.usedAt), gt(passwordResetTokens.expiresAt, now)));
-    const affectedRows = Number((updated as unknown as { affectedRows?: number }).affectedRows ?? 0);
+    const affectedRows = Number(updated[0]?.affectedRows ?? 0);
     if (!affectedRows) return null;
     await tx.update(localAccounts).set({ passwordHash: input.passwordHash }).where(eq(localAccounts.userId, reset.userId));
     await tx.update(users).set({ sessionVersion: sql`${users.sessionVersion} + 1` }).where(eq(users.id, reset.userId));
@@ -313,26 +318,30 @@ export async function updateWorkspaceApprovalThreshold(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  await db
-    .update(workspaces)
-    .set({ approvalThreshold })
-    .where(eq(workspaces.id, workspaceId));
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId,
-      actorUserId,
-      entityType: "workspace",
-      entityId: workspaceId,
-      action: "approval_threshold_updated",
-      metadata: JSON.stringify({ approvalThreshold }),
-    });
-  const rows = await db
-    .select()
-    .from(workspaces)
-    .where(eq(workspaces.id, workspaceId))
-    .limit(1);
-  return rows[0];
+  return db.transaction(async tx => {
+    const result = await tx
+      .update(workspaces)
+      .set({ approvalThreshold })
+      .where(eq(workspaces.id, workspaceId));
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Workspace not found");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId,
+        actorUserId,
+        entityType: "workspace",
+        entityId: workspaceId,
+        action: "approval_threshold_updated",
+        metadata: JSON.stringify({ approvalThreshold }),
+      });
+    const rows = await tx
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function listWorkspaceTreasuryBalances(workspaceId: number) {
@@ -349,7 +358,7 @@ export async function listWorkspaceTreasuryBalances(workspaceId: number) {
 export async function recordTreasuryBalanceSnapshot(input: {
   workspaceId: number;
   token: string;
-  network: "mainnet" | "sepolia";
+  network: "mainnet";
   availableBalance: string;
   source?: string;
 }) {
@@ -375,7 +384,7 @@ export async function simulateTreasuryPolicy(
     token: string;
     totalAmount: string;
     approvalCount: number;
-    network: "mainnet" | "sepolia";
+    network: "mainnet";
   }
 ) {
   const db = await getDb();
@@ -408,8 +417,7 @@ export async function simulateTreasuryPolicy(
         route.createdAt >= start &&
         !["failed", "cancelled"].includes(route.status)
     )
-    .reduce((sum, route) => sum + Number(route.totalAmount), 0)
-    .toString();
+    .reduce((sum, route) => addDecimalStrings(sum, route.totalAmount), "0");
   const evaluation = evaluateTreasuryPolicy(policy, { ...input, dailyUsed });
   return {
     ...evaluation,
@@ -438,46 +446,48 @@ export async function createTreasuryPolicy(input: {
   createdByUserId: number;
   name: string;
   token: string;
-  network: "mainnet" | "sepolia";
+  network: "mainnet";
   maxRouteAmount: string;
   dailyLimit: string;
   approvalThreshold: number;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const existing = await db
-    .select()
-    .from(treasuryPolicies)
-    .where(
-      and(
-        eq(treasuryPolicies.workspaceId, input.workspaceId),
-        eq(treasuryPolicies.name, input.name),
-        eq(treasuryPolicies.status, "active")
+  return db.transaction(async tx => {
+    const existing = await tx
+      .select()
+      .from(treasuryPolicies)
+      .where(
+        and(
+          eq(treasuryPolicies.workspaceId, input.workspaceId),
+          eq(treasuryPolicies.name, input.name),
+          eq(treasuryPolicies.status, "active")
+        )
       )
-    )
-    .limit(1);
-  if (existing[0]) return existing[0];
-  const inserted = await db
-    .insert(treasuryPolicies)
-    .values(input)
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create treasury policy");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "treasury_policy",
-      entityId: id,
-      action: "created",
-    });
-  const rows = await db
-    .select()
-    .from(treasuryPolicies)
-    .where(eq(treasuryPolicies.id, id))
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    if (existing[0]) return existing[0];
+    const inserted = await tx
+      .insert(treasuryPolicies)
+      .values(input)
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create treasury policy");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "treasury_policy",
+        entityId: id,
+        action: "created",
+      });
+    const rows = await tx
+      .select()
+      .from(treasuryPolicies)
+      .where(eq(treasuryPolicies.id, id))
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function createRecipientClaimLink(input: {
@@ -489,85 +499,90 @@ export async function createRecipientClaimLink(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const route = await db
-    .select({ id: paymentRoutes.id })
-    .from(paymentRoutes)
-    .where(
-      and(
-        eq(paymentRoutes.id, input.routeId),
-        eq(paymentRoutes.workspaceId, input.workspaceId)
-      )
-    )
-    .limit(1);
-  const recipient = await db
-    .select({ id: recipients.id })
-    .from(recipients)
-    .where(
-      and(
-        eq(recipients.id, input.recipientId),
-        eq(recipients.workspaceId, input.workspaceId),
-        eq(recipients.status, "active")
-      )
-    )
-    .limit(1);
-  const allocation = await db
-    .select({ id: routeRecipients.id })
-    .from(routeRecipients)
-    .where(
-      and(
-        eq(routeRecipients.routeId, input.routeId),
-        eq(routeRecipients.recipientId, input.recipientId)
-      )
-    )
-    .limit(1);
-  if (!route[0] || !recipient[0] || !allocation[0])
-    throw new Error("Route recipient allocation not found in workspace");
   if (input.expiresAt <= new Date())
     throw new Error("Claim link must expire in the future");
-  const existing = await db
-    .select()
-    .from(claimLinks)
-    .where(
-      and(
-        eq(claimLinks.workspaceId, input.workspaceId),
-        eq(claimLinks.routeId, input.routeId),
-        eq(claimLinks.recipientId, input.recipientId),
-        eq(claimLinks.status, "pending")
+
+  return db.transaction(async tx => {
+    const route = await tx
+      .select({ id: paymentRoutes.id })
+      .from(paymentRoutes)
+      .where(
+        and(
+          eq(paymentRoutes.id, input.routeId),
+          eq(paymentRoutes.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (existing[0] && existing[0].expiresAt > new Date()) return existing[0];
-  const token = `claim-${randomUUID().replaceAll("-", "")}`;
-  const inserted = await db
-    .insert(claimLinks)
-    .values({ ...input, token })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create claim link");
-  await db
-    .update(routeRecipients)
-    .set({ fulfillmentStatus: "claim_ready" })
-    .where(
-      and(
-        eq(routeRecipients.routeId, input.routeId),
-        eq(routeRecipients.recipientId, input.recipientId)
+      .limit(1);
+    const recipient = await tx
+      .select({ id: recipients.id })
+      .from(recipients)
+      .where(
+        and(
+          eq(recipients.id, input.recipientId),
+          eq(recipients.workspaceId, input.workspaceId),
+          eq(recipients.status, "active")
+        )
       )
-    );
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "claim_link",
-      entityId: id,
-      action: "created",
-    });
-  const rows = await db
-    .select()
-    .from(claimLinks)
-    .where(eq(claimLinks.id, id))
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    const allocation = await tx
+      .select({ id: routeRecipients.id })
+      .from(routeRecipients)
+      .where(
+        and(
+          eq(routeRecipients.routeId, input.routeId),
+          eq(routeRecipients.recipientId, input.recipientId)
+        )
+      )
+      .limit(1);
+    if (!route[0] || !recipient[0] || !allocation[0])
+      throw new Error("Route recipient allocation not found in workspace");
+
+    const existing = await tx
+      .select()
+      .from(claimLinks)
+      .where(
+        and(
+          eq(claimLinks.workspaceId, input.workspaceId),
+          eq(claimLinks.routeId, input.routeId),
+          eq(claimLinks.recipientId, input.recipientId),
+          eq(claimLinks.status, "pending")
+        )
+      )
+      .limit(1);
+    if (existing[0] && existing[0].expiresAt > new Date()) return existing[0];
+
+    const token = `claim-${randomUUID().replaceAll("-", "")}`;
+    const inserted = await tx
+      .insert(claimLinks)
+      .values({ ...input, token })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create claim link");
+    await tx
+      .update(routeRecipients)
+      .set({ fulfillmentStatus: "claim_ready" })
+      .where(
+        and(
+          eq(routeRecipients.routeId, input.routeId),
+          eq(routeRecipients.recipientId, input.recipientId)
+        )
+      );
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "claim_link",
+        entityId: id,
+        action: "created",
+      });
+    const rows = await tx
+      .select()
+      .from(claimLinks)
+      .where(eq(claimLinks.id, id))
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function getPublicClaim(token: string) {
@@ -689,24 +704,26 @@ export async function createRecipient(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const inserted = await db.insert(recipients).values(input).$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create recipient");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "recipient",
-      entityId: id,
-      action: "created",
-    });
-  const rows = await db
-    .select()
-    .from(recipients)
-    .where(eq(recipients.id, id))
-    .limit(1);
-  return rows[0];
+  return db.transaction(async tx => {
+    const inserted = await tx.insert(recipients).values(input).$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create recipient");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "recipient",
+        entityId: id,
+        action: "created",
+      });
+    const rows = await tx
+      .select()
+      .from(recipients)
+      .where(eq(recipients.id, id))
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function archiveRecipient(
@@ -716,25 +733,29 @@ export async function archiveRecipient(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  await db
-    .update(recipients)
-    .set({ status: "archived" })
-    .where(
-      and(
-        eq(recipients.id, recipientId),
-        eq(recipients.workspaceId, workspaceId)
-      )
-    );
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId,
-      actorUserId,
-      entityType: "recipient",
-      entityId: recipientId,
-      action: "archived",
-    });
-  return { success: true } as const;
+  return db.transaction(async tx => {
+    const result = await tx
+      .update(recipients)
+      .set({ status: "archived" })
+      .where(
+        and(
+          eq(recipients.id, recipientId),
+          eq(recipients.workspaceId, workspaceId)
+        )
+      );
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Recipient not found in workspace");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId,
+        actorUserId,
+        entityType: "recipient",
+        entityId: recipientId,
+        action: "archived",
+      });
+    return { success: true } as const;
+  });
 }
 
 export async function createPaymentRoute(input: {
@@ -742,7 +763,7 @@ export async function createPaymentRoute(input: {
   createdByUserId: number;
   name: string;
   token: string;
-  network: "mainnet" | "sepolia";
+  network: "mainnet";
   totalAmount: string;
   recipientAmounts: Array<{ recipientId: number; amount: string }>;
 }) {
@@ -752,70 +773,76 @@ export async function createPaymentRoute(input: {
     throw new Error(
       "Route allocations must be unique, positive, and add exactly to the route total"
     );
-  const activePolicy = (
-    await db
-      .select()
-      .from(treasuryPolicies)
-      .where(
-        and(
-          eq(treasuryPolicies.workspaceId, input.workspaceId),
-          eq(treasuryPolicies.token, input.token),
-          eq(treasuryPolicies.status, "active")
-        )
-      )
-      .orderBy(desc(treasuryPolicies.createdAt))
-      .limit(1)
-  )[0];
-  const start = new Date();
-  start.setUTCHours(0, 0, 0, 0);
-  const todayRoutes = await db
-    .select()
-    .from(paymentRoutes)
-    .where(eq(paymentRoutes.workspaceId, input.workspaceId));
-  const dailyUsed = todayRoutes
-    .filter(
-      route =>
-        route.token === input.token &&
-        route.network === input.network &&
-        route.createdAt >= start &&
-        !["failed", "cancelled"].includes(route.status)
-    )
-    .reduce((sum, route) => sum + Number(route.totalAmount), 0)
-    .toString();
-  const evaluation = evaluateTreasuryPolicy(activePolicy, {
-    totalAmount: input.totalAmount,
-    approvalCount: 0,
-    network: input.network,
-    dailyUsed,
-  });
-  if (
-    !evaluation.allowed &&
-    evaluation.reasons.some(
-      reason =>
-        reason.includes("limit") ||
-        reason.includes("restricted") ||
-        reason.includes("exceeded")
-    )
-  )
-    throw new Error(evaluation.reasons.join(" / "));
-  const recipientIds = Array.from(
-    new Set(input.recipientAmounts.map(item => item.recipientId))
-  );
-  const ownedRecipients = recipientIds.length
-    ? await db
-        .select({ id: recipients.id })
-        .from(recipients)
+  return db.transaction(async tx => {
+    const workspace = await tx
+      .select({ id: workspaces.id })
+      .from(workspaces)
+      .where(eq(workspaces.id, input.workspaceId))
+      .for("update")
+      .limit(1);
+    if (!workspace[0]) throw new Error("Workspace not found");
+    const activePolicy = (
+      await tx
+        .select()
+        .from(treasuryPolicies)
         .where(
           and(
-            eq(recipients.workspaceId, input.workspaceId),
-            eq(recipients.status, "active")
+            eq(treasuryPolicies.workspaceId, input.workspaceId),
+            eq(treasuryPolicies.token, input.token),
+            eq(treasuryPolicies.status, "active")
           )
         )
-    : [];
-  const ownedIds = new Set(ownedRecipients.map(row => row.id));
-  if (recipientIds.some(id => !ownedIds.has(id)))
-    throw new Error("One or more recipients do not belong to this workspace");
-  return db.transaction(async tx => {
+        .orderBy(desc(treasuryPolicies.createdAt))
+        .limit(1)
+    )[0];
+    const start = new Date();
+    start.setUTCHours(0, 0, 0, 0);
+    const todayRoutes = await tx
+      .select()
+      .from(paymentRoutes)
+      .where(eq(paymentRoutes.workspaceId, input.workspaceId));
+    const dailyUsed = todayRoutes
+      .filter(
+        route =>
+          route.token === input.token &&
+          route.network === input.network &&
+          route.createdAt >= start &&
+          !["failed", "cancelled"].includes(route.status)
+      )
+      .reduce((sum, route) => addDecimalStrings(sum, route.totalAmount), "0");
+    const evaluation = evaluateTreasuryPolicy(activePolicy, {
+      totalAmount: input.totalAmount,
+      approvalCount: 0,
+      network: input.network,
+      dailyUsed,
+    });
+    if (
+      !evaluation.allowed &&
+      evaluation.reasons.some(
+        reason =>
+          reason.includes("limit") ||
+          reason.includes("restricted") ||
+          reason.includes("exceeded")
+      )
+    )
+      throw new Error(evaluation.reasons.join(" / "));
+    const recipientIds = Array.from(
+      new Set(input.recipientAmounts.map(item => item.recipientId))
+    );
+    const ownedRecipients = recipientIds.length
+      ? await tx
+          .select({ id: recipients.id })
+          .from(recipients)
+          .where(
+            and(
+              eq(recipients.workspaceId, input.workspaceId),
+              eq(recipients.status, "active")
+            )
+          )
+      : [];
+    const ownedIds = new Set(ownedRecipients.map(row => row.id));
+    if (recipientIds.some(id => !ownedIds.has(id)))
+      throw new Error("One or more recipients do not belong to this workspace");
     const inserted = await tx
       .insert(paymentRoutes)
       .values({
@@ -866,35 +893,39 @@ export async function updateRecipient(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  await db
-    .update(recipients)
-    .set(input)
-    .where(
-      and(
-        eq(recipients.id, recipientId),
-        eq(recipients.workspaceId, workspaceId)
+  return db.transaction(async tx => {
+    const result = await tx
+      .update(recipients)
+      .set(input)
+      .where(
+        and(
+          eq(recipients.id, recipientId),
+          eq(recipients.workspaceId, workspaceId)
+        )
+      );
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Recipient not found in workspace");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId,
+        actorUserId,
+        entityType: "recipient",
+        entityId: recipientId,
+        action: "updated",
+      });
+    const rows = await tx
+      .select()
+      .from(recipients)
+      .where(
+        and(
+          eq(recipients.id, recipientId),
+          eq(recipients.workspaceId, workspaceId)
+        )
       )
-    );
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId,
-      actorUserId,
-      entityType: "recipient",
-      entityId: recipientId,
-      action: "updated",
-    });
-  const rows = await db
-    .select()
-    .from(recipients)
-    .where(
-      and(
-        eq(recipients.id, recipientId),
-        eq(recipients.workspaceId, workspaceId)
-      )
-    )
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function restoreRecipient(
@@ -904,25 +935,29 @@ export async function restoreRecipient(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  await db
-    .update(recipients)
-    .set({ status: "active" })
-    .where(
-      and(
-        eq(recipients.id, recipientId),
-        eq(recipients.workspaceId, workspaceId)
-      )
-    );
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId,
-      actorUserId,
-      entityType: "recipient",
-      entityId: recipientId,
-      action: "restored",
-    });
-  return { success: true } as const;
+  return db.transaction(async tx => {
+    const result = await tx
+      .update(recipients)
+      .set({ status: "active" })
+      .where(
+        and(
+          eq(recipients.id, recipientId),
+          eq(recipients.workspaceId, workspaceId)
+        )
+      );
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Recipient not found in workspace");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId,
+        actorUserId,
+        entityType: "recipient",
+        entityId: recipientId,
+        action: "restored",
+      });
+    return { success: true } as const;
+  });
 }
 
 export async function transitionPaymentRoute(
@@ -933,72 +968,77 @@ export async function transitionPaymentRoute(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const ownedRoute = await db
-    .select({ id: paymentRoutes.id, status: paymentRoutes.status })
-    .from(paymentRoutes)
-    .where(
-      and(
-        eq(paymentRoutes.id, routeId),
-        eq(paymentRoutes.workspaceId, workspaceId)
-      )
-    )
-    .limit(1);
-  if (!ownedRoute[0]) throw new Error("Route not found in workspace");
-  if (!canAdvancePaymentRouteStatus(ownedRoute[0].status, status))
-    throw new Error(
-      `Invalid route transition: ${ownedRoute[0].status} -> ${status}`
-    );
-  if (status === "settled") {
-    const workspace = await db
-      .select({ approvalThreshold: workspaces.approvalThreshold })
-      .from(workspaces)
-      .where(eq(workspaces.id, workspaceId))
-      .limit(1);
-    const approved = await db
-      .select({ id: routeApprovals.id })
-      .from(routeApprovals)
+  return db.transaction(async tx => {
+    const ownedRoute = await tx
+      .select({ id: paymentRoutes.id, status: paymentRoutes.status })
+      .from(paymentRoutes)
       .where(
         and(
-          eq(routeApprovals.workspaceId, workspaceId),
-          eq(routeApprovals.routeId, routeId),
-          eq(routeApprovals.status, "approved")
+          eq(paymentRoutes.id, routeId),
+          eq(paymentRoutes.workspaceId, workspaceId)
+        )
+      )
+      .limit(1);
+    if (!ownedRoute[0]) throw new Error("Route not found in workspace");
+    if (!canAdvancePaymentRouteStatus(ownedRoute[0].status, status))
+      throw new Error(
+        `Invalid route transition: ${ownedRoute[0].status} -> ${status}`
+      );
+    if (status === "settled") {
+      const workspace = await tx
+        .select({ approvalThreshold: workspaces.approvalThreshold })
+        .from(workspaces)
+        .where(eq(workspaces.id, workspaceId))
+        .limit(1);
+      const approved = await tx
+        .select({ id: routeApprovals.id })
+        .from(routeApprovals)
+        .where(
+          and(
+            eq(routeApprovals.workspaceId, workspaceId),
+            eq(routeApprovals.routeId, routeId),
+            eq(routeApprovals.status, "approved")
+          )
+        );
+      const threshold = workspace[0]?.approvalThreshold ?? 1;
+      if (approved.length < threshold)
+        throw new Error(
+          `Route requires ${threshold} approval(s) before settlement`
+        );
+    }
+    const result = await tx
+      .update(paymentRoutes)
+      .set({ status })
+      .where(
+        and(
+          eq(paymentRoutes.id, routeId),
+          eq(paymentRoutes.workspaceId, workspaceId),
+          eq(paymentRoutes.status, ownedRoute[0].status)
         )
       );
-    const threshold = workspace[0]?.approvalThreshold ?? 1;
-    if (approved.length < threshold)
-      throw new Error(
-        `Route requires ${threshold} approval(s) before settlement`
-      );
-  }
-  await db
-    .update(paymentRoutes)
-    .set({ status })
-    .where(
-      and(
-        eq(paymentRoutes.id, routeId),
-        eq(paymentRoutes.workspaceId, workspaceId)
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Route changed before transition could be applied");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId,
+        actorUserId,
+        entityType: "payment_route",
+        entityId: routeId,
+        action: `status_${status}`,
+      });
+    const rows = await tx
+      .select()
+      .from(paymentRoutes)
+      .where(
+        and(
+          eq(paymentRoutes.id, routeId),
+          eq(paymentRoutes.workspaceId, workspaceId)
+        )
       )
-    );
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId,
-      actorUserId,
-      entityType: "payment_route",
-      entityId: routeId,
-      action: `status_${status}`,
-    });
-  const rows = await db
-    .select()
-    .from(paymentRoutes)
-    .where(
-      and(
-        eq(paymentRoutes.id, routeId),
-        eq(paymentRoutes.workspaceId, workspaceId)
-      )
-    )
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function listWorkspaceAuditEvents(workspaceId: number) {
@@ -1016,9 +1056,9 @@ export async function recordBlockchainTransaction(input: {
   workspaceId: number;
   actorUserId: number;
   routeId: number;
-  network: "mainnet" | "sepolia";
+  network: "mainnet";
   transactionHash: string;
-  status: "submitted" | "confirmed" | "reverted" | "unknown";
+  status: "submitted";
   explorerUrl?: string;
 }) {
   const db = await getDb();
@@ -1050,24 +1090,6 @@ export async function recordBlockchainTransaction(input: {
       status: input.status,
       explorerUrl: input.explorerUrl,
     });
-    if (input.status === "confirmed") {
-      if (!canAdvancePaymentRouteStatus(ownedRoute[0].status, "settled"))
-        throw new Error(`Invalid route transition: ${ownedRoute[0].status} -> settled`);
-      const workspace = await tx
-        .select({ approvalThreshold: workspaces.approvalThreshold })
-        .from(workspaces)
-        .where(eq(workspaces.id, input.workspaceId))
-        .limit(1);
-      const approved = await tx
-        .select({ id: routeApprovals.id })
-        .from(routeApprovals)
-        .where(and(eq(routeApprovals.workspaceId, input.workspaceId), eq(routeApprovals.routeId, input.routeId), eq(routeApprovals.status, "approved")));
-      const threshold = workspace[0]?.approvalThreshold ?? 1;
-      if (approved.length < threshold)
-        throw new Error(`Route requires ${threshold} approval(s) before settlement`);
-      await tx.update(paymentRoutes).set({ status: "settled" }).where(and(eq(paymentRoutes.id, input.routeId), eq(paymentRoutes.workspaceId, input.workspaceId)));
-      await tx.insert(auditEvents).values({ workspaceId: input.workspaceId, actorUserId: input.actorUserId, entityType: "payment_route", entityId: input.routeId, action: "status_settled" });
-    }
     const rows = await tx
       .select()
       .from(blockchainTransactions)
@@ -1114,16 +1136,12 @@ export async function listWorkspacesForUser(userId: number) {
 
 export async function verifyStarknetReceipt(
   transactionHash: string,
-  network: "mainnet" | "sepolia"
+  network: "mainnet"
 ) {
   const nodeUrl =
-    network === "sepolia"
-      ? process.env.STARKNET_SEPOLIA_RPC_URL ||
-        process.env.STARKNET_RPC_URL ||
-        "https://starknet-sepolia.public.blastapi.io"
-      : process.env.STARKNET_MAINNET_RPC_URL ||
-        process.env.STARKNET_RPC_URL ||
-        "https://starknet-mainnet.public.blastapi.io";
+    process.env.STARKNET_MAINNET_RPC_URL ||
+    process.env.STARKNET_RPC_URL ||
+    "https://starknet-mainnet.public.blastapi.io";
   const provider = new RpcProvider({ nodeUrl });
   const receipt = await provider.getTransactionReceipt(transactionHash);
   const executionStatus = String(
@@ -1209,95 +1227,102 @@ export async function updatePaymentRoute(input: {
   actorUserId: number;
   name: string;
   token: string;
-  network: "mainnet" | "sepolia";
+  network: "mainnet";
   totalAmount: string;
   recipientAmounts: Array<{ recipientId: number; amount: string }>;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const existing = await db
-    .select()
-    .from(paymentRoutes)
-    .where(
-      and(
-        eq(paymentRoutes.id, input.routeId),
-        eq(paymentRoutes.workspaceId, input.workspaceId)
-      )
-    )
-    .limit(1);
-  if (!existing[0]) throw new Error("Route not found in workspace");
-  if (existing[0].status !== "draft")
-    throw new Error("Only draft routes can be edited");
   if (!hasExactRouteAllocations(input.totalAmount, input.recipientAmounts))
     throw new Error(
       "Route allocations must be unique, positive, and add exactly to the route total"
     );
-  const activePolicy = (
-    await db
-      .select()
-      .from(treasuryPolicies)
+  return db.transaction(async tx => {
+    const workspace = await tx
+      .select({ id: workspaces.id })
+      .from(workspaces)
+      .where(eq(workspaces.id, input.workspaceId))
+      .for("update")
+      .limit(1);
+    if (!workspace[0]) throw new Error("Workspace not found");
+    const existing = await tx
+      .select({ id: paymentRoutes.id, status: paymentRoutes.status })
+      .from(paymentRoutes)
       .where(
         and(
-          eq(treasuryPolicies.workspaceId, input.workspaceId),
-          eq(treasuryPolicies.token, input.token),
-          eq(treasuryPolicies.status, "active")
+          eq(paymentRoutes.id, input.routeId),
+          eq(paymentRoutes.workspaceId, input.workspaceId)
         )
       )
-      .orderBy(desc(treasuryPolicies.createdAt))
-      .limit(1)
-  )[0];
-  const start = new Date();
-  start.setUTCHours(0, 0, 0, 0);
-  const todayRoutes = await db
-    .select()
-    .from(paymentRoutes)
-    .where(eq(paymentRoutes.workspaceId, input.workspaceId));
-  const dailyUsed = todayRoutes
-    .filter(
-      route =>
-        route.id !== input.routeId &&
-        route.token === input.token &&
-        route.network === input.network &&
-        route.createdAt >= start &&
-        !["failed", "cancelled"].includes(route.status)
-    )
-    .reduce((sum, route) => sum + Number(route.totalAmount), 0)
-    .toString();
-  const evaluation = evaluateTreasuryPolicy(activePolicy, {
-    totalAmount: input.totalAmount,
-    approvalCount: 0,
-    network: input.network,
-    dailyUsed,
-  });
-  if (
-    !evaluation.allowed &&
-    evaluation.reasons.some(
-      reason =>
-        reason.includes("limit") ||
-        reason.includes("restricted") ||
-        reason.includes("exceeded")
-    )
-  )
-    throw new Error(evaluation.reasons.join(" / "));
-  const recipientIds = Array.from(
-    new Set(input.recipientAmounts.map(item => item.recipientId))
-  );
-  const owned = await db
-    .select({ id: recipients.id })
-    .from(recipients)
-    .where(
-      and(
-        eq(recipients.workspaceId, input.workspaceId),
-        eq(recipients.status, "active")
+      .for("update")
+      .limit(1);
+    if (!existing[0]) throw new Error("Route not found in workspace");
+    if (existing[0].status !== "draft")
+      throw new Error("Only draft routes can be edited");
+    const activePolicy = (
+      await tx
+        .select()
+        .from(treasuryPolicies)
+        .where(
+          and(
+            eq(treasuryPolicies.workspaceId, input.workspaceId),
+            eq(treasuryPolicies.token, input.token),
+            eq(treasuryPolicies.status, "active")
+          )
+        )
+        .orderBy(desc(treasuryPolicies.createdAt))
+        .limit(1)
+    )[0];
+    const start = new Date();
+    start.setUTCHours(0, 0, 0, 0);
+    const todayRoutes = await tx
+      .select()
+      .from(paymentRoutes)
+      .where(eq(paymentRoutes.workspaceId, input.workspaceId));
+    const dailyUsed = todayRoutes
+      .filter(
+        route =>
+          route.id !== input.routeId &&
+          route.token === input.token &&
+          route.network === input.network &&
+          route.createdAt >= start &&
+          !["failed", "cancelled"].includes(route.status)
       )
+      .reduce((sum, route) => addDecimalStrings(sum, route.totalAmount), "0");
+    const evaluation = evaluateTreasuryPolicy(activePolicy, {
+      totalAmount: input.totalAmount,
+      approvalCount: 0,
+      network: input.network,
+      dailyUsed,
+    });
+    if (
+      !evaluation.allowed &&
+      evaluation.reasons.some(
+        reason =>
+          reason.includes("limit") ||
+          reason.includes("restricted") ||
+          reason.includes("exceeded")
+      )
+    )
+      throw new Error(evaluation.reasons.join(" / "));
+    const recipientIds = Array.from(
+      new Set(input.recipientAmounts.map(item => item.recipientId))
     );
-  const ownedIds = new Set(owned.map(row => row.id));
-  if (!recipientIds.length || recipientIds.some(id => !ownedIds.has(id)))
-    throw new Error(
-      "All selected recipients must be active workspace recipients"
-    );
-  return db.transaction(async tx => {
-    await tx
+    const owned = await tx
+      .select({ id: recipients.id })
+      .from(recipients)
+      .where(
+        and(
+          eq(recipients.workspaceId, input.workspaceId),
+          eq(recipients.status, "active")
+        )
+      );
+    const ownedIds = new Set(owned.map(row => row.id));
+    if (!recipientIds.length || recipientIds.some(id => !ownedIds.has(id)))
+      throw new Error(
+        "All selected recipients must be active workspace recipients"
+      );
+    const result = await tx
       .update(paymentRoutes)
       .set({
         name: input.name,
@@ -1308,9 +1333,12 @@ export async function updatePaymentRoute(input: {
       .where(
         and(
           eq(paymentRoutes.id, input.routeId),
-          eq(paymentRoutes.workspaceId, input.workspaceId)
+          eq(paymentRoutes.workspaceId, input.workspaceId),
+          eq(paymentRoutes.status, "draft")
         )
       );
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Only draft routes can be edited");
     await tx
       .delete(routeRecipients)
       .where(eq(routeRecipients.routeId, input.routeId));
@@ -1395,52 +1423,54 @@ export async function createPayrollSchedule(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const route = await db
-    .select({ id: paymentRoutes.id })
-    .from(paymentRoutes)
-    .where(
-      and(
-        eq(paymentRoutes.id, input.routeId),
-        eq(paymentRoutes.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const route = await tx
+      .select({ id: paymentRoutes.id })
+      .from(paymentRoutes)
+      .where(
+        and(
+          eq(paymentRoutes.id, input.routeId),
+          eq(paymentRoutes.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (!route[0]) throw new Error("Route not found in workspace");
-  const existing = await db
-    .select()
-    .from(payrollSchedules)
-    .where(
-      and(
-        eq(payrollSchedules.workspaceId, input.workspaceId),
-        eq(payrollSchedules.routeId, input.routeId),
-        eq(payrollSchedules.frequency, input.frequency),
-        eq(payrollSchedules.nextRunAt, input.nextRunAt),
-        eq(payrollSchedules.status, "active")
+      .limit(1);
+    if (!route[0]) throw new Error("Route not found in workspace");
+    const existing = await tx
+      .select()
+      .from(payrollSchedules)
+      .where(
+        and(
+          eq(payrollSchedules.workspaceId, input.workspaceId),
+          eq(payrollSchedules.routeId, input.routeId),
+          eq(payrollSchedules.frequency, input.frequency),
+          eq(payrollSchedules.nextRunAt, input.nextRunAt),
+          eq(payrollSchedules.status, "active")
+        )
       )
-    )
-    .limit(1);
-  if (existing[0]) return existing[0];
-  const inserted = await db
-    .insert(payrollSchedules)
-    .values({ ...input, status: "active" })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create payroll schedule");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "schedule",
-      entityId: id,
-      action: "created",
-    });
-  const rows = await db
-    .select()
-    .from(payrollSchedules)
-    .where(eq(payrollSchedules.id, id))
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    if (existing[0]) return existing[0];
+    const inserted = await tx
+      .insert(payrollSchedules)
+      .values({ ...input, status: "active" })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create payroll schedule");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "schedule",
+        entityId: id,
+        action: "created",
+      });
+    const rows = await tx
+      .select()
+      .from(payrollSchedules)
+      .where(eq(payrollSchedules.id, id))
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function listWorkspaceSchedules(workspaceId: number) {
@@ -1460,7 +1490,7 @@ export async function setPayrollScheduleTaskUid(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  await db
+  const result = await db
     .update(payrollSchedules)
     .set({ scheduleCronTaskUid: taskUid })
     .where(
@@ -1469,6 +1499,8 @@ export async function setPayrollScheduleTaskUid(
         eq(payrollSchedules.workspaceId, workspaceId)
       )
     );
+  if (result[0]?.affectedRows !== 1)
+    throw new Error("Schedule not found in workspace");
   const rows = await db
     .select()
     .from(payrollSchedules)
@@ -1499,7 +1531,7 @@ export async function markPayrollScheduleTriggered(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  await db
+  const result = await db
     .update(payrollSchedules)
     .set({ lastRunAt: new Date(), nextRunAt })
     .where(
@@ -1508,6 +1540,8 @@ export async function markPayrollScheduleTriggered(
         eq(payrollSchedules.status, "active")
       )
     );
+  if (result[0]?.affectedRows !== 1)
+    throw new Error("Active payroll schedule was not found");
   return { success: true } as const;
 }
 
@@ -1524,41 +1558,39 @@ export async function updatePayrollSchedule(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const existing = await db
-    .select({ id: payrollSchedules.id })
-    .from(payrollSchedules)
-    .where(
-      and(
-        eq(payrollSchedules.id, scheduleId),
-        eq(payrollSchedules.workspaceId, workspaceId)
+  return db.transaction(async tx => {
+    const result = await tx
+      .update(payrollSchedules)
+      .set(input)
+      .where(
+        and(
+          eq(payrollSchedules.id, scheduleId),
+          eq(payrollSchedules.workspaceId, workspaceId)
+        )
+      );
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Schedule not found in workspace");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId,
+        actorUserId,
+        entityType: "schedule",
+        entityId: scheduleId,
+        action: `status_${input.status}`,
+      });
+    const rows = await tx
+      .select()
+      .from(payrollSchedules)
+      .where(
+        and(
+          eq(payrollSchedules.id, scheduleId),
+          eq(payrollSchedules.workspaceId, workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (!existing[0]) throw new Error("Schedule not found in workspace");
-  await db
-    .update(payrollSchedules)
-    .set(input)
-    .where(
-      and(
-        eq(payrollSchedules.id, scheduleId),
-        eq(payrollSchedules.workspaceId, workspaceId)
-      )
-    );
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId,
-      actorUserId,
-      entityType: "schedule",
-      entityId: scheduleId,
-      action: `status_${input.status}`,
-    });
-  const rows = await db
-    .select()
-    .from(payrollSchedules)
-    .where(eq(payrollSchedules.id, scheduleId))
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function listRouteApprovals(workspaceId: number, routeId: number) {
@@ -1596,61 +1628,51 @@ export async function upsertRouteApproval(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const route = await db
-    .select({ id: paymentRoutes.id })
-    .from(paymentRoutes)
-    .where(
-      and(
-        eq(paymentRoutes.id, input.routeId),
-        eq(paymentRoutes.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const route = await tx
+      .select({ id: paymentRoutes.id })
+      .from(paymentRoutes)
+      .where(
+        and(
+          eq(paymentRoutes.id, input.routeId),
+          eq(paymentRoutes.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (!route[0]) throw new Error("Route not found in workspace");
-  const existing = await db
-    .select({ id: routeApprovals.id })
-    .from(routeApprovals)
-    .where(
-      and(
-        eq(routeApprovals.workspaceId, input.workspaceId),
-        eq(routeApprovals.routeId, input.routeId),
-        eq(routeApprovals.approverUserId, input.approverUserId)
+      .limit(1);
+    if (!route[0]) throw new Error("Route not found in workspace");
+    const now = new Date();
+    await tx
+      .insert(routeApprovals)
+      .values({ ...input, decidedAt: now })
+      .onDuplicateKeyUpdate({
+        set: {
+          status: input.status,
+          comment: input.comment,
+          decidedAt: now,
+        },
+      });
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.approverUserId,
+        entityType: "route_approval",
+        entityId: input.routeId,
+        action: input.status,
+      });
+    const rows = await tx
+      .select()
+      .from(routeApprovals)
+      .where(
+        and(
+          eq(routeApprovals.workspaceId, input.workspaceId),
+          eq(routeApprovals.routeId, input.routeId),
+          eq(routeApprovals.approverUserId, input.approverUserId)
+        )
       )
-    )
-    .limit(1);
-  if (existing[0]) {
-    await db
-      .update(routeApprovals)
-      .set({
-        status: input.status,
-        comment: input.comment,
-        decidedAt: new Date(),
-      })
-      .where(eq(routeApprovals.id, existing[0].id));
-  } else {
-    await db.insert(routeApprovals).values({ ...input, decidedAt: new Date() });
-  }
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.approverUserId,
-      entityType: "route_approval",
-      entityId: input.routeId,
-      action: input.status,
-    });
-  const rows = await db
-    .select()
-    .from(routeApprovals)
-    .where(
-      and(
-        eq(routeApprovals.workspaceId, input.workspaceId),
-        eq(routeApprovals.routeId, input.routeId),
-        eq(routeApprovals.approverUserId, input.approverUserId)
-      )
-    )
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function createShareableProof(input: {
@@ -1660,58 +1682,60 @@ export async function createShareableProof(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const route = await db
-    .select({
-      id: paymentRoutes.id,
-      proofReference: paymentRoutes.proofReference,
-      status: paymentRoutes.status,
-      token: paymentRoutes.token,
-      totalAmount: paymentRoutes.totalAmount,
-      name: paymentRoutes.name,
-      createdAt: paymentRoutes.createdAt,
-    })
-    .from(paymentRoutes)
-    .where(
-      and(
-        eq(paymentRoutes.id, input.routeId),
-        eq(paymentRoutes.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const route = await tx
+      .select({
+        id: paymentRoutes.id,
+        proofReference: paymentRoutes.proofReference,
+        status: paymentRoutes.status,
+        token: paymentRoutes.token,
+        totalAmount: paymentRoutes.totalAmount,
+        name: paymentRoutes.name,
+        createdAt: paymentRoutes.createdAt,
+      })
+      .from(paymentRoutes)
+      .where(
+        and(
+          eq(paymentRoutes.id, input.routeId),
+          eq(paymentRoutes.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (!route[0]) throw new Error("Route not found in workspace");
-  if (!canPublishShareableProof(route[0].status))
-    throw new Error("Public proofs require a settled route");
-  if (!route[0].proofReference?.trim())
-    throw new Error("Public proofs require a confirmed receipt reference");
-  const existing = await db
-    .select()
-    .from(shareableProofs)
-    .where(
-      and(
-        eq(shareableProofs.workspaceId, input.workspaceId),
-        eq(shareableProofs.routeId, input.routeId),
-        eq(shareableProofs.status, "active")
+      .limit(1);
+    if (!route[0]) throw new Error("Route not found in workspace");
+    if (!canPublishShareableProof(route[0].status))
+      throw new Error("Public proofs require a settled route");
+    if (!route[0].proofReference?.trim())
+      throw new Error("Public proofs require a confirmed receipt reference");
+    const existing = await tx
+      .select()
+      .from(shareableProofs)
+      .where(
+        and(
+          eq(shareableProofs.workspaceId, input.workspaceId),
+          eq(shareableProofs.routeId, input.routeId),
+          eq(shareableProofs.status, "active")
+        )
       )
-    )
-    .limit(1);
-  if (existing[0]) return { slug: existing[0].slug, route: route[0] };
-  const slug = `vp-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
-  const inserted = await db
-    .insert(shareableProofs)
-    .values({ ...input, slug })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create proof link");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "proof",
-      entityId: id,
-      action: "created",
-    });
-  return { slug, route: route[0] };
+      .limit(1);
+    if (existing[0]) return { slug: existing[0].slug, route: route[0] };
+    const slug = `vp-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
+    const inserted = await tx
+      .insert(shareableProofs)
+      .values({ ...input, slug })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create proof link");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "proof",
+        entityId: id,
+        action: "created",
+      });
+    return { slug, route: route[0] };
+  });
 }
 
 export async function getPublicProof(slug: string) {
@@ -1870,36 +1894,39 @@ export async function createPrivateMarket(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const slug = `market-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
-  const inserted = await db
-    .insert(privateMarkets)
-    .values({
-      ...input,
-      slug,
-      status: "draft",
-      currentPrice: "0",
-      publicVolume: "0",
-      publicParticipants: 0,
-    })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create private market");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "private_market",
-      entityId: id,
-      action: "created",
-    });
-    const rows = await db
-    .select({ id: privateMarkets.id, slug: privateMarkets.slug })
-    .from(privateMarkets)
-    .where(eq(privateMarkets.id, id))
-    .limit(1);
-  if (!rows[0]) throw new Error("Private market was created but could not be reloaded");
-  return rows[0];
+  return db.transaction(async tx => {
+    const slug = `market-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
+    const inserted = await tx
+      .insert(privateMarkets)
+      .values({
+        ...input,
+        slug,
+        status: "draft",
+        currentPrice: "0",
+        publicVolume: "0",
+        publicParticipants: 0,
+      })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create private market");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "private_market",
+        entityId: id,
+        action: "created",
+      });
+    const rows = await tx
+      .select({ id: privateMarkets.id, slug: privateMarkets.slug })
+      .from(privateMarkets)
+      .where(eq(privateMarkets.id, id))
+      .limit(1);
+    if (!rows[0])
+      throw new Error("Private market was created but could not be reloaded");
+    return rows[0];
+  });
 }
 export async function updatePrivateMarketStatus(input: {
   workspaceId: number;
@@ -1916,55 +1943,70 @@ export async function updatePrivateMarketStatus(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const market = await db
-    .select()
-    .from(privateMarkets)
-    .where(
-      and(
-        eq(privateMarkets.id, input.marketId),
-        eq(privateMarkets.workspaceId, input.workspaceId)
-      )
-    )
-    .limit(1);
-  if (!market[0]) throw new Error("Private market not found in workspace");
-  if (!canAdvancePrivateMarketStatus(market[0].status, input.status))
-    throw new Error(
-      `Invalid private market transition: ${market[0].status} -> ${input.status}`
-    );
-  if (input.status === "settled") {
-    const acceptedBids = await db
-      .select({ id: privateMarketBids.id })
-      .from(privateMarketBids)
+  return db.transaction(async tx => {
+    const market = await tx
+      .select()
+      .from(privateMarkets)
       .where(
         and(
-          eq(privateMarketBids.marketId, input.marketId),
-          eq(privateMarketBids.status, "accepted")
+          eq(privateMarkets.id, input.marketId),
+          eq(privateMarkets.workspaceId, input.workspaceId)
+        )
+      )
+      .limit(1);
+    if (!market[0]) throw new Error("Private market not found in workspace");
+    if (!canAdvancePrivateMarketStatus(market[0].status, input.status))
+      throw new Error(
+        `Invalid private market transition: ${market[0].status} -> ${input.status}`
+      );
+    if (input.status === "settled") {
+      const acceptedBids = await tx
+        .select({ id: privateMarketBids.id })
+        .from(privateMarketBids)
+        .where(
+          and(
+            eq(privateMarketBids.marketId, input.marketId),
+            eq(privateMarketBids.status, "accepted")
+          )
+        );
+      if (!acceptedBids.length)
+        throw new Error(
+          "Cannot mark a market settled before an accepted allocation exists"
+        );
+    }
+    const result = await tx
+      .update(privateMarkets)
+      .set({ status: input.status })
+      .where(
+        and(
+          eq(privateMarkets.id, input.marketId),
+          eq(privateMarkets.workspaceId, input.workspaceId),
+          eq(privateMarkets.status, market[0].status)
         )
       );
-    if (!acceptedBids.length)
-      throw new Error(
-        "Cannot mark a market settled before an accepted allocation exists"
-      );
-  }
-  await db
-    .update(privateMarkets)
-    .set({ status: input.status })
-    .where(eq(privateMarkets.id, input.marketId));
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.actorUserId,
-      entityType: "private_market",
-      entityId: input.marketId,
-      action: `status_${input.status}`,
-    });
-  const rows = await db
-    .select()
-    .from(privateMarkets)
-    .where(eq(privateMarkets.id, input.marketId))
-    .limit(1);
-  return rows[0];
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Private market changed before transition could be applied");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.actorUserId,
+        entityType: "private_market",
+        entityId: input.marketId,
+        action: `status_${input.status}`,
+      });
+    const rows = await tx
+      .select()
+      .from(privateMarkets)
+      .where(
+        and(
+          eq(privateMarkets.id, input.marketId),
+          eq(privateMarkets.workspaceId, input.workspaceId)
+        )
+      )
+      .limit(1);
+    return rows[0];
+  });
 }
 
 export async function commitPrivateMarketBid(input: {
@@ -2025,13 +2067,11 @@ export async function commitPrivateMarketBid(input: {
     );
   if (
     policy &&
-    compareDecimalStrings(market[0].targetAmount, "0") > 0 &&
-    compareDecimalStrings(
-      addDecimalStrings(input.bidAmount, "0"),
-      (
-        (Number(market[0].targetAmount) * policy.maxConcentrationPct) /
-        100
-      ).toFixed(18)
+    compareDecimalTimesInteger(
+      input.bidAmount,
+      100,
+      market[0].targetAmount,
+      policy.maxConcentrationPct
     ) > 0
   )
     violations.push(
@@ -2129,45 +2169,48 @@ export async function createLaunchpadProject(input: {
   name: string;
   description?: string;
   token: string;
-  network: "mainnet" | "sepolia";
+  network: "mainnet";
   targetAmount: string;
   fundingEndsAt?: Date;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const slug = `launch-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
-  const inserted = await db
-    .insert(launchpadProjects)
-    .values({ ...input, slug, privacyMode: "shielded", status: "draft" })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create Launchpad project");
-  await db
-    .insert(launchpadProjectOps)
-    .values({
-      projectId: id,
-      ownerLabel: input.name,
-      roundType: "community",
-      stage: "planning",
-      riskLevel: "medium",
-      readinessOverride: "none",
-    });
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "launchpad_project",
-      entityId: id,
-      action: "created",
-    });
-    const rows = await db
-    .select({ id: launchpadProjects.id, slug: launchpadProjects.slug })
-    .from(launchpadProjects)
-    .where(eq(launchpadProjects.id, id))
-    .limit(1);
-  if (!rows[0]) throw new Error("Launchpad project was created but could not be reloaded");
-  return rows[0];
+  return db.transaction(async tx => {
+    const slug = `launch-${randomUUID().replaceAll("-", "").slice(0, 20)}`;
+    const inserted = await tx
+      .insert(launchpadProjects)
+      .values({ ...input, slug, privacyMode: "shielded", status: "draft" })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create Launchpad project");
+    await tx
+      .insert(launchpadProjectOps)
+      .values({
+        projectId: id,
+        ownerLabel: input.name,
+        roundType: "community",
+        stage: "planning",
+        riskLevel: "medium",
+        readinessOverride: "none",
+      });
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "launchpad_project",
+        entityId: id,
+        action: "created",
+      });
+    const rows = await tx
+      .select({ id: launchpadProjects.id, slug: launchpadProjects.slug })
+      .from(launchpadProjects)
+      .where(eq(launchpadProjects.id, id))
+      .limit(1);
+    if (!rows[0])
+      throw new Error("Launchpad project was created but could not be reloaded");
+    return rows[0];
+  });
 }
 export async function getLaunchpadProjectOps(
   workspaceId: number,
@@ -2205,38 +2248,47 @@ export async function updateLaunchpadProjectOps(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const project = await db
-    .select({ id: launchpadProjects.id })
-    .from(launchpadProjects)
-    .where(
-      and(
-        eq(launchpadProjects.id, input.projectId),
-        eq(launchpadProjects.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const project = await tx
+      .select({ id: launchpadProjects.id })
+      .from(launchpadProjects)
+      .where(
+        and(
+          eq(launchpadProjects.id, input.projectId),
+          eq(launchpadProjects.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (!project[0]) throw new Error("Launchpad project not found in workspace");
-  await db
-    .update(launchpadProjectOps)
-    .set({
-      ownerLabel: input.ownerLabel,
-      roundType: input.roundType,
-      stage: input.stage,
-      riskLevel: input.riskLevel,
-      operationalNotes: input.operationalNotes,
-      readinessOverride: input.readinessOverride,
-    })
-    .where(eq(launchpadProjectOps.projectId, input.projectId));
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.actorUserId,
-      entityType: "launchpad_project_ops",
-      entityId: input.projectId,
-      action: "updated",
-    });
-  return getLaunchpadProjectOps(input.workspaceId, input.projectId);
+      .limit(1);
+    if (!project[0]) throw new Error("Launchpad project not found in workspace");
+    const result = await tx
+      .update(launchpadProjectOps)
+      .set({
+        ownerLabel: input.ownerLabel,
+        roundType: input.roundType,
+        stage: input.stage,
+        riskLevel: input.riskLevel,
+        operationalNotes: input.operationalNotes,
+        readinessOverride: input.readinessOverride,
+      })
+      .where(eq(launchpadProjectOps.projectId, input.projectId));
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Launchpad operating metadata not found");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.actorUserId,
+        entityType: "launchpad_project_ops",
+        entityId: input.projectId,
+        action: "updated",
+      });
+    const rows = await tx
+      .select({ ops: launchpadProjectOps })
+      .from(launchpadProjectOps)
+      .where(eq(launchpadProjectOps.projectId, input.projectId))
+      .limit(1);
+    return rows[0]?.ops;
+  });
 }
 
 export async function getLaunchpadReadiness(
@@ -2449,62 +2501,64 @@ export async function createLaunchpadReleaseRequest(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const rows = await db
-    .select({ milestone: launchpadMilestones, project: launchpadProjects })
-    .from(launchpadMilestones)
-    .innerJoin(
-      launchpadProjects,
-      eq(launchpadMilestones.projectId, launchpadProjects.id)
-    )
-    .where(
-      and(
-        eq(launchpadMilestones.id, input.milestoneId),
-        eq(launchpadProjects.id, input.projectId),
-        eq(launchpadProjects.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const rows = await tx
+      .select({ milestone: launchpadMilestones, project: launchpadProjects })
+      .from(launchpadMilestones)
+      .innerJoin(
+        launchpadProjects,
+        eq(launchpadMilestones.projectId, launchpadProjects.id)
       )
-    )
-    .limit(1);
-  if (!rows[0]) throw new Error("Milestone not found in project workspace");
-  const existing = await db
-    .select()
-    .from(launchpadReleaseRequests)
-    .where(
-      and(
-        eq(launchpadReleaseRequests.projectId, input.projectId),
-        eq(launchpadReleaseRequests.milestoneId, input.milestoneId),
-        eq(launchpadReleaseRequests.status, "pending")
+      .where(
+        and(
+          eq(launchpadMilestones.id, input.milestoneId),
+          eq(launchpadProjects.id, input.projectId),
+          eq(launchpadProjects.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (existing[0]) return existing[0];
-  const inserted = await db
-    .insert(launchpadReleaseRequests)
-    .values({
-      projectId: input.projectId,
-      milestoneId: input.milestoneId,
-      requestedByUserId: input.actorUserId,
-      requestedAmount: input.requestedAmount,
-      reason: input.reason,
-      status: "pending",
-    })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create release request");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.actorUserId,
-      entityType: "launchpad_release",
-      entityId: id,
-      action: "requested",
-    });
-  const release = await db
-    .select()
-    .from(launchpadReleaseRequests)
-    .where(eq(launchpadReleaseRequests.id, id))
-    .limit(1);
-  return release[0];
+      .limit(1);
+    if (!rows[0]) throw new Error("Milestone not found in project workspace");
+    const existing = await tx
+      .select()
+      .from(launchpadReleaseRequests)
+      .where(
+        and(
+          eq(launchpadReleaseRequests.projectId, input.projectId),
+          eq(launchpadReleaseRequests.milestoneId, input.milestoneId),
+          eq(launchpadReleaseRequests.status, "pending")
+        )
+      )
+      .limit(1);
+    if (existing[0]) return existing[0];
+    const inserted = await tx
+      .insert(launchpadReleaseRequests)
+      .values({
+        projectId: input.projectId,
+        milestoneId: input.milestoneId,
+        requestedByUserId: input.actorUserId,
+        requestedAmount: input.requestedAmount,
+        reason: input.reason,
+        status: "pending",
+      })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create release request");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.actorUserId,
+        entityType: "launchpad_release",
+        entityId: id,
+        action: "requested",
+      });
+    const release = await tx
+      .select()
+      .from(launchpadReleaseRequests)
+      .where(eq(launchpadReleaseRequests.id, id))
+      .limit(1);
+    return release[0];
+  });
 }
 
 export async function decideLaunchpadReleaseRequest(input: {
@@ -2537,7 +2591,7 @@ export async function decideLaunchpadReleaseRequest(input: {
       throw new Error(`Cannot move release request from ${current.status} to ${input.status}`);
     }
 
-    await tx
+    const result = await tx
       .update(launchpadReleaseRequests)
       .set({
         status: input.status,
@@ -2551,6 +2605,8 @@ export async function decideLaunchpadReleaseRequest(input: {
           eq(launchpadReleaseRequests.status, current.status)
         )
       );
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Release request changed before decision could be applied");
     await tx
       .insert(auditEvents)
       .values({
@@ -2600,44 +2656,46 @@ export async function createLaunchpadMilestone(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const project = await db
-    .select({ id: launchpadProjects.id })
-    .from(launchpadProjects)
-    .where(
-      and(
-        eq(launchpadProjects.id, input.projectId),
-        eq(launchpadProjects.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const project = await tx
+      .select({ id: launchpadProjects.id })
+      .from(launchpadProjects)
+      .where(
+        and(
+          eq(launchpadProjects.id, input.projectId),
+          eq(launchpadProjects.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (!project[0]) throw new Error("Launchpad project not found in workspace");
-  const inserted = await db
-    .insert(launchpadMilestones)
-    .values({
-      projectId: input.projectId,
-      name: input.name,
-      sequence: input.sequence,
-      releaseAmount: input.releaseAmount,
-      approvalThreshold: input.approvalThreshold,
-    })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create Launchpad milestone");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "launchpad_milestone",
-      entityId: id,
-      action: "created",
-    });
-  const rows = await db
-    .select()
-    .from(launchpadMilestones)
-    .where(eq(launchpadMilestones.id, id))
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    if (!project[0]) throw new Error("Launchpad project not found in workspace");
+    const inserted = await tx
+      .insert(launchpadMilestones)
+      .values({
+        projectId: input.projectId,
+        name: input.name,
+        sequence: input.sequence,
+        releaseAmount: input.releaseAmount,
+        approvalThreshold: input.approvalThreshold,
+      })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create Launchpad milestone");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "launchpad_milestone",
+        entityId: id,
+        action: "created",
+      });
+    const rows = await tx
+      .select()
+      .from(launchpadMilestones)
+      .where(eq(launchpadMilestones.id, id))
+      .limit(1);
+    return rows[0];
+  });
 }
 export async function listLaunchpadAllocations(
   workspaceId: number,
@@ -2679,62 +2737,64 @@ export async function createLaunchpadAllocation(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const project = await db
-    .select({ id: launchpadProjects.id })
-    .from(launchpadProjects)
-    .where(
-      and(
-        eq(launchpadProjects.id, input.projectId),
-        eq(launchpadProjects.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const project = await tx
+      .select({ id: launchpadProjects.id })
+      .from(launchpadProjects)
+      .where(
+        and(
+          eq(launchpadProjects.id, input.projectId),
+          eq(launchpadProjects.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (!project[0]) throw new Error("Launchpad project not found in workspace");
-  const existing = await db
-    .select()
-    .from(launchpadAllocations)
-    .where(eq(launchpadAllocations.commitment, input.commitment))
-    .limit(1);
-  if (existing[0]) {
-    if (
-      canReuseLaunchpadAllocation(
-        existing[0].projectId,
-        input.projectId,
-        existing[0].commitment,
-        input.commitment
+      .limit(1);
+    if (!project[0]) throw new Error("Launchpad project not found in workspace");
+    const existing = await tx
+      .select()
+      .from(launchpadAllocations)
+      .where(eq(launchpadAllocations.commitment, input.commitment))
+      .limit(1);
+    if (existing[0]) {
+      if (
+        canReuseLaunchpadAllocation(
+          existing[0].projectId,
+          input.projectId,
+          existing[0].commitment,
+          input.commitment
+        )
       )
-    )
-      return existing[0];
-    throw new Error(
-      "Allocation commitment has already been used in another project"
-    );
-  }
-  const inserted = await db
-    .insert(launchpadAllocations)
-    .values({
-      projectId: input.projectId,
-      commitment: input.commitment,
-      encryptedReference: input.encryptedReference,
-      allocationAmount: input.allocationAmount,
-    })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not reserve Launchpad allocation");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "launchpad_allocation",
-      entityId: id,
-      action: "reserved",
-    });
-  const rows = await db
-    .select()
-    .from(launchpadAllocations)
-    .where(eq(launchpadAllocations.id, id))
-    .limit(1);
-  return rows[0];
+        return existing[0];
+      throw new Error(
+        "Allocation commitment has already been used in another project"
+      );
+    }
+    const inserted = await tx
+      .insert(launchpadAllocations)
+      .values({
+        projectId: input.projectId,
+        commitment: input.commitment,
+        encryptedReference: input.encryptedReference,
+        allocationAmount: input.allocationAmount,
+      })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not reserve Launchpad allocation");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "launchpad_allocation",
+        entityId: id,
+        action: "reserved",
+      });
+    const rows = await tx
+      .select()
+      .from(launchpadAllocations)
+      .where(eq(launchpadAllocations.id, id))
+      .limit(1);
+    return rows[0];
+  });
 }
 export async function updateLaunchpadProjectStatus(input: {
   workspaceId: number;
@@ -2744,40 +2804,55 @@ export async function updateLaunchpadProjectStatus(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const project = await db
-    .select()
-    .from(launchpadProjects)
-    .where(
-      and(
-        eq(launchpadProjects.id, input.projectId),
-        eq(launchpadProjects.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const project = await tx
+      .select()
+      .from(launchpadProjects)
+      .where(
+        and(
+          eq(launchpadProjects.id, input.projectId),
+          eq(launchpadProjects.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (!project[0]) throw new Error("Launchpad project not found in workspace");
-  if (!canAdvanceLaunchpadProjectStatus(project[0].status, input.status))
-    throw new Error(
-      `Invalid Launchpad project transition: ${project[0].status} -> ${input.status}`
-    );
-  await db
-    .update(launchpadProjects)
-    .set({ status: input.status })
-    .where(eq(launchpadProjects.id, input.projectId));
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.actorUserId,
-      entityType: "launchpad_project",
-      entityId: input.projectId,
-      action: `status_${input.status}`,
-    });
-  const rows = await db
-    .select()
-    .from(launchpadProjects)
-    .where(eq(launchpadProjects.id, input.projectId))
-    .limit(1);
-  return rows[0];
+      .limit(1);
+    if (!project[0]) throw new Error("Launchpad project not found in workspace");
+    if (!canAdvanceLaunchpadProjectStatus(project[0].status, input.status))
+      throw new Error(
+        `Invalid Launchpad project transition: ${project[0].status} -> ${input.status}`
+      );
+    const result = await tx
+      .update(launchpadProjects)
+      .set({ status: input.status })
+      .where(
+        and(
+          eq(launchpadProjects.id, input.projectId),
+          eq(launchpadProjects.workspaceId, input.workspaceId),
+          eq(launchpadProjects.status, project[0].status)
+        )
+      );
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Launchpad project changed before transition could be applied");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.actorUserId,
+        entityType: "launchpad_project",
+        entityId: input.projectId,
+        action: `status_${input.status}`,
+      });
+    const rows = await tx
+      .select()
+      .from(launchpadProjects)
+      .where(
+        and(
+          eq(launchpadProjects.id, input.projectId),
+          eq(launchpadProjects.workspaceId, input.workspaceId)
+        )
+      )
+      .limit(1);
+    return rows[0];
+  });
 }
 export async function updateLaunchpadMilestoneStatus(input: {
   workspaceId: number;
@@ -2788,46 +2863,55 @@ export async function updateLaunchpadMilestoneStatus(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const rows = await db
-    .select({ milestone: launchpadMilestones, project: launchpadProjects })
-    .from(launchpadMilestones)
-    .innerJoin(
-      launchpadProjects,
-      eq(launchpadMilestones.projectId, launchpadProjects.id)
-    )
-    .where(
-      and(
-        eq(launchpadMilestones.id, input.milestoneId),
-        eq(launchpadProjects.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const rows = await tx
+      .select({ milestone: launchpadMilestones, project: launchpadProjects })
+      .from(launchpadMilestones)
+      .innerJoin(
+        launchpadProjects,
+        eq(launchpadMilestones.projectId, launchpadProjects.id)
       )
+      .where(
+        and(
+          eq(launchpadMilestones.id, input.milestoneId),
+          eq(launchpadProjects.workspaceId, input.workspaceId)
+        )
+      )
+      .limit(1);
+    if (!rows[0]) throw new Error("Launchpad milestone not found in workspace");
+    if (
+      !canAdvanceLaunchpadMilestoneStatus(rows[0].milestone.status, input.status)
     )
-    .limit(1);
-  if (!rows[0]) throw new Error("Launchpad milestone not found in workspace");
-  if (
-    !canAdvanceLaunchpadMilestoneStatus(rows[0].milestone.status, input.status)
-  )
-    throw new Error(
-      `Invalid Launchpad milestone transition: ${rows[0].milestone.status} -> ${input.status}`
-    );
-  await db
-    .update(launchpadMilestones)
-    .set({ status: input.status, proofReference: input.proofReference })
-    .where(eq(launchpadMilestones.id, input.milestoneId));
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.actorUserId,
-      entityType: "launchpad_milestone",
-      entityId: input.milestoneId,
-      action: `status_${input.status}`,
-    });
-  const updated = await db
-    .select()
-    .from(launchpadMilestones)
-    .where(eq(launchpadMilestones.id, input.milestoneId))
-    .limit(1);
-  return updated[0];
+      throw new Error(
+        `Invalid Launchpad milestone transition: ${rows[0].milestone.status} -> ${input.status}`
+      );
+    const result = await tx
+      .update(launchpadMilestones)
+      .set({ status: input.status, proofReference: input.proofReference })
+      .where(
+        and(
+          eq(launchpadMilestones.id, input.milestoneId),
+          eq(launchpadMilestones.status, rows[0].milestone.status)
+        )
+      );
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("Launchpad milestone changed before transition could be applied");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.actorUserId,
+        entityType: "launchpad_milestone",
+        entityId: input.milestoneId,
+        action: `status_${input.status}`,
+      });
+    const updated = await tx
+      .select()
+      .from(launchpadMilestones)
+      .where(eq(launchpadMilestones.id, input.milestoneId))
+      .limit(1);
+    return updated[0];
+  });
 }
 export async function getPublicLaunchpadProject(slug: string) {
   const db = await getDb();
@@ -2940,16 +3024,19 @@ export async function getPrivateMarketInsights(
   const visibleBids = allBids.filter(bid => marketIds.includes(bid.marketId));
   const committed = visibleBids
     .filter(bid => bid.status !== "rejected")
-    .reduce((sum, bid) => sum + Number(bid.bidAmount), 0);
+    .reduce((sum, bid) => addDecimalStringsExact(sum, bid.bidAmount), "0");
   const accepted = visibleBids.filter(bid => bid.status === "accepted");
   const settledAmount = accepted.reduce(
-    (sum, bid) => sum + Number(bid.bidAmount),
-    0
+    (sum, bid) => addDecimalStringsExact(sum, bid.bidAmount),
+    "0"
   );
   const currentValue = accepted.reduce((sum, bid) => {
     const market = markets.find(item => item.id === bid.marketId);
-    return sum + Number(bid.bidAmount) * Number(market?.currentPrice ?? 0);
-  }, 0);
+    return addDecimalStringsExact(
+      sum,
+      multiplyDecimalStringsExact(bid.bidAmount, market?.currentPrice ?? "0")
+    );
+  }, "0");
   const openCommitments = visibleBids.filter(
     bid => bid.status === "committed" || bid.status === "revealed"
   ).length;
@@ -2957,9 +3044,7 @@ export async function getPrivateMarketInsights(
     (max, market) =>
       Math.max(
         max,
-        Number(market.targetAmount) > 0
-          ? (Number(market.publicVolume) / Number(market.targetAmount)) * 100
-          : 0
+        decimalRatioAsNumber(market.publicVolume, market.targetAmount) * 100
       ),
     0
   );
@@ -2973,7 +3058,12 @@ export async function getPrivateMarketInsights(
     )
   )
     attention.push("One or more live bid windows require operator review");
-  if (maxUtilizationPct > 90)
+  if (
+    markets.some(
+      market =>
+        decimalRatioAsNumber(market.publicVolume, market.targetAmount) * 100 > 90
+    )
+  )
     attention.push("A market is approaching its target allocation");
   if (policies.some(policy => policy.maxConcentrationPct < 10))
     attention.push(
@@ -2998,15 +3088,9 @@ export async function getPrivateMarketInsights(
     markets: markets.map(
       ({ createdByUserId: _createdByUserId, ...market }) => ({
         ...market,
-        utilizationPct:
-          Number(market.targetAmount) > 0
-            ? Number(
-                (
-                  (Number(market.publicVolume) / Number(market.targetAmount)) *
-                  100
-                ).toFixed(2)
-              )
-            : 0,
+        utilizationPct: Number(
+          (decimalRatioAsNumber(market.publicVolume, market.targetAmount) * 100).toFixed(2)
+        ),
         lifecycleAction:
           market.status === "draft"
             ? "SCHEDULE MARKET"
@@ -3018,11 +3102,11 @@ export async function getPrivateMarketInsights(
       })
     ),
     portfolio: {
-      committedAmount: committed.toString(),
+      committedAmount: committed,
       openCommitments,
-      settledAmount: settledAmount.toString(),
-      currentValue: currentValue.toString(),
-      pnl: (currentValue - settledAmount).toString(),
+      settledAmount,
+      currentValue,
+      pnl: subtractDecimalStringsExact(currentValue, settledAmount),
       history,
     },
     execution: {
@@ -3083,53 +3167,55 @@ export async function createPrivateMarketQuote(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  const market = await db
-    .select()
-    .from(privateMarkets)
-    .where(
-      and(
-        eq(privateMarkets.id, input.marketId),
-        eq(privateMarkets.workspaceId, input.workspaceId)
+  return db.transaction(async tx => {
+    const market = await tx
+      .select()
+      .from(privateMarkets)
+      .where(
+        and(
+          eq(privateMarkets.id, input.marketId),
+          eq(privateMarkets.workspaceId, input.workspaceId)
+        )
       )
-    )
-    .limit(1);
-  if (!market[0]) throw new Error("Private market not found in workspace");
-  if (market[0].status === "closed")
-    throw new Error("Cannot quote a closed market");
-  if (input.expiresAt.getTime() <= Date.now())
-    throw new Error("Quote expiry must be in the future");
-  const inserted = await db
-    .insert(privateMarketQuotes)
-    .values({
-      marketId: input.marketId,
-      createdByUserId: input.createdByUserId,
-      providerLabel: input.providerLabel,
-      price: input.price,
-      feeBps: input.feeBps,
-      capacity: input.capacity,
-      expiresAt: input.expiresAt,
-      status: "open",
-    })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not create RFQ quote");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "private_market_quote",
-      entityId: id,
-      action: "created",
-    });
-  const rows = await db
-    .select()
-    .from(privateMarketQuotes)
-    .where(eq(privateMarketQuotes.id, id))
-    .limit(1);
-  if (!rows[0]) throw new Error("Could not load RFQ quote");
-  const { createdByUserId: _createdByUserId, ...quote } = rows[0];
-  return quote;
+      .limit(1);
+    if (!market[0]) throw new Error("Private market not found in workspace");
+    if (market[0].status === "closed")
+      throw new Error("Cannot quote a closed market");
+    if (input.expiresAt.getTime() <= Date.now())
+      throw new Error("Quote expiry must be in the future");
+    const inserted = await tx
+      .insert(privateMarketQuotes)
+      .values({
+        marketId: input.marketId,
+        createdByUserId: input.createdByUserId,
+        providerLabel: input.providerLabel,
+        price: input.price,
+        feeBps: input.feeBps,
+        capacity: input.capacity,
+        expiresAt: input.expiresAt,
+        status: "open",
+      })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not create RFQ quote");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "private_market_quote",
+        entityId: id,
+        action: "created",
+      });
+    const rows = await tx
+      .select()
+      .from(privateMarketQuotes)
+      .where(eq(privateMarketQuotes.id, id))
+      .limit(1);
+    if (!rows[0]) throw new Error("Could not load RFQ quote");
+    const { createdByUserId: _createdByUserId, ...quote } = rows[0];
+    return quote;
+  });
 }
 
 export async function getPrivateMarketRiskPolicy(
@@ -3175,48 +3261,63 @@ export async function upsertPrivateMarketRiskPolicy(input: {
     throw new Error("Concentration must be between 1 and 100 percent");
   if (input.approvalThreshold < 1 || input.approvalThreshold > 10)
     throw new Error("Approval threshold must be between 1 and 10");
-  if (input.marketId !== undefined) {
-    const market = await db
-      .select({ id: privateMarkets.id })
-      .from(privateMarkets)
+  return db.transaction(async tx => {
+    if (input.marketId !== undefined) {
+      const market = await tx
+        .select({ id: privateMarkets.id })
+        .from(privateMarkets)
+        .where(
+          and(
+            eq(privateMarkets.id, input.marketId),
+            eq(privateMarkets.workspaceId, input.workspaceId)
+          )
+        )
+        .limit(1);
+      if (!market[0]) throw new Error("Private market not found in workspace");
+    }
+    const scope = input.marketId === undefined
+      ? isNull(privateMarketRiskPolicies.marketId)
+      : eq(privateMarketRiskPolicies.marketId, input.marketId);
+    await tx
+      .update(privateMarketRiskPolicies)
+      .set({ status: "archived" })
       .where(
         and(
-          eq(privateMarkets.id, input.marketId),
-          eq(privateMarkets.workspaceId, input.workspaceId)
+          eq(privateMarketRiskPolicies.workspaceId, input.workspaceId),
+          scope,
+          eq(privateMarketRiskPolicies.status, "active")
         )
-      )
+      );
+    const inserted = await tx
+      .insert(privateMarketRiskPolicies)
+      .values({
+        workspaceId: input.workspaceId,
+        marketId: input.marketId,
+        createdByUserId: input.createdByUserId,
+        maxBidAmount: input.maxBidAmount,
+        maxConcentrationPct: input.maxConcentrationPct,
+        approvalThreshold: input.approvalThreshold,
+        status: "active",
+      })
+      .$returningId();
+    const id = inserted[0]?.id;
+    if (!id) throw new Error("Could not persist risk policy");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.createdByUserId,
+        entityType: "private_market_risk_policy",
+        entityId: id,
+        action: "created",
+      });
+    const rows = await tx
+      .select()
+      .from(privateMarketRiskPolicies)
+      .where(eq(privateMarketRiskPolicies.id, id))
       .limit(1);
-    if (!market[0]) throw new Error("Private market not found in workspace");
-  }
-  const inserted = await db
-    .insert(privateMarketRiskPolicies)
-    .values({
-      workspaceId: input.workspaceId,
-      marketId: input.marketId,
-      createdByUserId: input.createdByUserId,
-      maxBidAmount: input.maxBidAmount,
-      maxConcentrationPct: input.maxConcentrationPct,
-      approvalThreshold: input.approvalThreshold,
-      status: "active",
-    })
-    .$returningId();
-  const id = inserted[0]?.id;
-  if (!id) throw new Error("Could not persist risk policy");
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.createdByUserId,
-      entityType: "private_market_risk_policy",
-      entityId: id,
-      action: "created",
-    });
-  const rows = await db
-    .select()
-    .from(privateMarketRiskPolicies)
-    .where(eq(privateMarketRiskPolicies.id, id))
-    .limit(1);
-  return rows[0] ? { ...rows[0], createdByUserId: undefined } : null;
+    return rows[0] ? { ...rows[0], createdByUserId: undefined } : null;
+  });
 }
 
 export async function updatePrivateMarketQuoteStatus(input: {
@@ -3245,27 +3346,36 @@ export async function updatePrivateMarketQuoteStatus(input: {
   if (!existing) throw new Error("RFQ quote not found in workspace");
   if (existing.quote.status !== "open")
     throw new Error("Only open RFQ quotes can change status");
-  await db
-    .update(privateMarketQuotes)
-    .set({ status: input.status })
-    .where(eq(privateMarketQuotes.id, input.quoteId));
-  await db
-    .insert(auditEvents)
-    .values({
-      workspaceId: input.workspaceId,
-      actorUserId: input.actorUserId,
-      entityType: "private_market_quote",
-      entityId: input.quoteId,
-      action: input.status,
-    });
-  const updated = await db
-    .select()
-    .from(privateMarketQuotes)
-    .where(eq(privateMarketQuotes.id, input.quoteId))
-    .limit(1);
-  if (!updated[0]) throw new Error("Could not load updated RFQ quote");
-  const { createdByUserId: _createdByUserId, ...quote } = updated[0];
-  return quote;
+  return db.transaction(async tx => {
+    const result = await tx
+      .update(privateMarketQuotes)
+      .set({ status: input.status })
+      .where(
+        and(
+          eq(privateMarketQuotes.id, input.quoteId),
+          eq(privateMarketQuotes.status, "open")
+        )
+      );
+    if (result[0]?.affectedRows !== 1)
+      throw new Error("RFQ quote changed before status update could be applied");
+    await tx
+      .insert(auditEvents)
+      .values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.actorUserId,
+        entityType: "private_market_quote",
+        entityId: input.quoteId,
+        action: input.status,
+      });
+    const updated = await tx
+      .select()
+      .from(privateMarketQuotes)
+      .where(eq(privateMarketQuotes.id, input.quoteId))
+      .limit(1);
+    if (!updated[0]) throw new Error("Could not load updated RFQ quote");
+    const { createdByUserId: _createdByUserId, ...quote } = updated[0];
+    return quote;
+  });
 }
 
 export async function exportPrivateMarketBook(
@@ -3401,16 +3511,18 @@ export async function listPrivateMarketAlerts(
         });
     }
     const utilization =
-      Number(market.targetAmount) > 0
-        ? (Number(market.publicVolume) / Number(market.targetAmount)) * 100
-        : 0;
-    if (utilization > 90 && !existingUtilizationAlert[0]) {
+      decimalRatioAsNumber(market.publicVolume, market.targetAmount) * 100;
+    const utilizationAbove90 =
+      compareDecimalTimesInteger(market.publicVolume, 100, market.targetAmount, 90) > 0;
+    const utilizationAbove100 =
+      compareDecimalTimesInteger(market.publicVolume, 100, market.targetAmount, 100) > 0;
+    if (utilizationAbove90 && !existingUtilizationAlert[0]) {
       await db
         .insert(privateMarketAlerts)
         .values({
           workspaceId,
           marketId: market.id,
-          severity: utilization > 100 ? "critical" : "warning",
+          severity: utilizationAbove100 ? "critical" : "warning",
           code: "MARKET_UTILIZATION_HIGH",
           message: `Market utilization is ${utilization.toFixed(2)}% of target capacity.`,
           status: "open",
@@ -3434,29 +3546,41 @@ export async function listPrivateMarketAlerts(
 
 export async function acknowledgePrivateMarketAlert(input: {
   workspaceId: number;
+  actorUserId: number;
   alertId: number;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database is not configured");
-  await db
-    .update(privateMarketAlerts)
-    .set({ status: "acknowledged", acknowledgedAt: new Date() })
-    .where(
-      and(
-        eq(privateMarketAlerts.id, input.alertId),
-        eq(privateMarketAlerts.workspaceId, input.workspaceId),
-        eq(privateMarketAlerts.status, "open")
+  return db.transaction(async tx => {
+    const result = await tx
+      .update(privateMarketAlerts)
+      .set({ status: "acknowledged", acknowledgedAt: new Date() })
+      .where(
+        and(
+          eq(privateMarketAlerts.id, input.alertId),
+          eq(privateMarketAlerts.workspaceId, input.workspaceId),
+          eq(privateMarketAlerts.status, "open")
+        )
+      );
+    if (result[0]?.affectedRows === 1) {
+      await tx.insert(auditEvents).values({
+        workspaceId: input.workspaceId,
+        actorUserId: input.actorUserId,
+        entityType: "private_market_alert",
+        entityId: input.alertId,
+        action: "acknowledged",
+      });
+    }
+    const updated = await tx
+      .select()
+      .from(privateMarketAlerts)
+      .where(
+        and(
+          eq(privateMarketAlerts.id, input.alertId),
+          eq(privateMarketAlerts.workspaceId, input.workspaceId)
+        )
       )
-    );
-  const updated = await db
-    .select()
-    .from(privateMarketAlerts)
-    .where(
-      and(
-        eq(privateMarketAlerts.id, input.alertId),
-        eq(privateMarketAlerts.workspaceId, input.workspaceId)
-      )
-    )
-    .limit(1);
-  return updated[0] ?? null;
+      .limit(1);
+    return updated[0] ?? null;
+  });
 }

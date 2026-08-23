@@ -24,7 +24,7 @@ describe("private primitives contract", () => {
 
   it("keeps demo links and network evidence boundaries explicit", () => {
     expect(privateClaimDemoPath).toMatch(/^\/claim\//);
-    expect(privatePrimitiveEvidenceNote("sepolia")).toContain("no mainnet proof");
-    expect(privatePrimitiveEvidenceNote("mainnet")).toContain("wallet approval");
+    expect(privatePrimitiveEvidenceNote()).toContain("Mainnet evidence");
+    expect(privatePrimitiveEvidenceNote()).toContain("wallet approval");
   });
 });

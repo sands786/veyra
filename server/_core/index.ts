@@ -100,7 +100,6 @@ async function startServer() {
         .split(",")
         .map(value => value.trim())
         .filter(Boolean),
-      "https://veyra-gamma-gold.vercel.app",
     ]);
     const originIsTrustedProxy = Boolean(origin && trustedProxyOrigins.has(origin));
     const fetchSite = String(req.headers["sec-fetch-site"] || "").toLowerCase();

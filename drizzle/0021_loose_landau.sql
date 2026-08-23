@@ -1,0 +1,1 @@
+ALTER TABLE `routeApprovals` ADD CONSTRAINT `routeApprovals_workspace_route_approver_unique` UNIQUE(`workspaceId`,`routeId`,`approverUserId`);

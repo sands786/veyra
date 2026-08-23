@@ -20,4 +20,16 @@ describe("public claim hardening", () => {
       'if (affectedRows !== 1) throw new Error("Claim link was already redeemed")'
     );
   });
+
+  it("creates claim links atomically after workspace ownership validation", () => {
+    const start = source.indexOf("export async function createRecipientClaimLink");
+    const end = source.indexOf("export async function getPublicClaim", start);
+    const block = source.slice(start, end);
+    expect(block).toContain("return db.transaction(async tx =>");
+    expect(block).toContain("eq(paymentRoutes.workspaceId, input.workspaceId)");
+    expect(block).toContain("eq(recipients.workspaceId, input.workspaceId)");
+    expect(block).toContain("await tx\n      .insert(claimLinks)");
+    expect(block).toContain("await tx\n      .update(routeRecipients)");
+    expect(block).toContain("await tx\n      .insert(auditEvents)");
+  });
 });

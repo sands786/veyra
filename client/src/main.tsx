@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { startLogin } from "./const";
+import { safeLocalStorageGet } from "./lib/safeStorage";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -53,12 +54,8 @@ const trpcClient = trpc.createClient({
       url: "/api/trpc",
       transformer: superjson,
       headers() {
-        try {
-          const workspaceId = localStorage.getItem("veilpay-active-workspace");
-          return workspaceId ? { "x-workspace-id": workspaceId } : {};
-        } catch {
-          return {};
-        }
+        const workspaceId = safeLocalStorageGet("veilpay-active-workspace");
+        return workspaceId ? { "x-workspace-id": workspaceId } : {};
       },
       fetch(input, init) {
         return globalThis.fetch(input, {

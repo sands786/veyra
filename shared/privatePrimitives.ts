@@ -19,8 +19,6 @@ export function privateSettlementState(routeStatus?: string): PrivateSettlementS
   return "unsigned";
 }
 
-export function privatePrimitiveEvidenceNote(network: "sepolia" | "mainnet") {
-  return network === "sepolia"
-    ? "Testnet evidence only; no mainnet proof."
-    : "Mainnet evidence requires explicit wallet approval.";
+export function privatePrimitiveEvidenceNote() {
+  return "Mainnet evidence requires explicit wallet approval.";
 }

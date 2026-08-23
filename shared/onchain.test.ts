@@ -3,7 +3,7 @@ import { boundaryForPersistedIntent, canPublishOnchainProof, isTerminalOnchainLi
 
 describe("shared on-chain lifecycle model", () => {
   it("starts persisted intents as wallet-required and non-final", () => {
-    expect(boundaryForPersistedIntent("payroll", "sepolia")).toMatchObject({ lifecycle: "intent_ready", requiresWallet: true, isProtocolFinal: false });
+    expect(boundaryForPersistedIntent("payroll", "mainnet")).toMatchObject({ network: "mainnet", lifecycle: "intent_ready", requiresWallet: true, isProtocolFinal: false });
   });
 
   it("only treats confirmed protocol transactions as terminal", () => {

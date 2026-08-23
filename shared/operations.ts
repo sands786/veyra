@@ -1,5 +1,109 @@
 export type PayrollFrequency = "weekly" | "biweekly" | "monthly";
 
+type DecimalParts = { digits: bigint; scale: number };
+
+function parseDecimal(value: string): DecimalParts | null {
+  if (!/^\d+(\.\d{1,18})?$/.test(value)) return null;
+  const [whole = "0", fraction = ""] = value.split(".");
+  const trimmedFraction = fraction.replace(/0+$/, "");
+  return {
+    digits: BigInt(`${whole}${trimmedFraction}` || "0"),
+    scale: trimmedFraction.length,
+  };
+}
+
+function scaleDecimal(parts: DecimalParts, scale: number): bigint {
+  let multiplier = BigInt(1);
+  for (let index = parts.scale; index < scale; index += 1) {
+    multiplier *= BigInt(10);
+  }
+  return parts.digits * multiplier;
+}
+
+function formatDecimal(digits: bigint, scale: number): string {
+  if (digits === BigInt(0)) return "0";
+  const raw = digits.toString().padStart(scale + 1, "0");
+  if (scale === 0) return raw;
+  const splitAt = raw.length - scale;
+  const fraction = raw.slice(splitAt).replace(/0+$/, "");
+  return fraction ? `${raw.slice(0, splitAt)}.${fraction}` : raw.slice(0, splitAt);
+}
+
+function isPositiveDecimalString(value: string): boolean {
+  const parts = parseDecimal(value.trim());
+  return Boolean(parts && parts.digits > BigInt(0));
+}
+
+function compareDecimalStringsExact(left: string, right: string): number {
+  const a = parseDecimal(left);
+  const b = parseDecimal(right);
+  if (!a || !b) return 0;
+  const scale = Math.max(a.scale, b.scale);
+  const leftValue = scaleDecimal(a, scale);
+  const rightValue = scaleDecimal(b, scale);
+  return leftValue === rightValue ? 0 : leftValue > rightValue ? 1 : -1;
+}
+
+export function addDecimalStringsExact(left: string, right: string): string {
+  const a = parseDecimal(left);
+  const b = parseDecimal(right);
+  if (!a || !b) return "0";
+  const scale = Math.max(a.scale, b.scale);
+  return formatDecimal(scaleDecimal(a, scale) + scaleDecimal(b, scale), scale);
+}
+
+export function subtractDecimalStringsExact(left: string, right: string): string {
+  const a = parseDecimal(left);
+  const b = parseDecimal(right);
+  if (!a || !b) return "0";
+  const scale = Math.max(a.scale, b.scale);
+  const difference = scaleDecimal(a, scale) - scaleDecimal(b, scale);
+  if (difference >= BigInt(0)) return formatDecimal(difference, scale);
+  return `-${formatDecimal(-difference, scale)}`;
+}
+
+export function compareDecimalTimesInteger(
+  left: string,
+  leftMultiplier: number,
+  right: string,
+  rightMultiplier: number
+): number {
+  const a = parseDecimal(left);
+  const b = parseDecimal(right);
+  if (!a || !b || !Number.isInteger(leftMultiplier) || !Number.isInteger(rightMultiplier)) return 0;
+  const scale = Math.max(a.scale, b.scale);
+  const leftValue = scaleDecimal(a, scale) * BigInt(leftMultiplier);
+  const rightValue = scaleDecimal(b, scale) * BigInt(rightMultiplier);
+  return leftValue === rightValue ? 0 : leftValue > rightValue ? 1 : -1;
+}
+
+export function multiplyDecimalStringsExact(left: string, right: string): string {
+  const a = parseDecimal(left);
+  const b = parseDecimal(right);
+  if (!a || !b) return "0";
+  return formatDecimal(a.digits * b.digits, a.scale + b.scale);
+}
+
+export function decimalRatioAsNumber(left: string, right: string): number {
+  const a = parseDecimal(left);
+  const b = parseDecimal(right);
+  if (!a || !b || b.digits === BigInt(0)) return 0;
+  const approximate = (parts: DecimalParts) => {
+    const digits = parts.digits.toString();
+    const significant = digits.slice(0, 15);
+    const significantValue = Number(significant);
+    return significantValue * 10 ** (digits.length - significant.length - parts.scale);
+  };
+  const ratio = approximate(a) / approximate(b);
+  return Number.isFinite(ratio) ? ratio : ratio < 0 ? -Number.MAX_VALUE : Number.MAX_VALUE;
+}
+
+function decimalAsFiniteNumber(value: string): number {
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) return numeric;
+  return numeric < 0 ? -Number.MAX_VALUE : Number.MAX_VALUE;
+}
+
 function zonedParts(date: Date, timezone: string) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
@@ -63,7 +167,7 @@ export type PolicyEvaluation = {
   maxRouteAmount: string;
   dailyLimit: string;
   approvalThreshold: number;
-  network: "mainnet" | "sepolia";
+  network: "mainnet";
 };
 
 export function evaluateTreasuryPolicy(
@@ -71,7 +175,7 @@ export function evaluateTreasuryPolicy(
   input: {
     totalAmount: string;
     approvalCount: number;
-    network: "mainnet" | "sepolia";
+    network: "mainnet";
     dailyUsed: string;
   }
 ) {
@@ -84,11 +188,13 @@ export function evaluateTreasuryPolicy(
   const reasons: string[] = [];
   if (input.network !== policy.network)
     reasons.push(`Policy is restricted to ${policy.network}`);
-  if (Number(input.totalAmount) > Number(policy.maxRouteAmount))
+  if (compareDecimalStringsExact(input.totalAmount, policy.maxRouteAmount) > 0)
     reasons.push(`Amount exceeds per-route limit of ${policy.maxRouteAmount}`);
   if (
-    Number(input.dailyUsed) + Number(input.totalAmount) >
-    Number(policy.dailyLimit)
+    compareDecimalStringsExact(
+      addDecimalStringsExact(input.dailyUsed, input.totalAmount),
+      policy.dailyLimit
+    ) > 0
   )
     reasons.push(`Daily limit of ${policy.dailyLimit} would be exceeded`);
   if (input.approvalCount < policy.approvalThreshold)
@@ -229,18 +335,14 @@ export function canSubmitLaunchpadProject(
   name: string,
   targetAmount: string
 ): boolean {
-  return (
-    name.trim().length >= 2 && /^\d+(\.\d{1,18})?$/.test(targetAmount.trim())
-  );
+  return name.trim().length >= 2 && isPositiveDecimalString(targetAmount);
 }
 
 export function canSubmitLaunchpadAllocation(
   commitment: string,
   amount: string
 ): boolean {
-  return (
-    commitment.trim().length >= 16 && /^\d+(\.\d{1,18})?$/.test(amount.trim())
-  );
+  return commitment.trim().length >= 16 && isPositiveDecimalString(amount);
 }
 
 export function canAdvanceLaunchpadProjectStatus(
@@ -311,7 +413,7 @@ export function buildLaunchpadPublicSummary(
     name: string;
     description: string | null;
     token: string;
-    network: "mainnet" | "sepolia";
+    network: "mainnet";
     targetAmount: string;
     raisedAmount: string;
     privacyMode: "shielded" | "public";
@@ -385,47 +487,8 @@ export function hasExactRouteAllocations(
 ): boolean {
   if (!/^\d+(\.\d{1,18})?$/.test(totalAmount) || recipientAmounts.length === 0)
     return false;
-  const normalize = (value: string) => {
-    const [whole = "0", fraction = ""] = value.split(".");
-    return {
-      whole: whole.replace(/^0+(?=\d)/, "") || "0",
-      fraction: fraction.replace(/0+$/, ""),
-    };
-  };
-  const compare = (left: string, right: string) => {
-    const a = normalize(left);
-    const b = normalize(right);
-    if (a.whole.length !== b.whole.length)
-      return a.whole.length > b.whole.length ? 1 : -1;
-    if (a.whole !== b.whole) return a.whole > b.whole ? 1 : -1;
-    const width = Math.max(a.fraction.length, b.fraction.length);
-    const af = a.fraction.padEnd(width, "0");
-    const bf = b.fraction.padEnd(width, "0");
-    return af === bf ? 0 : af > bf ? 1 : -1;
-  };
-  const add = (left: string, right: string) => {
-    const [leftWhole, leftFraction = ""] = left.split(".");
-    const [rightWhole, rightFraction = ""] = right.split(".");
-    const precision = Math.max(leftFraction.length, rightFraction.length);
-    const a = `${leftWhole || "0"}${leftFraction.padEnd(precision, "0")}`;
-    const b = `${rightWhole || "0"}${rightFraction.padEnd(precision, "0")}`;
-    const width = Math.max(a.length, b.length);
-    let carry = 0;
-    let result = "";
-    for (let index = width - 1; index >= 0; index -= 1) {
-      const sum =
-        Number(a.padStart(width, "0")[index]) +
-        Number(b.padStart(width, "0")[index]) +
-        carry;
-      result = String(sum % 10) + result;
-      carry = Math.floor(sum / 10);
-    }
-    if (carry) result = String(carry) + result;
-    const wholeEnd = result.length - precision;
-    const whole = result.slice(0, wholeEnd) || "0";
-    const fraction = result.slice(wholeEnd).replace(/0+$/, "");
-    return fraction ? `${whole}.${fraction}` : whole;
-  };
+  const compare = compareDecimalStringsExact;
+  const add = addDecimalStringsExact;
   const ids = new Set<number>();
   let allocationTotal = "0";
   for (const allocation of recipientAmounts) {
@@ -544,22 +607,31 @@ export function evaluatePrivateMarketRisk(input: {
   utilizationPct: number;
   concentrationPct: number;
 } {
-  const bid = Number(input.bidAmount);
-  const target = Number(input.targetAmount);
-  const committed = Number(input.currentCommitted);
-  const participant = Number(input.participantCommitted ?? input.bidAmount);
+  const bidParts = parseDecimal(input.bidAmount);
+  const target = decimalAsFiniteNumber(input.targetAmount);
+  const participant = decimalAsFiniteNumber(input.participantCommitted ?? input.bidAmount);
+  const committedWithBid = addDecimalStringsExact(input.currentCommitted, input.bidAmount);
   const utilizationPct =
-    target > 0 ? Math.min(999, ((committed + bid) / target) * 100) : 0;
+    compareDecimalStringsExact(input.targetAmount, "0") > 0
+      ? Math.min(999, (decimalAsFiniteNumber(committedWithBid) / Math.max(target, Number.EPSILON)) * 100)
+      : 0;
   const concentrationPct =
-    committed + bid > 0 ? (participant / (committed + bid)) * 100 : 0;
+    compareDecimalStringsExact(committedWithBid, "0") > 0
+      ? (participant / Math.max(decimalAsFiniteNumber(committedWithBid), Number.EPSILON)) * 100
+      : 0;
   const reasons: string[] = [];
-  if (!Number.isFinite(bid) || bid <= 0)
+  if (!bidParts || bidParts.digits === BigInt(0))
     reasons.push("Bid must be greater than zero");
-  if (input.maxBidAmount && bid > Number(input.maxBidAmount))
+  if (input.maxBidAmount && compareDecimalStringsExact(input.bidAmount, input.maxBidAmount) > 0)
     reasons.push(`Bid exceeds the configured cap of ${input.maxBidAmount}`);
   if (
     input.maxConcentrationPct !== undefined &&
-    concentrationPct > input.maxConcentrationPct
+    compareDecimalTimesInteger(
+      input.participantCommitted ?? input.bidAmount,
+      100,
+      committedWithBid,
+      input.maxConcentrationPct
+    ) > 0
   )
     reasons.push(`Concentration exceeds ${input.maxConcentrationPct}%`);
   return {
@@ -583,9 +655,24 @@ export function comparePrivateMarketQuotes(
     .filter(quote => new Date(quote.expiresAt).getTime() > now.getTime())
     .map(quote => ({
       ...quote,
-      allInPrice: Number(quote.price) * (1 + quote.feeBps / 10000),
+      allInPrice: decimalAsFiniteNumber(
+        formatDecimal(
+          (parseDecimal(quote.price)?.digits ?? BigInt(0)) * BigInt(10000 + quote.feeBps),
+          parseDecimal(quote.price)?.scale ?? 0
+        )
+      ) / 10000,
     }))
-    .sort((left, right) => left.allInPrice - right.allInPrice);
+    .sort((left, right) => {
+      const leftQuote = quotes.find(quote => quote.id === left.id);
+      const rightQuote = quotes.find(quote => quote.id === right.id);
+      if (!leftQuote || !rightQuote) return left.allInPrice - right.allInPrice;
+      return compareDecimalTimesInteger(
+        leftQuote.price,
+        10000 + leftQuote.feeBps,
+        rightQuote.price,
+        10000 + rightQuote.feeBps
+      );
+    });
 }
 
 export function buildPrivateMarketPortfolio(input: {
@@ -598,17 +685,14 @@ export function buildPrivateMarketPortfolio(input: {
 }) {
   const committed = input.commitments
     .filter(item => item.status !== "rejected")
-    .reduce((sum, item) => sum + Number(item.amount), 0);
-  const settled = Number(input.settledValue);
-  const current = Number(input.currentValue);
+    .reduce((sum, item) => addDecimalStringsExact(sum, item.amount), "0");
+  const settled = input.settledValue;
+  const current = input.currentValue;
   return {
-    committedAmount: committed
-      .toFixed(18)
-      .replace(/0+$/, "")
-      .replace(/\.$/, ""),
-    settledAmount: settled.toString(),
-    currentValue: current.toString(),
-    pnl: (current - settled).toString(),
+    committedAmount: committed,
+    settledAmount: settled,
+    currentValue: current,
+    pnl: subtractDecimalStringsExact(current, settled),
     openCommitments: input.commitments.filter(
       item => item.status === "committed" || item.status === "revealed"
     ).length,

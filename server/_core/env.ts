@@ -11,4 +11,5 @@ export const ENV = {
   resendApiKey: process.env.RESEND_API_KEY ?? "",
   // Resend permits its free test sender for constrained testing; production domains can override it.
   resendFromEmail: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
+  publicAppUrl: process.env.PUBLIC_APP_URL ?? "",
 };

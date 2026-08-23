@@ -144,6 +144,64 @@ describe("operations primitives", () => {
     );
   });
 
+  it("compares treasury limits exactly beyond JavaScript safe-integer precision", () => {
+    const blocked = evaluateTreasuryPolicy(
+      {
+        maxRouteAmount: "9007199254740992",
+        dailyLimit: "18014398509481984",
+        approvalThreshold: 1,
+        network: "mainnet",
+      },
+      {
+        totalAmount: "9007199254740993",
+        approvalCount: 1,
+        network: "mainnet",
+        dailyUsed: "9007199254740992",
+      }
+    );
+    expect(blocked.allowed).toBe(false);
+    expect(blocked.reasons).toContain(
+      "Amount exceeds per-route limit of 9007199254740992"
+    );
+    expect(blocked.reasons).toContain(
+      "Daily limit of 18014398509481984 would be exceeded"
+    );
+  });
+
+  it("rejects zero Launchpad values before the button can submit", () => {
+    expect(canSubmitLaunchpadProject("Round", "0")).toBe(false);
+    expect(canSubmitLaunchpadAllocation("a".repeat(16), "0.000000000000000000")).toBe(false);
+  });
+
+  it("evaluates private-market caps exactly beyond JavaScript safe-integer precision", () => {
+    const blocked = evaluatePrivateMarketRisk({
+      bidAmount: "9007199254740993",
+      targetAmount: "100000000000000000000",
+      currentCommitted: "0",
+      maxBidAmount: "9007199254740992",
+    });
+    expect(blocked.allowed).toBe(false);
+    expect(blocked.reasons).toContain(
+      "Bid exceeds the configured cap of 9007199254740992"
+    );
+  });
+
+  it("preserves exact portfolio totals and signed PnL", () => {
+    expect(
+      buildPrivateMarketPortfolio({
+        commitments: [
+          { amount: "9007199254740993", status: "committed" },
+          { amount: "0.000000000000000001", status: "accepted" },
+        ],
+        settledValue: "10.5",
+        currentValue: "10",
+      })
+    ).toMatchObject({
+      committedAmount: "9007199254740993.000000000000000001",
+      pnl: "-0.5",
+    });
+  });
+
   it("evaluates treasury policy limits and approval requirements", () => {
     const blocked = evaluateTreasuryPolicy(
       {
@@ -176,21 +234,14 @@ describe("operations primitives", () => {
       }
     );
     expect(allowed.allowed).toBe(true);
-    const wrongNetwork = evaluateTreasuryPolicy(
-      {
-        maxRouteAmount: "5000",
-        dailyLimit: "10000",
-        approvalThreshold: 1,
-        network: "sepolia",
-      },
-      {
-        totalAmount: "100",
-        approvalCount: 1,
-        network: "mainnet",
-        dailyUsed: "0",
-      }
-    );
-    expect(wrongNetwork.allowed).toBe(false);
+    const noPolicy = evaluateTreasuryPolicy(undefined, {
+      totalAmount: "100",
+      approvalCount: 0,
+      network: "mainnet",
+      dailyUsed: "0",
+    });
+    expect(noPolicy.allowed).toBe(true);
+    expect(noPolicy.policyFound).toBe(false);
   });
 
   it("enforces Launchpad role boundaries and slug shape", () => {

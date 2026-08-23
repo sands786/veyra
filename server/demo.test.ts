@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEMO_TABS, nextDemoActionState, nextDemoState, nextTestnetEvidenceState, testnetTranscript } from "../shared/demo";
+import { DEMO_TABS, nextDemoActionState, nextDemoState } from "../shared/demo";
 
 describe("Demo Mode contract", () => {
   it("exposes all primary VeilPay simulation surfaces", () => {
@@ -22,23 +22,4 @@ describe("Demo Mode contract", () => {
     expect(nextDemoState("APPROVED", "approve-release")).toBe("APPROVED");
   });
 
-  it("models a complete Sepolia round trip without upgrading it to mainnet evidence", () => {
-    let state = nextTestnetEvidenceState("idle", "start");
-    state = nextTestnetEvidenceState(state, "submitted");
-    state = nextTestnetEvidenceState(state, "confirmed");
-    state = nextTestnetEvidenceState(state, "read");
-    expect(state).toBe("verified");
-    expect(testnetTranscript(state).some((line) => line.includes("network=Starknet Sepolia"))).toBe(true);
-    expect(testnetTranscript(state).some((line) => line.includes("payload_match=true"))).toBe(true);
-  });
-
-  it("reconciles an UNKNOWN outcome idempotently", () => {
-    let state = nextTestnetEvidenceState("idle", "start");
-    state = nextTestnetEvidenceState(state, "submitted");
-    state = nextTestnetEvidenceState(state, "timeout");
-    expect(state).toBe("unknown");
-    state = nextTestnetEvidenceState(state, "reconcile");
-    expect(testnetTranscript(state).some((line) => line.includes("duplicate_write=false"))).toBe(true);
-    expect(nextTestnetEvidenceState(state, "accept")).toBe("accepted");
-  });
 });

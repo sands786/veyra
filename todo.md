@@ -475,3 +475,15 @@
 - [x] Audit confirmed interaction defects and responsive control issues: no new defect requiring product-code changes was found; privacy, auth, and mainnet-only semantics remain intact.
 - [x] Add or update regression coverage for the audited interaction contracts and verify all primary controls at desktop and mobile widths.
 - [x] Run the complete Vitest suite, TypeScript check, production build, and save a published checkpoint.
+
+
+## Full source audit follow-up
+- [x] Enumerate every tracked application, configuration, schema, migration, and test file for the line-by-line audit.
+- [x] Inspect server, database, authentication, security, network, and privacy boundaries in full.
+- [x] Inspect client state, handlers, routing, dependency usage, and build/deployment configuration in full.
+- [x] Fix every confirmed defect found by the audit and add regression coverage; record warnings separately when no safe code change is justified.
+- [x] Re-run exhaustive tests, typecheck, production build, and runtime checks, then publish the audited checkpoint.
+
+- [x] Audit finding: prevent client-controlled transaction statuses from marking routes confirmed or settled
+- [x] Audit finding: replace precision-unsafe market utilization arithmetic with exact decimal comparisons
+- [x] Audit finding: route tRPC workspace headers through the shared safe browser-storage boundary

@@ -1,6 +1,6 @@
 export type OnchainSurface = "payroll" | "treasury" | "claims" | "launchpad" | "markets" | "proof";
 export type OnchainLifecycle = "draft" | "intent_ready" | "awaiting_signature" | "submitted" | "confirming" | "confirmed" | "reverted" | "unknown";
-export type OnchainNetwork = "mainnet" | "sepolia";
+export type OnchainNetwork = "mainnet";
 
 export type OnchainBoundary = {
   surface: OnchainSurface;

@@ -64,7 +64,7 @@ export const workspaces = mysqlTable("workspaces", {
   defaultToken: varchar("defaultToken", { length: 80 })
     .notNull()
     .default("USDC"),
-  network: mysqlEnum("network", ["mainnet", "sepolia"])
+  network: mysqlEnum("network", ["mainnet"])
     .notNull()
     .default("mainnet"),
   approvalThreshold: int("approvalThreshold").notNull().default(1),
@@ -102,7 +102,7 @@ export const paymentRoutes = mysqlTable("paymentRoutes", {
   createdByUserId: int("createdByUserId").notNull(),
   name: varchar("name", { length: 160 }).notNull(),
   token: varchar("token", { length: 80 }).notNull(),
-  network: mysqlEnum("network", ["mainnet", "sepolia"])
+  network: mysqlEnum("network", ["mainnet"])
     .notNull()
     .default("mainnet"),
   totalAmount: varchar("totalAmount", { length: 80 }).notNull(),
@@ -178,18 +178,26 @@ export const payrollSchedules = mysqlTable(
   })
 );
 
-export const routeApprovals = mysqlTable("routeApprovals", {
-  id: int("id").autoincrement().primaryKey(),
-  workspaceId: int("workspaceId").notNull(),
-  routeId: int("routeId").notNull(),
-  approverUserId: int("approverUserId").notNull(),
-  status: mysqlEnum("status", ["pending", "approved", "rejected"])
-    .notNull()
-    .default("pending"),
-  comment: text("comment"),
-  decidedAt: timestamp("decidedAt"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const routeApprovals = mysqlTable(
+  "routeApprovals",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    workspaceId: int("workspaceId").notNull(),
+    routeId: int("routeId").notNull(),
+    approverUserId: int("approverUserId").notNull(),
+    status: mysqlEnum("status", ["pending", "approved", "rejected"])
+      .notNull()
+      .default("pending"),
+    comment: text("comment"),
+    decidedAt: timestamp("decidedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  table => ({
+    approverRouteUnique: uniqueIndex(
+      "routeApprovals_workspace_route_approver_unique"
+    ).on(table.workspaceId, table.routeId, table.approverUserId),
+  })
+);
 
 export const shareableProofs = mysqlTable("shareableProofs", {
   id: int("id").autoincrement().primaryKey(),
@@ -208,7 +216,7 @@ export const treasuryBalanceSnapshots = mysqlTable("treasuryBalanceSnapshots", {
   id: int("id").autoincrement().primaryKey(),
   workspaceId: int("workspaceId").notNull(),
   token: varchar("token", { length: 80 }).notNull(),
-  network: mysqlEnum("network", ["mainnet", "sepolia"]).notNull(),
+  network: mysqlEnum("network", ["mainnet"]).notNull(),
   availableBalance: varchar("availableBalance", { length: 80 }).notNull(),
   source: varchar("source", { length: 40 }).notNull().default("wallet_read"),
   capturedAt: timestamp("capturedAt").defaultNow().notNull(),
@@ -220,7 +228,7 @@ export const treasuryPolicies = mysqlTable("treasuryPolicies", {
   createdByUserId: int("createdByUserId").notNull(),
   name: varchar("name", { length: 160 }).notNull(),
   token: varchar("token", { length: 80 }).notNull(),
-  network: mysqlEnum("network", ["mainnet", "sepolia"])
+  network: mysqlEnum("network", ["mainnet"])
     .notNull()
     .default("mainnet"),
   maxRouteAmount: varchar("maxRouteAmount", { length: 80 }).notNull(),
@@ -257,7 +265,7 @@ export const launchpadProjects = mysqlTable("launchpadProjects", {
   slug: varchar("slug", { length: 160 }).notNull().unique(),
   description: text("description"),
   token: varchar("token", { length: 80 }).notNull(),
-  network: mysqlEnum("network", ["mainnet", "sepolia"])
+  network: mysqlEnum("network", ["mainnet"])
     .notNull()
     .default("mainnet"),
   targetAmount: varchar("targetAmount", { length: 80 }).notNull(),
@@ -498,7 +506,7 @@ export const privateMarketAlerts = mysqlTable(
 export const blockchainTransactions = mysqlTable("blockchainTransactions", {
   id: int("id").autoincrement().primaryKey(),
   routeId: int("routeId").notNull(),
-  network: mysqlEnum("network", ["mainnet", "sepolia"]).notNull(),
+  network: mysqlEnum("network", ["mainnet"]).notNull(),
   transactionHash: varchar("transactionHash", { length: 100 })
     .notNull()
     .unique(),

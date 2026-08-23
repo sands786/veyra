@@ -20,7 +20,7 @@ describe("security audit hardening contracts", () => {
     expect(source).toContain('const forwardedHost = String(req.headers["x-forwarded-host"] || "")');
     expect(source).toContain('const expectedHost = forwardedHost || req.headers.host;');
     expect(source).toContain('process.env.TRUSTED_BROWSER_ORIGINS || ""');
-    expect(source).toContain('"https://veyra-gamma-gold.vercel.app"');
+    expect(source).not.toContain('"https://veyra-gamma-gold.vercel.app"');
     expect(source).toContain('!originIsTrustedProxy');
     expect(source).toContain('error: "cross-site-request-blocked"');
   });
