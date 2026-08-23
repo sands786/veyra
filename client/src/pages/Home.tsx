@@ -636,6 +636,13 @@ export default function Home() {
       await handleWalletConnect();
       return;
     }
+    if (!isDemoMode && stage === 1 && !wallet?.strk20InvokeTransaction) {
+      toast("This wallet cannot submit the STRK20 Mainnet action.", {
+        description:
+          "Use a Starknet wallet with STRK20 invocation support before creating a production route.",
+      });
+      return;
+    }
     let savedRoute: { id: number } | undefined;
     if (stage === 1) {
       try {

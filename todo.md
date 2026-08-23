@@ -487,3 +487,6 @@
 - [x] Audit finding: prevent client-controlled transaction statuses from marking routes confirmed or settled
 - [x] Audit finding: replace precision-unsafe market utilization arithmetic with exact decimal comparisons
 - [x] Audit finding: route tRPC workspace headers through the shared safe browser-storage boundary
+- [x] Publish the audited Veyra source revision to the public GitHub repository at https://github.com/sands786/veyra.
+- [ ] User-owned evidence still required: connect a real Starknet mainnet wallet, execute and verify the intended mainnet flows, record the resulting transaction hashes, and submit the final demo materials.
+- [x] Audit finding: prevent a production route from advancing to shielded/routed stages when the connected wallet cannot submit the required STRK20 transaction

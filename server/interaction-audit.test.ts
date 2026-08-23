@@ -55,6 +55,11 @@ describe("Veyra interaction contracts", () => {
     expect(signIn).toContain('type="button" onClick={() => changeMode("register")}');
   });
 
+  it("fails closed before production route creation without STRK20 wallet support", () => {
+    expect(home).toContain("if (!isDemoMode && stage === 1 && !wallet?.strk20InvokeTransaction)");
+    expect(home).toContain("This wallet cannot submit the STRK20 Mainnet action.");
+  });
+
   it("routes workspace headers through safe storage", () => {
     expect(main).toContain("safeLocalStorageGet");
     expect(main).not.toContain('localStorage.getItem("veilpay-active-workspace")');
