@@ -39,9 +39,16 @@ import {
   resolveLaunchpadPanel,
   shouldReuseLaunchpadAllocation,
   canReusePrivateMarketBid,
+  decimalToScaledBigInt,
 } from "@shared/operations";
 
 describe("operations primitives", () => {
+  it("scales fractional Mainnet token amounts exactly", () => {
+    expect(decimalToScaledBigInt("0.2", 18)).toBe(200000000000000000n);
+    expect(decimalToScaledBigInt("1.000000000000000001", 18)).toBe(1000000000000000001n);
+    expect(() => decimalToScaledBigInt("0.0000000000000000001", 18)).toThrow("decimal places");
+  });
+
   it("builds weekly Heartbeat cron expressions in UTC", () => {
     expect(
       buildPayrollCron(new Date("2026-08-15T09:07:00.000Z"), "weekly")

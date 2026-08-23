@@ -1,6 +1,6 @@
 import type { VeilNetwork } from "./strk20";
 
-export type ProtocolSurface = "payroll" | "treasury" | "claims" | "launchpad" | "markets" | "proof";
+export type ProtocolSurface = "privacy" | "payroll" | "treasury" | "claims" | "launchpad" | "markets" | "proof";
 
 export type ProtocolContractConfig = {
   address: string;
@@ -17,6 +17,7 @@ const address = (value: unknown): ProtocolContractConfig | undefined => {
 const env = (_network: VeilNetwork) => {
   const suffix = "MAINNET" as const;
   return {
+    privacy: address(import.meta.env.VITE_VEYRA_STRK20_PRIVACY_CONTRACT_MAINNET),
     payroll: address(import.meta.env[`VITE_VEYRA_PAYROLL_CONTRACT_${suffix}`]),
     treasury: address(import.meta.env[`VITE_VEYRA_TREASURY_CONTRACT_${suffix}`]),
     claims: address(import.meta.env[`VITE_VEYRA_CLAIMS_CONTRACT_${suffix}`]),

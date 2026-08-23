@@ -63,6 +63,7 @@ import { protocolContracts } from "@/lib/onchainConfig";
 import {
   canCreateRecipientClaim,
   canScheduleRoute,
+  decimalToScaledBigInt,
   isValidStarknetAddress,
   isWalletActionLocked,
   normalizeAmountInput,
@@ -636,6 +637,21 @@ export default function Home() {
       await handleWalletConnect();
       return;
     }
+    const privacyContract = protocolContracts(selectedNetwork).privacy;
+    if (!isDemoMode && stage === 1 && !privacyContract) {
+      toast("STRK20 privacy contract is not configured for Mainnet.", {
+        description:
+          "Add the verified Veyra privacy contract address before attempting a wallet-signed route.",
+      });
+      return;
+    }
+    if (!isDemoMode && stage === 1 && tokenSymbol.trim().toUpperCase() !== "STRK") {
+      toast("This Mainnet asset is not configured for STRK20 execution.", {
+        description:
+          "Use STRK for the configured route contract, or add a verified token contract mapping before sending another asset.",
+      });
+      return;
+    }
     if (!isDemoMode && stage === 1 && !wallet?.strk20InvokeTransaction) {
       toast("This wallet cannot submit the STRK20 Mainnet action.", {
         description:
@@ -672,8 +688,7 @@ export default function Home() {
     }
     if (wallet?.strk20InvokeTransaction && stage === 1) {
       try {
-        const amountSmallestUnit =
-          BigInt(normalizedAmount || "0") * BigInt("1000000");
+        const amountSmallestUnit = decimalToScaledBigInt(normalizedAmount, 18);
         const tx = await submitShieldedRoute(
           wallet,
           amountSmallestUnit,

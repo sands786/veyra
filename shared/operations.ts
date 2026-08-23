@@ -77,6 +77,15 @@ export function compareDecimalTimesInteger(
   return leftValue === rightValue ? 0 : leftValue > rightValue ? 1 : -1;
 }
 
+export function decimalToScaledBigInt(value: string, decimals: number): bigint {
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 36)
+    throw new Error("Decimal scale is invalid");
+  const parts = parseDecimal(value.trim());
+  if (!parts || parts.scale > decimals)
+    throw new Error("Amount has too many decimal places");
+  return scaleDecimal(parts, decimals);
+}
+
 export function multiplyDecimalStringsExact(left: string, right: string): string {
   const a = parseDecimal(left);
   const b = parseDecimal(right);

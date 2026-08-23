@@ -55,9 +55,14 @@ describe("Veyra interaction contracts", () => {
     expect(signIn).toContain('type="button" onClick={() => changeMode("register")}');
   });
 
-  it("fails closed before production route creation without STRK20 wallet support", () => {
+  it("fails closed before production route creation without configured asset or wallet support", () => {
+    expect(home).toContain("const privacyContract = protocolContracts(selectedNetwork).privacy");
+    expect(home).toContain("STRK20 privacy contract is not configured for Mainnet.");
+    expect(home).toContain('tokenSymbol.trim().toUpperCase() !== "STRK"');
+    expect(home).toContain("This Mainnet asset is not configured for STRK20 execution.");
     expect(home).toContain("if (!isDemoMode && stage === 1 && !wallet?.strk20InvokeTransaction)");
     expect(home).toContain("This wallet cannot submit the STRK20 Mainnet action.");
+    expect(home).toContain("decimalToScaledBigInt(normalizedAmount, 18)");
   });
 
   it("routes workspace headers through safe storage", () => {

@@ -490,3 +490,6 @@
 - [x] Publish the audited Veyra source revision to the public GitHub repository at https://github.com/sands786/veyra.
 - [ ] User-owned evidence still required: connect a real Starknet mainnet wallet, execute and verify the intended mainnet flows, record the resulting transaction hashes, and submit the final demo materials.
 - [x] Audit finding: prevent a production route from advancing to shielded/routed stages when the connected wallet cannot submit the required STRK20 transaction
+- [ ] Fix reported Braavos wallet capability detection so supported Starknet Mainnet submission is recognized without weakening the fail-closed guard
+- [x] Fix reported Mainnet asset-integrity gap: prevent a visible USDC route from invoking a hardcoded STRK token action
+- [ ] Require configured public STRK20 contract addresses and verified entrypoints before any Braavos-compatible Mainnet execution path
