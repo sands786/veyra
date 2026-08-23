@@ -79,8 +79,12 @@ export type VeilWallet = {
   name?: string;
   icon?: string;
   account?: { address?: string };
+  accounts?: Array<{ address?: string; chainId?: string } | string>;
   address?: string;
+  selectedAddress?: string;
+  selectedAccount?: { address?: string; chainId?: string };
   chainId?: string;
+  selectedChainId?: string;
   /** Native STRK20 wallet-api method, when the wallet exposes it directly. */
   strk20InvokeTransaction?: (
     actions: OnchainAction[]
@@ -125,7 +129,13 @@ function detectWallet(): VeilWallet | undefined {
 }
 
 function addressFromWallet(wallet?: VeilWallet): string | undefined {
-  return wallet?.address ?? wallet?.account?.address;
+  const candidate =
+    wallet?.address ??
+    wallet?.account?.address ??
+    wallet?.selectedAddress ??
+    wallet?.selectedAccount?.address ??
+    addressFromValue(wallet?.accounts);
+  return addressFromValue(candidate);
 }
 
 export function describeStrk20SubmissionError(
@@ -391,7 +401,17 @@ function mergeWalletConnection(
 async function hydrateWalletApiAccount(
   wallet: VeilWallet
 ): Promise<VeilWallet> {
-  if (!wallet.request || addressFromWallet(wallet)) return wallet;
+  const knownAddress = addressFromWallet(wallet);
+  if (knownAddress) {
+    return mergeWalletConnection(wallet, {
+      address: knownAddress,
+      chainId:
+        wallet.chainId ??
+        wallet.selectedChainId ??
+        wallet.selectedAccount?.chainId,
+    });
+  }
+  if (!wallet.request) return wallet;
   const accounts = await wallet.request.call(wallet, {
     type: "wallet_requestAccounts",
   });

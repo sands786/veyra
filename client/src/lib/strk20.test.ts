@@ -161,6 +161,20 @@ describe("STRK20 on-chain adapter", () => {
     });
   });
 
+  it("hydrates a Braavos-style selected account when no connection payload is returned", async () => {
+    const result = await connectVeilWallet({
+      selectedAddress: "0xfeed",
+      selectedChainId: "SN_MAIN",
+      request: async () => undefined,
+    });
+    expect(result).toMatchObject({
+      address: "0xfeed",
+      live: true,
+      network: "mainnet",
+      wallet: { address: "0xfeed", chainId: "SN_MAIN" },
+    });
+  });
+
   it("reports standard wallet-api request support as executable only on Mainnet", () => {
     const wallet = {
       address: "0x1234",

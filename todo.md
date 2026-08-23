@@ -596,3 +596,9 @@
 - [x] Reproduce the provider shape where Braavos detects successfully but exposes no account through the current official wrapper response.
 - [x] Add only a validated wallet-API account discovery fallback, preserving strict Mainnet chain checks and refusing ambiguous account responses.
 - [x] Run regression, TypeScript, production build, and deployed runtime checks before retrying the user’s wallet.
+
+## Wallet-specific live verification follow-up
+
+- [x] Trace Braavos-specific provider discovery and connection behavior independently from the working Ready X account flow.
+- [x] Keep Ready X’s confirmed STRK20 `NOT_REGISTERED` response documented as a protocol-registration prerequisite; do not mislabel it as a wallet connection failure.
+- [x] Apply only a verified Braavos compatibility correction, then run the full regression and deployment verification suite.
