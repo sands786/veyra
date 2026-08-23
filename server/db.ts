@@ -1393,6 +1393,31 @@ export async function listRouteRecipientIds(
   return rows.map(row => row.recipientId);
 }
 
+export async function listRouteRecipientReview(
+  workspaceId: number,
+  routeId: number
+) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      recipientId: routeRecipients.recipientId,
+      displayName: recipients.displayName,
+      allocation: routeRecipients.amount,
+      fulfillmentStatus: routeRecipients.fulfillmentStatus,
+      fulfilledWalletAddress: routeRecipients.fulfilledWalletAddress,
+    })
+    .from(routeRecipients)
+    .innerJoin(paymentRoutes, eq(routeRecipients.routeId, paymentRoutes.id))
+    .innerJoin(recipients, eq(routeRecipients.recipientId, recipients.id))
+    .where(
+      and(
+        eq(routeRecipients.routeId, routeId),
+        eq(paymentRoutes.workspaceId, workspaceId)
+      )
+    );
+}
+
 export async function getWorkspaceByIdForUser(
   userId: number,
   workspaceId: number

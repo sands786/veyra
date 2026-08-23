@@ -182,6 +182,10 @@ export default function Home() {
     { routeId: editingRouteId ?? 0 },
     { enabled: isAuthenticated && editingRouteId !== null, retry: false }
   );
+  const routeRecipientReviewQuery = trpc.routes.recipientReview.useQuery(
+    { routeId: selectedRouteId ?? 0 },
+    { enabled: isAuthenticated && selectedRouteId !== null, retry: false }
+  );
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [retryAction, setRetryAction] = useState<(() => void) | null>(null);
   const utils = trpc.useUtils();
@@ -404,6 +408,13 @@ export default function Home() {
     },
   });
   const selectedRoute = liveRoutes.find(route => route.id === selectedRouteId);
+  const recipientReview = routeRecipientReviewQuery.data ?? [];
+  const claimedRecipient =
+    recipientReview.length === 1 &&
+    recipientReview[0]?.fulfillmentStatus === "claimed" &&
+    isValidStarknetAddress(recipientReview[0]?.fulfilledWalletAddress ?? "")
+      ? recipientReview[0]
+      : undefined;
   const displayActivity = isAuthenticated
     ? liveRoutes.map(route => ({
         id: `VP-${String(route.id).padStart(3, "0")}`,
@@ -419,7 +430,8 @@ export default function Home() {
     overviewQuery.error ??
     recipientsQuery.error ??
     auditQuery.error ??
-    transactionsQuery.error;
+    transactionsQuery.error ??
+    routeRecipientReviewQuery.error;
   const visibleError = workspaceError?.message ?? mutationError;
   useEffect(() => {
     const firstWorkspace = workspaceListQuery.data?.[0];
@@ -785,6 +797,89 @@ export default function Home() {
       description:
         "The public chain sees a commitment, not your recipient roster.",
     });
+  }
+
+  async function submitClaimedRecipientRoute() {
+    if (!isAuthenticated) {
+      startLogin();
+      return;
+    }
+    if (!selectedRouteId || !selectedRoute) {
+      toast("Select a saved route before reviewing a claim.");
+      return;
+    }
+    if (selectedRoute.network !== "mainnet") {
+      toast("Claimed private transactions are Mainnet-only.");
+      return;
+    }
+    if (!claimedRecipient) {
+      toast("A single claimed recipient is required.", {
+        description:
+          "This guarded flow supports one claimed recipient only. Review the route recipients before requesting a private wallet action.",
+      });
+      return;
+    }
+    if (!connected || !wallet) {
+      toast("Connect a STRK20-capable wallet to continue.", {
+        description:
+          "The next step opens your wallet picker. No transaction will be requested until you review it in the wallet.",
+      });
+      openWalletPicker();
+      return;
+    }
+    if (!wallet.strk20InvokeTransaction) {
+      toast("This wallet cannot submit the STRK20 Mainnet action.", {
+        description:
+          "No private transaction was created. Use a wallet that implements the official STRK20 invocation capability.",
+      });
+      return;
+    }
+    const tokenAddress = strk20TokenAddressForSymbol(selectedRoute.token);
+    const tokenDecimals = strk20TokenDecimalsForSymbol(selectedRoute.token);
+    const routeAmount = normalizeAmountInput(selectedRoute.totalAmount);
+    if (!tokenAddress || tokenDecimals === undefined || !routeAmount) {
+      toast("The claimed route cannot be submitted.", {
+        description:
+          "Its asset or amount is not configured for verified STRK20 Mainnet execution.",
+      });
+      return;
+    }
+    try {
+      const tx = await submitShieldedRoute(
+        wallet,
+        decimalToScaledBigInt(routeAmount, tokenDecimals),
+        selectedNetwork,
+        claimedRecipient.fulfilledWalletAddress ?? "",
+        tokenAddress
+      );
+      if (!tx.transaction_hash) {
+        toast("No private transaction was submitted.", {
+          description:
+            "The wallet returned no transaction hash. The claim remains recorded and the route remains ready to sign.",
+        });
+        return;
+      }
+      await recordTransactionMutation.mutateAsync({
+        routeId: selectedRouteId,
+        network: selectedNetwork,
+        transactionHash: tx.transaction_hash,
+        status: "submitted",
+        explorerUrl: explorerUrl(tx.transaction_hash, selectedNetwork),
+      });
+      setStage(2);
+      await Promise.all([
+        utils.workspace.overview.invalidate(),
+        utils.transactions.listRoute.invalidate({ routeId: selectedRouteId }),
+      ]);
+      toast("Private transaction submitted.", {
+        description: `${networkLabel(selectedNetwork)} · Receipt verification is still required before settlement is confirmed.`,
+      });
+    } catch (error) {
+      toast("STRK20 action was not submitted.", {
+        description:
+          describeStrk20SubmissionError(error) ?? String(error).slice(0, 180),
+      });
+    }
   }
 
   function viewContracts() {
@@ -1575,6 +1670,15 @@ export default function Home() {
                         className="font-mono text-[9px] tracking-[0.08em] text-[#AEB8BE] hover:text-[#F0563A]"
                       >
                         RECEIPTS
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedRouteId(item.routeId ?? null);
+                          goToOperations("claims");
+                        }}
+                        className="font-mono text-[9px] tracking-[0.08em] text-[#AEB8BE] hover:text-[#F0563A]"
+                      >
+                        CLAIM REVIEW
                       </button>
                       <button
                         onClick={() => {
@@ -2528,6 +2632,71 @@ export default function Home() {
                     Give one recipient an expiring private link. The roster
                     never becomes a public directory.
                   </p>
+                  {selectedRouteId ? (
+                    <div className="mt-4 border-t border-white/10 pt-4">
+                      <div className="font-mono text-[9px] tracking-[0.12em] text-[#AEB8BE]">
+                        CLAIMED RECIPIENT REVIEW
+                      </div>
+                      {routeRecipientReviewQuery.isLoading ? (
+                        <div className="mt-3 font-mono text-[9px] text-[#7F8F97]">
+                          LOADING CLAIM STATUS…
+                        </div>
+                      ) : recipientReview.length ? (
+                        <div className="mt-3 space-y-2">
+                          {recipientReview.map(recipient => (
+                            <div
+                              key={recipient.recipientId}
+                              className="rounded-[9px] border border-white/10 bg-[#111210] p-3"
+                            >
+                              <div className="flex items-center justify-between gap-3 font-mono text-[9px] text-[#F3EEE5]">
+                                <span className="truncate">
+                                  {recipient.displayName}
+                                </span>
+                                <span className="text-[#70D49D]">
+                                  {recipient.fulfillmentStatus.toUpperCase()}
+                                </span>
+                              </div>
+                              <div className="mt-2 font-mono text-[9px] text-[#AEB8BE]">
+                                {recipient.allocation} {selectedRoute?.token} /{" "}
+                                {recipient.fulfilledWalletAddress ??
+                                  "NO CLAIMED WALLET"}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="mt-3 font-mono text-[9px] text-[#7F8F97]">
+                          NO RECIPIENTS ARE AVAILABLE FOR THIS ROUTE.
+                        </div>
+                      )}
+                      <Button
+                        disabled={
+                          recordTransactionMutation.isPending ||
+                          routeRecipientReviewQuery.isLoading ||
+                          !claimedRecipient
+                        }
+                        onClick={() => void submitClaimedRecipientRoute()}
+                        className="mt-3 h-10 w-full rounded-[9px] bg-[#F0563A] font-mono text-[9px] tracking-[0.08em] text-[#111210] hover:bg-[#FF7257]"
+                      >
+                        {!connected
+                          ? "CONNECT WALLET TO REVIEW"
+                          : !wallet?.strk20InvokeTransaction
+                            ? "STRK20 WALLET REQUIRED"
+                            : "REVIEW & SUBMIT PRIVATE TRANSACTION"}
+                      </Button>
+                      <p className="mt-2 font-mono text-[8px] leading-4 text-[#7F8F97]">
+                        Uses the official STRK20 wallet action only. No
+                        public-transfer fallback is available. A transaction is
+                        recorded only if the wallet returns a hash; settlement
+                        remains unconfirmed until receipt verification.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-4 font-mono text-[9px] text-[#7F8F97]">
+                      SELECT A ROUTE, THEN USE CLAIM REVIEW TO INSPECT A
+                      RECORDED CLAIM.
+                    </div>
+                  )}
                   <Button
                     disabled={
                       !canCreateRecipientClaim(

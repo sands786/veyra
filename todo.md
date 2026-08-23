@@ -654,3 +654,37 @@
 - [x] Trace why an `UNKNOWN_ERROR` that did not submit a STRK20 action still displays the Veyra route as Shielded: stage 1 was misleadingly named Shielded before wallet submission.
 - [x] Keep the route as explicit Ready to sign / wallet-action-unavailable state until a transaction hash and verified receipt exist; improve unknown-error guidance.
 - [x] Add regression coverage and run the full production verification suite before publishing the correction.
+
+## Final hackathon submission package
+
+- [ ] Inventory and verify the live Veyra app URL, repository, demo materials, documentation, and real Mainnet evidence URL.
+- [ ] Prepare concise submission-ready product, architecture, privacy, and evidence copy that does not overclaim direct wallet execution.
+- [ ] Deliver the final checklist for the user-owned submission action.
+
+## Official STRK20 evidence-count reconciliation
+
+- [x] Reconcile the official three-transaction Mainnet evidence requirement with the three verified Ready X STRK20 pool transactions now recorded.
+- [x] Update the evidence handoff to include only verified hashes and distinguish the completed public-evidence prerequisite from remaining repository, registry, and submission actions.
+
+## Ready X recipient channel-context prerequisite
+
+- [ ] Confirm the Ready X recipient wallet has completed its own private-token or privacy-channel initialization before any retry.
+- [ ] Record only a user-approved successful transfer hash after the recipient context exists; preserve failed channel-context attempts as non-evidence.
+- [ ] Verify the newly reported completed Ready X-to-Ready X private transfer from its hash and reconcile it with the recipient’s Shielded Starknet balance before treating it as delivery or hackathon evidence.
+- [x] Verify the supplied third hash as a successful Starknet Mainnet STRK20 privacy-pool action and record it as public evidence only, without asserting recipient delivery.
+- [ ] Resolve the recipient delivery state for the third privacy-pool action: the recipient wallet already had its displayed private balance and still shows no incoming activity, so no delivery conclusion is currently justified.
+
+## Controlled product feature-test pass
+
+- [ ] Exercise the workspace, route, treasury, proof, claim, and Launchpad flows in clearly labeled Demo Mode without submitting a wallet action.
+- [ ] Exercise authenticated record-only flows without signing or submitting a Mainnet transaction, and report every observed state accurately.
+- [ ] Keep the unresolved Ready X private-transfer recipient-delivery investigation isolated from this feature-test pass.
+- [x] Verify the user-created recipient claim link remains an off-chain claim record until a supported wallet action returns a Mainnet transaction hash and receipt.
+- [x] Locate the sender-side route action after a recorded claim and correct the hand-off copy so it directs the owner to claim review rather than implying settlement.
+
+## Production claim-to-private-transaction handoff
+
+- [x] Surface the recorded claimed recipient, route allocation, asset, Mainnet, and payment state to the authenticated route owner for explicit review.
+- [x] Add a guarded sender-side private submission control that uses only `wallet_strk20InvokeTransaction`, requires a final wallet review, and never substitutes a public transfer or generic wallet execution.
+- [x] Record a route transaction only after the private wallet action returns a real hash, then require receipt verification before any confirmed state.
+- [x] Add focused regression coverage and complete Mainnet-safe test, type, build, changed-file format, and interaction-contract verification.

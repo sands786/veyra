@@ -101,6 +101,30 @@ describe("Veyra interaction contracts", () => {
     expect(home).toContain("STRK20 action was not submitted.");
   });
 
+  it("keeps claimed-recipient review workspace-scoped and submits only through the STRK20 wallet action", () => {
+    expect(routers).toContain("recipientReview: protectedProcedure");
+    expect(routers).toContain(
+      "listRouteRecipientReview(membership.workspace.id, input.routeId)"
+    );
+    const reviewStart = db.indexOf(
+      "export async function listRouteRecipientReview"
+    );
+    const reviewEnd = db.indexOf("\nexport async function ", reviewStart + 1);
+    const reviewBlock = db.slice(
+      reviewStart,
+      reviewEnd === -1 ? db.length : reviewEnd
+    );
+    expect(reviewBlock).toContain("eq(paymentRoutes.workspaceId, workspaceId)");
+    expect(reviewBlock).toContain("routeRecipients.fulfilledWalletAddress");
+    expect(home).toContain("CLAIMED RECIPIENT REVIEW");
+    expect(home).toContain("REVIEW & SUBMIT PRIVATE TRANSACTION");
+    expect(home).toContain("async function submitClaimedRecipientRoute()");
+    expect(home).toContain("wallet.strk20InvokeTransaction");
+    expect(home).toContain("await submitShieldedRoute(");
+    expect(home).toContain("The wallet returned no transaction hash.");
+    expect(home).toMatch(/No\s+public-transfer fallback\s+is available\./);
+  });
+
   it("routes workspace headers through safe storage", () => {
     expect(main).toContain("safeLocalStorageGet");
     expect(main).not.toContain(
