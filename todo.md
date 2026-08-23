@@ -657,9 +657,9 @@
 
 ## Final hackathon submission package
 
-- [ ] Inventory and verify the live Veyra app URL, repository, demo materials, documentation, and real Mainnet evidence URL.
-- [ ] Prepare concise submission-ready product, architecture, privacy, and evidence copy that does not overclaim direct wallet execution.
-- [ ] Deliver the final checklist for the user-owned submission action.
+- [x] Inventory and verify the live Veyra app URL, repository, demo materials, documentation, and real Mainnet evidence URL.
+- [x] Prepare concise submission-ready product, architecture, privacy, and evidence copy that does not overclaim direct wallet execution.
+- [x] Deliver the final checklist for the user-owned submission action in the repository submission pack.
 
 ## Official STRK20 evidence-count reconciliation
 

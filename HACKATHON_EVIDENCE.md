@@ -27,3 +27,14 @@ Veyra’s source code includes a full-stack privacy-finance workspace, wallet-co
 ```
 
 The official hub verifies each transaction against Starknet Mainnet and the STRK20 pool. The three hashes above are public evidence records only; they do not disclose private notes, recipient rosters, or wallet credentials. In particular, the third hash is a successful privacy-pool **Send** action, but its public receipt cannot prove that a designated recipient wallet has discovered or credited the encrypted private note. Recipient delivery must be confirmed inside that recipient wallet’s Shielded Starknet view.
+
+## Availability check — 23 August 2026
+
+| Asset | Verified public location | Result |
+| --- | --- | --- |
+| Live application | [veilpay-spri-t4knu9mv.manus.space](https://veilpay-spri-t4knu9mv.manus.space) | Resolved to the Veyra public product entry point. |
+| Source repository | [github.com/sands786/veyra](https://github.com/sands786/veyra) | Public repository; default branch `main`; description identifies Veyra as privacy-first Starknet financial coordination. |
+| Active metadata | [`strk20.json`](./strk20.json) | Valid JSON with exactly the three verified public Mainnet hashes, no fake placeholder, an empty contracts list, and the public app URL. |
+| Demo video | `demo_video` in `strk20.json` | HTTP `200`, `video/mp4`, 17,369,355 bytes at validation time. |
+
+This availability check does not replace the registry pull request or the user-owned final submission action.
