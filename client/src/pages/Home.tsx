@@ -100,7 +100,10 @@ const walletInstallLinks = [
 
 const stages = [
   { label: "DRAFT", note: "Recipients and amounts stay in your workspace." },
-  { label: "SHIELDED", note: "The payment intent is wrapped by STRK20." },
+  {
+    label: "READY TO SIGN",
+    note: "The saved intent is ready for a wallet action. No private action has been submitted.",
+  },
   { label: "ROUTED", note: "A private transfer route is ready to sign." },
   {
     label: "CONFIRMED",

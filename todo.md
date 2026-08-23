@@ -633,3 +633,24 @@
 
 - [x] Obtain the user-provided hash for the reported 1 STRK wallet-native shield and verify its public Mainnet receipt before inferring any balance outcome.
 - [x] Explain the verified public receipt alongside the wallet’s shielded-versus-public balance display without exposing private note data.
+
+## Additional wallet-native shield reconciliation
+
+- [x] Obtain and verify the user-provided hash for the second 1 STRK Ready X shield transaction.
+- [x] Reconcile the public confirmation with the user-visible public and shielded balance buckets without inferring private note details; the public receipts explain confirmed fees but cannot expose wallet-private note ownership.
+
+## Unexpected shielded-balance decrease investigation
+
+- [ ] Obtain the hashes for all recent Ready X privacy actions associated with the observed shielded-balance decrease.
+- [ ] Verify each public Mainnet receipt and reconcile only publicly observable transfers and fees before making a balance-loss conclusion.
+
+## Reported privacy-fee reconciliation
+
+- [x] Verify the reported $0.17 Ready X privacy presentation against the relevant public Mainnet receipts; the receipts show distinct 2.905315 and 2.905316 STRK on-chain fees plus separate protocol transfer legs.
+- [x] Reconcile the verified public fees with the observed balance deltas without asserting private-note ownership; no failed public receipt was found, while wallet-private accounting remains outside public-chain visibility.
+
+## False Shielded state after unsubmitted wallet error
+
+- [x] Trace why an `UNKNOWN_ERROR` that did not submit a STRK20 action still displays the Veyra route as Shielded: stage 1 was misleadingly named Shielded before wallet submission.
+- [x] Keep the route as explicit Ready to sign / wallet-action-unavailable state until a transaction hash and verified receipt exist; improve unknown-error guidance.
+- [x] Add regression coverage and run the full production verification suite before publishing the correction.

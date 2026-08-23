@@ -152,6 +152,9 @@ export function describeStrk20SubmissionError(
   if (/not implemented|not_implemented|unsupported.*strk20/i.test(message)) {
     return "This wallet connected successfully but does not implement the requested STRK20 private action. No transaction was created. The current official wallet privacy phase supports shielding inside Ready X or Xverse; Veyra will not replace this with an unsafe public transfer or an unverified contract call.";
   }
+  if (/unknown_error/i.test(message)) {
+    return "The wallet did not return a usable STRK20 result. No transaction hash was recorded and the Veyra route remains ready to sign; review the wallet state before retrying.";
+  }
   return undefined;
 }
 

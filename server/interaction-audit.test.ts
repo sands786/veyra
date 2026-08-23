@@ -95,6 +95,10 @@ describe("Veyra interaction contracts", () => {
     expect(home).toContain("selectedRecipients[0]?.walletAddress");
     expect(home).toContain("STRK20_ASSETS");
     expect(home).toContain('tokenAddress ?? ""');
+    expect(home).toContain('label: "READY TO SIGN"');
+    expect(home).toContain("No private action has been submitted.");
+    expect(home).toContain("setStage(2);");
+    expect(home).toContain("STRK20 action was not submitted.");
   });
 
   it("routes workspace headers through safe storage", () => {

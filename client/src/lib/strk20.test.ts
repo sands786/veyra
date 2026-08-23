@@ -24,6 +24,9 @@ describe("STRK20 on-chain adapter", () => {
     expect(
       describeStrk20SubmissionError(new Error("Error: Not implemented"))
     ).toContain("Ready X or Xverse");
+    expect(describeStrk20SubmissionError(new Error("UNKNOWN_ERROR"))).toContain(
+      "No transaction hash was recorded"
+    );
     expect(describeStrk20SubmissionError(new Error("User rejected"))).toBe(
       undefined
     );
