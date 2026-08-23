@@ -23,7 +23,7 @@ describe("STRK20 on-chain adapter", () => {
     ).toContain("No transaction was created");
     expect(
       describeStrk20SubmissionError(new Error("Error: Not implemented"))
-    ).toContain("does not implement the requested STRK20 private action");
+    ).toContain("Ready X or Xverse");
     expect(describeStrk20SubmissionError(new Error("User rejected"))).toBe(
       undefined
     );

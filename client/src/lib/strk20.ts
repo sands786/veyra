@@ -150,7 +150,7 @@ export function describeStrk20SubmissionError(
     return "The connected wallet or STRK20 privacy pool reports NOT_REGISTERED. No transaction was created. Complete STRK20 registration/shielding in a supported wallet, or configure the verified Mainnet SDK/pool deployment before retrying.";
   }
   if (/not implemented|not_implemented|unsupported.*strk20/i.test(message)) {
-    return "This wallet connected successfully but does not implement the requested STRK20 private action. No transaction was created. Use a wallet with verified STRK20 action support or complete the official privacy-pool flow; Veyra will not replace this with an unsafe public transfer.";
+    return "This wallet connected successfully but does not implement the requested STRK20 private action. No transaction was created. The current official wallet privacy phase supports shielding inside Ready X or Xverse; Veyra will not replace this with an unsafe public transfer or an unverified contract call.";
   }
   return undefined;
 }

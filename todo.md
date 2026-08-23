@@ -613,3 +613,8 @@
 - [x] Classify the live Braavos `Not implemented` response for `wallet_strk20InvokeTransaction` separately from connection and registration errors.
 - [x] Improve Veyra’s actionable unsupported-wallet messaging without substituting a generic invoke/transfer for a private STRK20 action.
 - [x] Add regression coverage, run full verification, and publish the safe diagnostic correction.
+
+## Official STRK20 wallet support clarification
+
+- [x] Confirm that the official first-phase wallet privacy flow is exposed through Ready X and Xverse, while broader wallet and developer API support remains a future expansion.
+- [x] Align Veyra’s unsupported-action guidance and regression coverage with that verified wallet-support boundary without weakening Mainnet execution safeguards.
