@@ -457,3 +457,8 @@
 
 ## Final evidence and receipt pass
 - [ ] User-owned final evidence: sign in, connect a real STRK20 wallet, run authenticated CRUD/transaction flows, publish the public repository, record three mainnet transactions, and submit the demo video.
+
+
+## No-cost password recovery refinement
+- [x] Make the free development-safe recovery path the explicit default when Resend credentials are unavailable, with no paid infrastructure requirement and clear demo/local labeling.
+- [x] Verify the no-cost recovery behavior with regression tests, typecheck, build, and runtime screenshots.
