@@ -581,5 +581,12 @@
 - [x] Audit mobile navigation semantics and icon-only control labels; confirmed the Home menu semantics and fixed the Demo Mode mobile control rail clipping.
 
 ## Repeated live STRK20 registration response
+
 - [x] Verify the registration boundary against the official STRK20 launch and SDK documentation: the connected wallet must use a supported, initialized privacy-pool flow; generic Starknet wallet capability is insufficient.
 - [x] Keep Veyra fail-closed and provide a precise operator-facing recovery path; never substitute an unverified contract or generic execute call.
+
+## Braavos wallet connection hydration follow-up
+
+- [x] Diagnose why detected Braavos returned no usable account: the official injected-wallet wrapper’s connect result did not reliably expose its hydrated standard account to Veyra’s merge boundary.
+- [x] Implement the narrowest safe hydration correction with regression coverage; preserve Mainnet chain validation and fail-closed STRK20 capability checks.
+- [x] Re-run wallet tests, full verification, responsive smoke checks, and publish the verified correction.

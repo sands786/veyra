@@ -192,6 +192,9 @@ describe("STRK20 on-chain adapter", () => {
       live: true,
       network: "mainnet",
     });
+    await expect(connected.wallet?.connect?.()).resolves.toMatchObject({
+      accounts: [{ address: "0x1234", chainId: MAINNET_CHAIN_ID }],
+    });
     await expect(
       submitShieldedRoute(connected.wallet, 2n, "mainnet", "0x4567", STRK_TOKEN)
     ).resolves.toEqual({ transaction_hash: "0xabc" });

@@ -229,7 +229,16 @@ function withWalletStandardMethods(wallet: VeilWallet): VeilWallet {
         address: account?.address ?? wallet.address,
         chainId: chainId ?? wallet.chainId,
         request: standardRequest,
-        connect: async () => standardConnect.connect({}),
+        connect: async () => {
+          const result = await standardConnect.connect({});
+          const connectedAccounts = standard.accounts.map(account => ({
+            address: account.address,
+            chainId: account.chains[0]?.split(":").at(-1),
+          }));
+          return connectedAccounts.length
+            ? { accounts: connectedAccounts }
+            : result;
+        },
         strk20InvokeTransaction:
           wallet.strk20InvokeTransaction ??
           (actions =>
