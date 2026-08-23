@@ -676,7 +676,7 @@
 
 ## Controlled product feature-test pass
 
-- [ ] Exercise the workspace, route, treasury, proof, claim, and Launchpad flows in clearly labeled Demo Mode without submitting a wallet action.
+- [x] Exercise the workspace, route, treasury, proof, claim, and Launchpad flows in clearly labeled Demo Mode without submitting a wallet action.
 - [ ] Exercise authenticated record-only flows without signing or submitting a Mainnet transaction, and report every observed state accurately.
 - [ ] Keep the unresolved Ready X private-transfer recipient-delivery investigation isolated from this feature-test pass.
 - [x] Verify the user-created recipient claim link remains an off-chain claim record until a supported wallet action returns a Mainnet transaction hash and receipt.
@@ -688,3 +688,8 @@
 - [x] Add a guarded sender-side private submission control that uses only `wallet_strk20InvokeTransaction`, requires a final wallet review, and never substitutes a public transfer or generic wallet execution.
 - [x] Record a route transaction only after the private wallet action returns a real hash, then require receipt verification before any confirmed state.
 - [x] Add focused regression coverage and complete Mainnet-safe test, type, build, changed-file format, and interaction-contract verification.
+
+## Claim-review navigation discoverability
+
+- [x] Make the sender route-selection path to Claim review explicit after a recipient redeems a claim link, so users do not mistake the blank Route Builder for the approval surface.
+- [x] Reverify the saved-route claim-review picker and guarded submit boundary through interaction regression coverage, typechecking, full tests, and a production build without creating a duplicate route or submitting a transaction.

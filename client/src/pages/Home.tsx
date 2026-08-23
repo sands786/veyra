@@ -2692,9 +2692,39 @@ export default function Home() {
                       </p>
                     </div>
                   ) : (
-                    <div className="mt-4 font-mono text-[9px] text-[#7F8F97]">
-                      SELECT A ROUTE, THEN USE CLAIM REVIEW TO INSPECT A
-                      RECORDED CLAIM.
+                    <div className="mt-4 border-t border-white/10 pt-4">
+                      <div className="font-mono text-[9px] tracking-[0.12em] text-[#AEB8BE]">
+                        SELECT A SAVED ROUTE FOR CLAIM REVIEW
+                      </div>
+                      {liveRoutes.length ? (
+                        <div className="mt-3 space-y-2">
+                          {liveRoutes.slice(0, 6).map(route => (
+                            <button
+                              key={route.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedRouteId(route.id);
+                                toast("Route selected for claim review.", {
+                                  description:
+                                    "Review the claimed recipient below before requesting a wallet action.",
+                                });
+                              }}
+                              className="flex w-full items-center justify-between gap-3 rounded-[9px] border border-white/10 bg-[#111210] px-3 py-3 text-left font-mono text-[9px] text-[#F3EEE5] hover:border-[#F0563A]/50"
+                            >
+                              <span className="min-w-0 truncate">
+                                {route.name}
+                              </span>
+                              <span className="shrink-0 text-[#AEB8BE]">
+                                {route.totalAmount} {route.token}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="mt-3 font-mono text-[9px] text-[#7F8F97]">
+                          NO SAVED ROUTES ARE AVAILABLE IN THIS WORKSPACE.
+                        </div>
+                      )}
                     </div>
                   )}
                   <Button

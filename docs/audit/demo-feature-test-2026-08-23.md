@@ -17,7 +17,12 @@ This test pass exercises only Veyra’s deterministic, local Demo Mode. It does 
 | Treasury        | Open the Treasury surface                            | The UI reported a successful Mainnet policy dry-run: 2,840 USDC was below the simulated 10,000 USDC daily limit.                                  | The result was presented as a Demo Mode policy check and not a transfer approval.           |
 | Treasury        | Select **Run Policy Dry-Run**, then **Retry Action** | The first interaction surfaced `FAILED / SIMULATED`; retry returned `COMPLETE` and recorded `Treasury policy dry-run passed` in the local ledger. | No wallet request, signature, or Mainnet transfer occurred.                                 |
 | Claims          | Open the Claims surface                              | The UI displayed a truncated claim reference, `UNREDEEMED` status, and a redemption control without showing a recipient roster.                   | The shared Demo Mode boundary stated that no real transaction is created.                   |
-| Claims          | Select **Redeem Private Link**                       | The action entered a clearly labeled `FAILED / SIMULATED` state with a `RETRY ACTION` control.                                                    | The simulated failure did not create a payment, a claim-link mutation, or a wallet request. |
+| Claims | Select **Redeem Private Link** | The action entered a clearly labeled `FAILED / SIMULATED` state with a `RETRY ACTION` control. | The simulated failure did not create a payment, a claim-link mutation, or a wallet request. |
+| Launchpad | Open the Launchpad surface | The UI displayed two deterministic project rooms, a selected project readiness state, and local allocation/readiness/release controls. | The global boundary continued to state `00 REAL TXNS` and `100% LOCAL STATE`. |
+| Launchpad | Select **Reserve Shielded Allocation** | The allocation control transitioned to `ALLOCATION RESERVED`. | The state change stayed local and did not request a wallet signature. |
+| Launchpad | Select **Simulate Milestone Release** | The action exposed `FAILED / SIMULATED` and a retry affordance. | No milestone release, wallet action, or on-chain settlement occurred. |
+| Proof | Open the Proof surface | The UI exposed only aggregate metadata and explicitly stated that recipient and allocation identities remain private. | The screen retained the `00 REAL TXNS` / `100% LOCAL STATE` Demo Mode boundary. |
+| Proof | Select **Publish Demo Proof** | The interaction entered `FAILED / SIMULATED` with a retry control. | It did not publish an on-chain proof, create a public proof link, or submit a transaction. |
 
 ## Next checks
 

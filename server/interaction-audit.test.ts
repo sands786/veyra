@@ -117,6 +117,7 @@ describe("Veyra interaction contracts", () => {
     expect(reviewBlock).toContain("eq(paymentRoutes.workspaceId, workspaceId)");
     expect(reviewBlock).toContain("routeRecipients.fulfilledWalletAddress");
     expect(home).toContain("CLAIMED RECIPIENT REVIEW");
+    expect(home).toContain("SELECT A SAVED ROUTE FOR CLAIM REVIEW");
     expect(home).toContain("REVIEW & SUBMIT PRIVATE TRANSACTION");
     expect(home).toContain("async function submitClaimedRecipientRoute()");
     expect(home).toContain("wallet.strk20InvokeTransaction");
