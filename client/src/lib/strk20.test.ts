@@ -1,41 +1,175 @@
 import { describe, expect, it } from "vitest";
-import { buildPayrollRegistryCreateCall, buildShieldedRouteActions, disconnectVeilWallet, MAINNET_CHAIN_ID, onchainCapability, requestWalletQrConnection, STRK_TOKEN, type StarknetWalletOption } from "./strk20";
+import {
+  buildPayrollRegistryCreateCall,
+  buildShieldedRouteActions,
+  disconnectVeilWallet,
+  ETH_TOKEN,
+  MAINNET_CHAIN_ID,
+  networkFromChainId,
+  onchainCapability,
+  requestWalletQrConnection,
+  STRK_TOKEN,
+  submitShieldedRoute,
+  type StarknetWalletOption,
+} from "./strk20";
 
 describe("STRK20 on-chain adapter", () => {
   it("builds a deposit action for a valid shielded route intent", () => {
-    expect(buildShieldedRouteActions({ network: "mainnet", token: STRK_TOKEN, amountSmallestUnit: 2_840_000_000n })).toEqual([
-      { type: "deposit", token: STRK_TOKEN, amount: "0xa946f600" },
+    expect(
+      buildShieldedRouteActions({
+        network: "mainnet",
+        token: STRK_TOKEN,
+        amountSmallestUnit: 2_840_000_000n,
+      })
+    ).toEqual([{ type: "deposit", token: STRK_TOKEN, amount: "0xa946f600" }]);
+  });
+
+  it("rejects zero, negative, and unconfigured token amounts before wallet execution", () => {
+    expect(() =>
+      buildShieldedRouteActions({
+        network: "mainnet",
+        token: STRK_TOKEN,
+        amountSmallestUnit: 0n,
+      })
+    ).toThrow("greater than zero");
+    expect(() =>
+      buildShieldedRouteActions({
+        network: "mainnet",
+        token: STRK_TOKEN,
+        amountSmallestUnit: -1n,
+      })
+    ).toThrow("greater than zero");
+    expect(() =>
+      buildShieldedRouteActions({
+        network: "mainnet",
+        token: "0x1234",
+        amountSmallestUnit: 1n,
+      })
+    ).toThrow("verified STRK or ETH Mainnet tokens");
+  });
+
+  it("accepts the verified Starknet Mainnet ETH token mapping", () => {
+    expect(
+      buildShieldedRouteActions({
+        network: "mainnet",
+        token: ETH_TOKEN,
+        amountSmallestUnit: 200000000000000000n,
+      })
+    ).toEqual([
+      {
+        type: "deposit",
+        token: ETH_TOKEN,
+        amount: "0x2c68af0bb140000",
+      },
     ]);
   });
 
-  it("rejects zero or negative settlement amounts before wallet execution", () => {
-    expect(() => buildShieldedRouteActions({ network: "mainnet", token: STRK_TOKEN, amountSmallestUnit: 0n })).toThrow("greater than zero");
-    expect(() => buildShieldedRouteActions({ network: "mainnet", token: STRK_TOKEN, amountSmallestUnit: -1n })).toThrow("greater than zero");
-  });
-
   it("builds Cairo u256 calldata for the payroll registry entrypoint", () => {
-    expect(buildPayrollRegistryCreateCall("0x1234", STRK_TOKEN, 2_840_000_000n, "0xabc")).toEqual({ contractAddress: "0x1234", entrypoint: "create_route", calldata: [STRK_TOKEN, "0xa946f600", "0x0", "0xabc"] });
+    expect(
+      buildPayrollRegistryCreateCall(
+        "0x1234",
+        STRK_TOKEN,
+        2_840_000_000n,
+        "0xabc"
+      )
+    ).toEqual({
+      contractAddress: "0x1234",
+      entrypoint: "create_route",
+      calldata: [STRK_TOKEN, "0xa946f600", "0x0", "0xabc"],
+    });
   });
 
   it("rejects unconfigured or unsafe payroll registry calls", () => {
-    expect(() => buildPayrollRegistryCreateCall("missing", STRK_TOKEN, 1n, "0xabc")).toThrow("contract address");
-    expect(() => buildPayrollRegistryCreateCall("0x1234", STRK_TOKEN, 0n, "0xabc")).toThrow("greater than zero");
+    expect(() =>
+      buildPayrollRegistryCreateCall("missing", STRK_TOKEN, 1n, "0xabc")
+    ).toThrow("contract address");
+    expect(() =>
+      buildPayrollRegistryCreateCall("0x1234", STRK_TOKEN, 0n, "0xabc")
+    ).toThrow("greater than zero");
   });
 
   it("disconnects a provider wallet when it exposes a disconnect method", async () => {
     let disconnected = false;
-    await disconnectVeilWallet({ disconnect: async () => { disconnected = true; } });
+    await disconnectVeilWallet({
+      disconnect: async () => {
+        disconnected = true;
+      },
+    });
     expect(disconnected).toBe(true);
   });
 
   it("returns a provider QR URI without claiming QR support when none is exposed", async () => {
-    const option = { id: "argent-x", name: "Argent X", wallet: { request: async () => ({ uri: "starknet://connect/test" }) }, supportsQr: true } satisfies StarknetWalletOption;
-    await expect(requestWalletQrConnection(option)).resolves.toEqual({ uri: "starknet://connect/test", walletId: "argent-x" });
+    const option = {
+      id: "argent-x",
+      name: "Argent X",
+      wallet: { request: async () => ({ uri: "starknet://connect/test" }) },
+      supportsQr: true,
+    } satisfies StarknetWalletOption;
+    await expect(requestWalletQrConnection(option)).resolves.toEqual({
+      uri: "starknet://connect/test",
+      walletId: "argent-x",
+    });
   });
 
-  it("reports whether a connected wallet can execute on the selected network", () => {
-    const wallet = { address: "0x1234", chainId: MAINNET_CHAIN_ID, strk20InvokeTransaction: async () => ({ transaction_hash: "0xabc" }) };
-    expect(onchainCapability(wallet, "mainnet")).toMatchObject({ walletConnected: true, walletNetwork: "mainnet", networkCompatible: true, strk20Ready: true, canExecute: true });
-    expect(onchainCapability({ address: "0x1234", chainId: "0xunknown", strk20InvokeTransaction: wallet.strk20InvokeTransaction }, "mainnet")).toMatchObject({ walletNetwork: undefined, networkCompatible: false, canExecute: false });
+  it("recognizes the official SN_MAIN chain alias", () => {
+    expect(networkFromChainId("SN_MAIN")).toBe("mainnet");
+    expect(networkFromChainId(MAINNET_CHAIN_ID)).toBe("mainnet");
+  });
+
+  it("reports standard wallet-api request support as executable only on Mainnet", () => {
+    const wallet = {
+      address: "0x1234",
+      chainId: MAINNET_CHAIN_ID,
+      request: async () => ({ transaction_hash: "0xabc" }),
+    };
+    expect(onchainCapability(wallet, "mainnet")).toMatchObject({
+      walletConnected: true,
+      walletNetwork: "mainnet",
+      networkCompatible: true,
+      strk20Ready: true,
+      canExecute: true,
+    });
+    expect(
+      onchainCapability(
+        { address: "0x1234", chainId: "0xunknown", request: wallet.request },
+        "mainnet"
+      )
+    ).toMatchObject({
+      walletNetwork: undefined,
+      networkCompatible: false,
+      canExecute: false,
+    });
+  });
+
+  it("submits through the official wallet_strk20InvokeTransaction request", async () => {
+    let received: unknown;
+    const wallet = {
+      address: "0x1234",
+      chainId: MAINNET_CHAIN_ID,
+      request: async (request: {
+        type: string;
+        params?: Record<string, unknown>;
+      }) => {
+        received = request;
+        return { transaction_hash: "0xabc" };
+      },
+    };
+    await expect(
+      submitShieldedRoute(wallet, 2n, "mainnet", "0x4567", STRK_TOKEN)
+    ).resolves.toEqual({ transaction_hash: "0xabc" });
+    expect(received).toEqual({
+      type: "wallet_strk20InvokeTransaction",
+      params: {
+        actions: [
+          { type: "deposit", token: STRK_TOKEN, amount: "0x2" },
+          {
+            type: "transfer",
+            token: STRK_TOKEN,
+            amount: "0x2",
+            recipient: "0x4567",
+          },
+        ],
+      },
+    });
   });
 });

@@ -54,7 +54,9 @@ import {
   onchainCapability,
   requestWalletQrConnection,
   submitShieldedRoute,
-  STRK_TOKEN,
+  STRK20_ASSETS,
+  strk20TokenAddressForSymbol,
+  strk20TokenDecimalsForSymbol,
   type StarknetWalletOption,
   type VeilNetwork,
   type VeilWallet,
@@ -436,7 +438,9 @@ export default function Home() {
     void utils.recipients.list.invalidate();
     void utils.audit.list.invalidate();
     void utils.routes.list.invalidate();
-    toast("Workspace switched.", { description: "Refreshing private workspace data." });
+    toast("Workspace switched.", {
+      description: "Refreshing private workspace data.",
+    });
   }
 
   function navigateTo(path: string) {
@@ -452,11 +456,11 @@ export default function Home() {
     "overview" | "treasury" | "claims"
   >("overview");
   const [routeName, setRouteName] = useState("March contractor run");
-  const [tokenSymbol, setTokenSymbol] = useState("USDC");
+  const [tokenSymbol, setTokenSymbol] = useState("STRK");
   const [selectedRecipientIds, setSelectedRecipientIds] = useState<number[]>(
     []
   );
-  const [amount, setAmount] = useState("2,840");
+  const [amount, setAmount] = useState("0.2");
   const normalizedAmount = normalizeAmountInput(amount);
   const adjustAmount = (delta: number) => {
     const current = Number(normalizedAmount || 0);
@@ -607,6 +611,16 @@ export default function Home() {
   }
 
   async function advanceRoute() {
+    if (!isDemoMode && stage >= 2) {
+      document
+        .getElementById("recent-routes")
+        ?.scrollIntoView({ behavior: "smooth" });
+      toast("Receipt verification is required.", {
+        description:
+          "A proof card is not a confirmation. Verify the submitted Mainnet receipt in Recent routes.",
+      });
+      return;
+    }
     if (!isAuthenticated) {
       startLogin();
       return;
@@ -620,6 +634,11 @@ export default function Home() {
     );
     if (activeRecipientIds.length !== selectedRecipientIds.length)
       setSelectedRecipientIds(activeRecipientIds);
+    const selectedRecipients = activeRecipientIds
+      .map(id => availableRecipients.find(recipient => recipient.id === id))
+      .filter((recipient): recipient is NonNullable<typeof recipient> =>
+        Boolean(recipient)
+      );
     if (!availableRecipients.length || !activeRecipientIds.length) {
       toast(
         "Select at least one active recipient before creating a saved route.",
@@ -637,18 +656,23 @@ export default function Home() {
       await handleWalletConnect();
       return;
     }
-    const privacyContract = protocolContracts(selectedNetwork).privacy;
-    if (!isDemoMode && stage === 1 && !privacyContract) {
-      toast("STRK20 privacy contract is not configured for Mainnet.", {
+    if (!isDemoMode && selectedRecipients.length !== 1) {
+      toast("Mainnet signing currently supports one recipient per route.", {
         description:
-          "Add the verified Veyra privacy contract address before attempting a wallet-signed route.",
+          "Use one selected recipient for this signed action; multi-recipient batching remains unavailable until its contract flow is verified.",
       });
       return;
     }
-    if (!isDemoMode && stage === 1 && tokenSymbol.trim().toUpperCase() !== "STRK") {
+    const tokenAddress = strk20TokenAddressForSymbol(tokenSymbol);
+    const tokenDecimals = strk20TokenDecimalsForSymbol(tokenSymbol);
+    if (
+      !isDemoMode &&
+      stage === 1 &&
+      (!tokenAddress || tokenDecimals === undefined)
+    ) {
       toast("This Mainnet asset is not configured for STRK20 execution.", {
         description:
-          "Use STRK for the configured route contract, or add a verified token contract mapping before sending another asset.",
+          "Choose a verified Starknet Mainnet asset before sending another token.",
       });
       return;
     }
@@ -688,11 +712,16 @@ export default function Home() {
     }
     if (wallet?.strk20InvokeTransaction && stage === 1) {
       try {
-        const amountSmallestUnit = decimalToScaledBigInt(normalizedAmount, 18);
+        const amountSmallestUnit = decimalToScaledBigInt(
+          normalizedAmount,
+          tokenDecimals ?? 18
+        );
         const tx = await submitShieldedRoute(
           wallet,
           amountSmallestUnit,
-          selectedNetwork
+          selectedNetwork,
+          selectedRecipients[0]?.walletAddress,
+          tokenAddress ?? ""
         );
         const transactionHashes = tx.transaction_hash
           ? [tx.transaction_hash]
@@ -707,7 +736,7 @@ export default function Home() {
             );
             const registryCall = buildPayrollRegistryCreateCall(
               payrollRegistry.address,
-              STRK_TOKEN,
+              tokenAddress ?? "",
               amountSmallestUnit,
               commitment
             );
@@ -955,7 +984,9 @@ export default function Home() {
               </span>
               <span className="h-2 w-2 rounded-full bg-[#70D49D] shadow-[0_0_12px_#70D49D]" />
             </div>
-            <div className="mt-3 font-display text-[15px] text-[#F3EEE5]">Starknet mainnet</div>
+            <div className="mt-3 font-display text-[15px] text-[#F3EEE5]">
+              Starknet mainnet
+            </div>
             <div className="mt-1 text-[12px] leading-5 text-[#AEB8BE]">
               Production path. Wallet approval required.
             </div>
@@ -1007,7 +1038,10 @@ export default function Home() {
                   SIGN OUT
                 </Button>
               )}
-              <div className="shrink-0 rounded-full border border-[#F0563A]/40 bg-[#201815] px-2 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] sm:px-3"><span className="sm:hidden">MAINNET</span><span className="hidden sm:inline">STARKNET MAINNET</span></div>
+              <div className="shrink-0 rounded-full border border-[#F0563A]/40 bg-[#201815] px-2 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] sm:px-3">
+                <span className="sm:hidden">MAINNET</span>
+                <span className="hidden sm:inline">STARKNET MAINNET</span>
+              </div>
               {isAuthenticated && (
                 <Button
                   disabled={isWalletActionLocked(walletConnecting)}
@@ -1025,7 +1059,10 @@ export default function Home() {
           </header>
 
           {mobileOpen && (
-            <div id="mobile-workspace-navigation" className="mobile-nav-panel border-b border-white/10 bg-[#151D21] px-5 py-4 lg:hidden">
+            <div
+              id="mobile-workspace-navigation"
+              className="mobile-nav-panel border-b border-white/10 bg-[#151D21] px-5 py-4 lg:hidden"
+            >
               {isAuthenticated && (
                 <label className="mb-3 flex items-center justify-between gap-3 border-b border-white/10 pb-3 font-mono text-[10px] tracking-[0.12em] text-[#AEB8BE]">
                   WORKSPACE
@@ -1284,13 +1321,18 @@ export default function Home() {
                 <div>
                   <Label className="field-label">ASSET</Label>
                   <div className="relative">
-                    <Input
+                    <select
                       value={tokenSymbol}
-                      onChange={event =>
-                        setTokenSymbol(event.target.value.toUpperCase())
-                      }
-                      className="field-input pr-16"
-                    />
+                      onChange={event => setTokenSymbol(event.target.value)}
+                      className="field-input w-full appearance-none pr-16"
+                      aria-label="Mainnet asset"
+                    >
+                      {Object.values(STRK20_ASSETS).map(asset => (
+                        <option key={asset.symbol} value={asset.symbol}>
+                          {asset.symbol}
+                        </option>
+                      ))}
+                    </select>
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#AEB8BE]">
                       STRK20
                     </span>
@@ -1391,7 +1433,7 @@ export default function Home() {
                   recordTransactionMutation.isPending
                     ? "PROCESSING…"
                     : stage >= 2
-                      ? "PREPARE PROOF CARD"
+                      ? "VERIFY RECEIPT"
                       : editingRouteId
                         ? "SAVE DRAFT CHANGES"
                         : "CREATE PRIVATE ROUTE"}
@@ -1482,7 +1524,10 @@ export default function Home() {
                 {copied ? "REFERENCE COPIED" : "COPY SAMPLE PROOF"}
               </button>
             </div>
-            <div className="overflow-hidden rounded-[16px] border border-white/10 bg-[#151D21]">
+            <div
+              id="recent-routes"
+              className="overflow-hidden rounded-[16px] border border-white/10 bg-[#151D21]"
+            >
               <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
                 <div className="font-mono text-[10px] tracking-[0.15em] text-[#AEB8BE]">
                   RECENT ROUTES
@@ -1581,12 +1626,17 @@ export default function Home() {
             </div>
             <div className="mt-5 grid gap-4 lg:grid-cols-2">
               <div className="relative overflow-hidden rounded-[12px] border border-white/10 bg-[#151D21] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-                <div aria-hidden="true" className="absolute right-0 top-0 h-8 w-8 border-b border-l border-[#F0563A]/25 bg-[#201815]" />
+                <div
+                  aria-hidden="true"
+                  className="absolute right-0 top-0 h-8 w-8 border-b border-l border-[#F0563A]/25 bg-[#201815]"
+                />
                 <div className="relative flex items-center justify-between gap-3">
                   <div className="font-mono text-[9px] tracking-[0.12em] text-[#AEB8BE]">
                     AUDIT HISTORY
                   </div>
-                  <span className="font-mono text-[8px] tracking-[0.1em] text-[#F0563A]">SEALED EVENT REGISTER</span>
+                  <span className="font-mono text-[8px] tracking-[0.1em] text-[#F0563A]">
+                    SEALED EVENT REGISTER
+                  </span>
                 </div>
                 {isAuthenticated ? (
                   (auditQuery.data?.slice(0, 5).map(event => (
@@ -1611,12 +1661,17 @@ export default function Home() {
                 )}
               </div>
               <div className="relative overflow-hidden rounded-[12px] border border-white/10 bg-[#151D21] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-                <div aria-hidden="true" className="absolute right-0 top-0 h-8 w-8 border-b border-l border-[#F0563A]/25 bg-[#201815]" />
+                <div
+                  aria-hidden="true"
+                  className="absolute right-0 top-0 h-8 w-8 border-b border-l border-[#F0563A]/25 bg-[#201815]"
+                />
                 <div className="relative flex items-center justify-between gap-3">
                   <div className="font-mono text-[9px] tracking-[0.12em] text-[#AEB8BE]">
                     TRANSACTION RECEIPTS
                   </div>
-                  <span className="font-mono text-[8px] tracking-[0.1em] text-[#F0563A]">RECEIPT VAULT</span>
+                  <span className="font-mono text-[8px] tracking-[0.1em] text-[#F0563A]">
+                    RECEIPT VAULT
+                  </span>
                 </div>
                 {selectedRouteId ? (
                   transactionsQuery.data?.length ? (
@@ -1764,8 +1819,16 @@ export default function Home() {
                   </>
                 ) : (
                   <div className="flex flex-wrap items-center gap-3 border-t border-white/10 pt-5">
-                    <div className="font-mono text-[9px] leading-5 tracking-[0.1em] text-[#AEB8BE]">CREATE OR ACCESS A VEYRA ACCOUNT BEFORE DISCOVERING WALLETS.</div>
-                    <Button onClick={startSignup} className="h-10 rounded-full bg-[#F0563A] px-4 font-mono text-[9px] tracking-[0.1em] text-[#111210] hover:bg-[#FF7257]">SIGN UP TO CONNECT</Button>
+                    <div className="font-mono text-[9px] leading-5 tracking-[0.1em] text-[#AEB8BE]">
+                      CREATE OR ACCESS A VEYRA ACCOUNT BEFORE DISCOVERING
+                      WALLETS.
+                    </div>
+                    <Button
+                      onClick={startSignup}
+                      className="h-10 rounded-full bg-[#F0563A] px-4 font-mono text-[9px] tracking-[0.1em] text-[#111210] hover:bg-[#FF7257]"
+                    >
+                      SIGN UP TO CONNECT
+                    </Button>
                   </div>
                 )}
               </div>

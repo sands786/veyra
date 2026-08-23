@@ -109,6 +109,9 @@ importers:
       '@starknet-io/get-starknet-wallet-standard':
         specifier: 6.0.2
         version: 6.0.2(typescript@5.9.3)(zod@4.1.12)
+      '@starknet-io/get-starknet-wallet-standard-v6':
+        specifier: npm:@starknet-io/get-starknet-wallet-standard@6.0.2
+        version: '@starknet-io/get-starknet-wallet-standard@6.0.2(typescript@5.9.3)(zod@4.1.12)'
       '@tanstack/react-query':
         specifier: 5.90.2
         version: 5.90.2(react@19.2.1)
@@ -194,8 +197,8 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       starknet:
-        specifier: 10.4.0
-        version: 10.4.0(typescript@5.9.3)(zod@4.1.12)
+        specifier: 10.5.0
+        version: 10.5.0(typescript@5.9.3)(zod@4.1.12)
       superjson:
         specifier: ^1.13.3
         version: 1.13.3
@@ -3251,8 +3254,8 @@ packages:
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
-  starknet@10.4.0:
-    resolution: {integrity: sha512-HoI53jf9DqqjoIz7APWdDoarhSbiD+Y1RpsWhvSOq4QBC838bbdzSWPH8nmoeF3JhmWmW01J/9c7/eEqAcqlWA==}
+  starknet@10.5.0:
+    resolution: {integrity: sha512-hHKW39sVFLCGPC8QKdQksbs8qo10Rjb6Zdpv3nKMYQUeXDtffvI1SOa62aX8+WcnpfG7Te4UBx5NTomz/X7ZpA==}
     engines: {node: '>=22'}
 
   statuses@2.0.1:
@@ -6393,7 +6396,7 @@ snapshots:
 
   stackback@0.0.2: {}
 
-  starknet@10.4.0(typescript@5.9.3)(zod@4.1.12):
+  starknet@10.5.0(typescript@5.9.3)(zod@4.1.12):
     dependencies:
       '@noble/curves': 1.7.0
       '@noble/hashes': 1.6.1

@@ -1,40 +1,47 @@
 # VeilPay Full SaaS Upgrade
 
 ## Phase 1 — Domain and scope
+
 - [x] Define workspace, recipient, payment route, route recipient, transaction, and audit-event models.
 - [x] Define role permissions for owner, admin, finance operator, and viewer.
 - [x] Define STRK20 transaction states and failure/retry behavior.
 - [x] Document privacy boundaries: never persist private keys or plaintext sensitive payment notes.
 
 ## Phase 2 — Backend capability
+
 - [x] Upgrade the project to full-stack auth, database, and backend support.
 - [x] Verify generated schema and server conventions.
 - [x] Add required environment/secrets only through the project configuration flow.
 
 ## Phase 3 — Product flows
+
 - [x] Replace demo route data with persisted workspace data.
 - [x] Add recipient CRUD with validation and soft deletion.
 - [x] Add route creation, draft editing, recipient assignment, and status transitions.
 - [x] Add activity/audit history and transaction receipt views.
 
 ## Phase 4 — STRK20
+
 - [x] Preserve the official `strk20InvokeTransaction` adapter boundary.
 - [x] Add server-safe transaction intent creation and client wallet signing.
 - [x] Persist only public transaction hashes, status, network, and timestamps.
 - [x] Add receipt verification and retry-safe idempotency.
 
 ## Phase 5 — Hardening and UX
+
 - [x] Enforce workspace membership and role checks on every backend mutation.
 - [x] Validate amounts, token addresses, recipients, and route ownership.
 - [x] Add loading, empty, error, and retry states.
 - [x] Add responsive SaaS navigation and workspace switching.
 
 ## Phase 6 — Verification and delivery
+
 - [x] Run typecheck, build, and local integration tests.
 - [x] Verify the key user flows in the browser.
 - [x] Save a checkpoint and document remaining mainnet configuration steps.
 
 ## Follow-up hardening discovered during SaaS review
+
 - [x] Add explicit privacy-boundary documentation and remove or constrain sensitive note persistence.
 - [x] Replace authenticated hardcoded activity and route values with form-driven persisted data.
 - [x] Implement recipient edit, archive, restore, and UI management actions.
@@ -47,16 +54,19 @@
 - [x] Re-verify authenticated workspace flows in the browser after these fixes.
 
 ## Final hardening pass
+
 - [x] Enforce the privacy boundary in code by removing sensitive note persistence or applying server-side redaction.
 - [x] Make route creation fully form-driven with explicit token and recipient selection.
 - [x] Add consistent error and retry affordances for audit, route, recipient, and transaction operations.
 - [x] Exercise and document authenticated recipient, route, archive/restore, refresh, and transaction-recording flows in the browser.
 
 ## Selection integrity follow-up
+
 - [x] Sanitize selected recipient IDs against the current active workspace recipients before route creation and clear archived selections.
 - [x] Remove stale recipient-count state and hardcoded unit cues from the route builder.
 
 ## Final evidence and receipt pass
+
 - [x] Add route draft update/edit API and UI for existing saved drafts.
 - [x] Render a real audit-history list and transaction-receipt panel in the frontend.
 - [x] Implement chain/provider receipt verification before allowing confirmed status.
@@ -64,48 +74,60 @@
 - [ ] User-owned final evidence: sign in, connect a real STRK20 wallet, run authenticated CRUD/transaction flows, publish the public repository, record three mainnet transactions, and submit the demo video.
 
 ## Mutation retry completeness
+
 - [x] Add retry/error handlers for every remaining route, recipient, and transaction mutation, including draft updates, recipient archive/update/restore, and transaction confirmation.
 
 ## Navigation bug report
+
 - [x] Make Payment routes, Proof ledger, and Identity keys sidebar items functional with active-state switching and section-specific content.
 
 ## Interaction completeness
+
 - [x] Make every visible button functional: navigation, view contracts, proof actions, wallet controls, route actions, recipient actions, and mobile menu controls.
 - [x] Add honest feedback or gated states for actions requiring authentication, a connected wallet, or persisted data.
 - [x] Verify all visible controls with typecheck, tests, build, and responsive visual QA.
 
 ## Route edit feedback hardening
+
 - [x] Make the proof-ledger EDIT action explicitly gated for non-draft routes.
 - [x] Restore persisted route recipient assignments when loading a draft for editing.
 - [x] Verify draft and non-draft edit behavior with tests or browser validation.
 
 ## Route edit verification evidence
+
 - [x] Add a focused test covering draft edit state restoration and non-draft edit gating, then rerun the full verification suite.
 
 ## Logo treatment refinement
+
 - [x] Remove the square logo container and render the VeilPay mark independently with transparent treatment across desktop and mobile surfaces.
 
 ## Workspace switching verification
+
 - [x] Add focused workspace-selection tests for membership-scoped resolution and invalid workspace fallback.
 - [x] Add an equivalent mobile workspace selector or responsive control.
 - [x] Include workspace-list loading/error handling in the shared retry surface and rerun verification.
 
 ## Workspace resolver evidence
+
 - [x] Add focused tests proving member-selected workspace resolution and unauthorized-ID fallback to the default accessible workspace.
 
 ## STRK20 Private Sprint compliance audit
+
 - [x] Verify official eligibility, scope, deadline, judging rubric, and submission channel.
 - [x] Verify required STRK20 SDK integration, registry metadata, deployment, and mainnet transaction evidence.
 - [x] Verify repository, demo URL, video, README, and public proof requirements.
 - [x] Map every requirement to VeilPay evidence and record honest gaps.
 
 ## Illustration blend refinement
+
 - [x] Blend the right-corner privacy illustration into its dark panel with seamless masking, scale, placement, and responsive behavior.
 
 ## Desktop composition refinement
+
 - [x] Reduce unused sidebar and content whitespace while preserving readable navigation and responsive behavior.
 
 ## SaaS expansion for STRK20 competition
+
 - [x] Add scheduled payroll routes with timezone-safe schedule state, platform Heartbeat task IDs, callback handling, and operator pause/resume controls.
 - [x] Add multi-approver route governance with configurable workspace approval thresholds, server-side settlement gating, and audit events.
 - [x] Add shareable proof pages that reveal only public route/receipt metadata and never the private roster.
@@ -114,6 +136,7 @@
 - [x] Add responsive UI states, authenticated gating, empty/error feedback, retry surfaces, and browser-verifiable controls for the four operations features.
 
 ## Differentiation expansion
+
 - [x] Add a privacy-safe treasury command center with balance snapshots, reusable policies, spending limits, and route-level budget enforcement.
 - [x] Add reusable payment policy templates with approval rules, token/network constraints, dry-run simulation, and wallet-signing guardrails.
 - [x] Add a recipient self-claim flow using expiring private claim links, persist redemption data, and connect it to route fulfillment without exposing the roster publicly.
@@ -121,22 +144,26 @@
 - [x] Add focused Vitest coverage, responsive UI states, and production verification for the differentiation expansion.
 
 ## Differentiation hardening gaps
+
 - [x] Enforce treasury daily-limit usage across active routes and include it in dry-run simulation.
 - [x] Enforce policy network constraints in dry-run and route-creation guardrails.
 - [x] Connect recipient claim redemption to route-recipient fulfillment state and payout readiness.
 - [x] Add concrete proof-health and unresolved-receipt monitoring views, not only aggregate counters.
 
 ## Claim-link error repair
+
 - [x] Diagnose the concrete runtime error shown in the claim-link workspace flow: comma-formatted amount values reached the strict treasury simulation validator; the existing route payload path was already normalizing commas.
 - [x] Fix the affected workspace error path by normalizing numeric inputs before treasury simulation, while preserving the existing route/wallet normalization and privacy/authorization boundaries.
 - [x] Add regression coverage and re-verify the claim flow visually and in production build.
 
 ## Workspace information architecture refactor
+
 - [x] Keep the primary page focused on route creation, proof ledger, identity, and recent route status.
 - [x] Move Operations, Treasury Guardrails, Recipient Claims, and monitoring into dedicated sidebar-accessible views.
 - [x] Preserve mobile navigation, deep-linkable section targets, loading/error states, tests, and responsive spacing.
 
 ## Privacy-focused Starknet Launchpad
+
 - [x] Define the launchpad product boundary: private project rooms, shielded allocations, milestone treasury releases, governance, claims, and public proof metadata.
 - [x] Add launchpad database models and workspace-scoped APIs with privacy-preserving authorization and state transitions.
 - [x] Add a dedicated Launchpad sidebar view without re-expanding the primary payroll page.
@@ -144,6 +171,7 @@
 - [x] Add focused Launchpad tests for project/milestone contracts, allocation idempotency and privacy-safe summaries, and role authorization; rerun the full suite before checkpointing.
 
 ## Launchpad product polish
+
 - [x] Replace the form-first Launchpad layout with a command-center hierarchy: overview, project status, milestone releases, and privacy signals.
 - [x] Improve project, milestone, and allocation interactions with clearer validation, actionable empty states, and safer state transitions.
 - [x] Refine the Copper Veil visual treatment with premium hierarchy, stronger cards, status accents, and responsive composition.
@@ -152,6 +180,7 @@
 - [x] Add deterministic Launchpad view-state helpers for default tab selection, visible panel resolution, and no-project/no-milestone empty states; test them and rerun the full suite before checkpointing.
 
 ## Full interaction audit
+
 - [x] Inventory every button and interactive control across Home, Launchpad, Claim, Proof, navigation, and wallet surfaces.
 - [x] Fix dead, misleading, duplicate, or unsafe handlers and add consistent pending, disabled, success, and error feedback.
 - [x] Add interaction-contract regression tests and verify primary controls at desktop and mobile widths.
@@ -161,81 +190,100 @@
 - [x] Refactor Launchpad room-reference copy to use the shared clipboard helper, then rerun typecheck/tests/build and responsive QA.
 
 ## Launchpad production SaaS upgrade
+
 - [x] Audit and document the current Launchpad gaps versus a production SaaS: onboarding, project portfolio, contributor operations, release readiness, activity/audit, and real execution boundaries.
 - [x] Add persisted project operating metadata and workspace-scoped operational APIs for project lifecycle, readiness, contributor allocation status, and release operations.
 - [x] Add a real project portfolio and project-detail workspace with actionable status, activity, milestone, allocation, and proof surfaces.
 - [x] Add production-oriented validation, permission states, loading/error/empty states, tests, and documentation distinguishing persisted SaaS behavior from pending wallet/onchain execution.
 
 ## Launchpad SaaS evidence gaps
+
 - [x] Add a workspace-scoped Launchpad allocations query exposing privacy-safe allocation statuses for operators and render it in the control room.
 - [x] Add explicit Launchpad query error/retry UI for portfolio, project operations, readiness, activity, and release-request surfaces.
 - [x] Add focused tests for Launchpad project-ops/release-request permissions, readiness/release failure paths, and allocation-status retrieval.
 
 ## Launchpad backend test evidence gaps
+
 - [x] Add router-level tests proving project-ops and release-request procedures reject unauthorized member roles.
 - [x] Add a focused test for workspace-scoped Launchpad allocation retrieval and privacy-safe projection.
 
 ## Launchpad privacy projection evidence
+
 - [x] Assert through the Launchpad allocation procedure that encrypted references and claimed wallet addresses are excluded while workspace scoping is preserved.
 
 ## Demo Mode expansion
+
 - [x] Add a clearly labeled, persisted Demo Mode switch with deterministic local workspace data and an exit path back to production mode.
 - [x] Make every primary VeilPay and Launchpad interaction demonstrable in Demo Mode without calling production mutations or claiming real onchain execution.
 - [x] Add Demo Mode loading, success, error, reset, wallet, claim, proof, governance, treasury, and Launchpad release feedback states.
 - [x] Add focused Demo Mode tests, responsive visual QA, and documentation that separates simulated activity from authenticated/onchain evidence.
 
 ## Demo Mode completeness gaps
+
 - [x] Make the persisted Demo Mode marker app-wide so Home, Launchpad, Claim, Proof, wallet, and operations surfaces can read the same mode boundary.
 - [x] Expand the demo workspace with recipient CRUD, route editing/status transitions, transaction/receipt confirmation, and deeper Launchpad operations.
 - [x] Add explicit simulated error and retry states for wallet, treasury, claims, proof publication, governance, and release actions.
 
 ## Demo Mode evidence hardening
+
 - [x] Wire the shared Demo Mode context into Home, Launchpad, Claim, and Proof so each route visibly reflects the same boundary and exit behavior.
 - [x] Replace toast-only demo controls with deterministic local recipient CRUD, route status/edit, and receipt state updates rendered in the workspace.
 - [x] Add per-surface simulated failure and retry handlers for wallet, treasury, claims, proof, governance, and Launchpad release actions.
 
 ## Demo Mode final evidence correction
+
 - [x] Add explicit Demo Mode boundary UI and exit behavior inside Launchpad, and consistent visible route-level chrome in Home, Claim, and Proof.
 - [x] Add action-level simulated failure and retry flows for demo wallet connection, treasury dry-run, claim redemption, proof publication, governance decisions, and Launchpad release actions.
 
 ## Demo Mode final action evidence
+
 - [x] Add visible Demo Mode route chrome on Home regardless of auth state, plus an explicit in-page Demo exit control inside Launchpad.
 - [x] Wire action-specific simulated failures and retries directly into wallet connect, treasury dry-run, claim redemption, proof publication, governance decision, and Launchpad release buttons.
 - [x] Add focused tests proving route-boundary visibility and named Demo action failure/recovery transitions.
 
 ## Product walkthrough video
+
 - [x] Create and deliver a polished VeilPay Demo Mode walkthrough video covering Payroll, Operations, Treasury, Claims, Launchpad, and Proof, with the simulation-only boundary clearly narrated.
 
 ## Product teaser video
+
 - [x] Create and deliver a short VeilPay teaser video with a strong privacy-payment hook, Starknet positioning, and a clear product call to action.
 
 ## Coming Soon typographic teaser
+
 - [x] Create and deliver a complete Coming Soon teaser film with a typographic intro, cinematic product reveal, privacy/Starknet message, and final VeilPay call to action.
 
 ## Audio-enhanced teaser
+
 - [x] Add a restrained cinematic electronic music bed to the Coming Soon teaser and deliver a validated final video with audio.
 
 ## Documentation section
+
 - [x] Add a first-class Documentation sidebar entry and route with the Coming Soon teaser video at the top.
 - [x] Add complete documentation content covering motivation, market gap, product surfaces, privacy boundaries, Starknet architecture, Demo Mode, and execution limitations.
 - [x] Add visual simulations for the payment route, privacy boundary, treasury governance, private claims, Launchpad milestones, proof publication, and Demo Mode flow.
 - [x] Add uploaded teaser media, responsive QA, focused tests, and documentation route verification.
 
 ## Complete Demo Mode walkthrough film
+
 - [x] Create and deliver a complete intro-to-demo walkthrough film explaining every Demo Mode function, simulated state, failure/retry path, and production boundary.
 
 ## Corrected detailed voiceover walkthrough
+
 - [x] Rebuild the Demo Mode walkthrough as a 2+ minute video with dedicated visuals for every surface, no music bed, and clear loud voiceover explaining each workflow, simulation state, failure/retry path, and production boundary.
 
 ## Standalone function videos
+
 - [x] Create separate clear-voice videos for Payroll, Operations, Treasury, Private Claims, Launchpad, Public Proof, Wallet/Execution Boundary, and Demo Mode error/retry behavior, with no music and dedicated visuals for each function.
 
 ## Video-led Documentation expansion
+
 - [x] Upload all eight standalone function videos to lifecycle-safe project storage and embed them in the Documentation page.
 - [x] Add detailed explanations for Payroll, Operations, Treasury, Private Claims, Launchpad, Public Proof, Wallet/Execution Boundary, and Demo Mode Error + Retry beside each video.
 - [x] Add responsive video QA, focused documentation-contract tests, and update the project QA record.
 
 ## Reference-matched explanatory videos
+
 - [x] Analyze the attached reference’s pacing, screen-led explanation, annotation, narration, and section structure.
 - [x] Replace all eight standalone Documentation videos with reference-matched step-by-step VeilPay walkthroughs using dedicated UI sequences and explanatory callouts.
 - [x] Upload replacement assets, update Documentation metadata/tests, and verify desktop/mobile playback and layout.
@@ -446,8 +494,8 @@
 - [x] Decide on Resend transactional email delivery for password-reset links: intentionally optional because the no-cost free test-sender/default secure fallback is shipped
 - [x] Implement approved development-safe password recovery fallback with explicit production delivery gating and no production token disclosure
 
-
 ## Secure password recovery
+
 - [x] Add single-use, expiring password-reset token persistence with hashed token storage.
 - [x] Add session-version invalidation when a password reset is consumed.
 - [x] Add generic forgot-password response, optional Resend delivery, and development-only preview fallback.
@@ -456,28 +504,29 @@
 - [x] User-owned delivery configuration reviewed: intentionally deferred because production email is optional and the no-cost secure recovery fallback is shipped.
 
 ## Final evidence and receipt pass
+
 - [ ] User-owned final evidence: sign in, connect a real STRK20 wallet, run authenticated CRUD/transaction flows, publish the public repository, record three mainnet transactions, and submit the demo video.
 
-
 ## No-cost password recovery refinement
+
 - [x] Make the free development-safe recovery path the explicit default when Resend credentials are unavailable, with no paid infrastructure requirement and clear demo/local labeling.
 - [x] Verify the no-cost recovery behavior with regression tests, typecheck, build, and runtime screenshots.
 
-
 ## Workspace-return navigation consistency
+
 - [x] Standardize the Private Markets back-to-workspace button treatment and behavior across every dedicated Veyra surface.
 - [x] Verify shared navigation behavior, desktop/mobile presentation, regression tests, and production build before checkpointing.
 
-
 ## Comprehensive interaction audit follow-up
+
 - [x] Inventory every visible Veyra button, link, form submit, wallet action, navigation action, and demo control with its expected outcome.
 - [x] Trace each interactive control to its handler, route, tRPC procedure, auth/wallet gate, and success/error state.
 - [x] Audit confirmed interaction defects and responsive control issues: no new defect requiring product-code changes was found; privacy, auth, and mainnet-only semantics remain intact.
 - [x] Add or update regression coverage for the audited interaction contracts and verify all primary controls at desktop and mobile widths.
 - [x] Run the complete Vitest suite, TypeScript check, production build, and save a published checkpoint.
 
-
 ## Full source audit follow-up
+
 - [x] Enumerate every tracked application, configuration, schema, migration, and test file for the line-by-line audit.
 - [x] Inspect server, database, authentication, security, network, and privacy boundaries in full.
 - [x] Inspect client state, handlers, routing, dependency usage, and build/deployment configuration in full.
@@ -490,6 +539,15 @@
 - [x] Publish the audited Veyra source revision to the public GitHub repository at https://github.com/sands786/veyra.
 - [ ] User-owned evidence still required: connect a real Starknet mainnet wallet, execute and verify the intended mainnet flows, record the resulting transaction hashes, and submit the final demo materials.
 - [x] Audit finding: prevent a production route from advancing to shielded/routed stages when the connected wallet cannot submit the required STRK20 transaction
-- [ ] Fix reported Braavos wallet capability detection so supported Starknet Mainnet submission is recognized without weakening the fail-closed guard
+- [x] Fix reported Braavos wallet capability detection so supported Starknet Mainnet submission is recognized without weakening the fail-closed guard
 - [x] Fix reported Mainnet asset-integrity gap: prevent a visible USDC route from invoking a hardcoded STRK token action
 - [ ] Require configured public STRK20 contract addresses and verified entrypoints before any Braavos-compatible Mainnet execution path
+- [x] Mainnet readiness: verify the official STRK20 contract interface and deployment details from authoritative sources
+- [x] Mainnet readiness: implement the official wallet-standard STRK20 execution request path; keep unknown contract calls fail-closed
+- [ ] Mainnet readiness: complete production configuration, regression coverage, and user-owned transaction evidence
+
+- [x] Mainnet adapter: support the official `wallet_strk20InvokeTransaction` wallet-standard request path for Braavos-compatible wallets
+- [x] Audit finding: prevent proof-card preparation from advancing a submitted route to confirmed without receipt verification
+- [x] Audit finding: prevent the current single-recipient action from silently signing a multi-recipient route with incorrect allocations
+- [x] Mainnet UI: expose only verified STRK and ETH Mainnet assets through the executable route selector
+- [x] Add verified Starknet Mainnet ETH token mapping and exact 18-decimal route support alongside STRK
