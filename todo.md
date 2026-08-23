@@ -462,3 +462,8 @@
 ## No-cost password recovery refinement
 - [x] Make the free development-safe recovery path the explicit default when Resend credentials are unavailable, with no paid infrastructure requirement and clear demo/local labeling.
 - [x] Verify the no-cost recovery behavior with regression tests, typecheck, build, and runtime screenshots.
+
+
+## Workspace-return navigation consistency
+- [x] Standardize the Private Markets back-to-workspace button treatment and behavior across every dedicated Veyra surface.
+- [x] Verify shared navigation behavior, desktop/mobile presentation, regression tests, and production build before checkpointing.

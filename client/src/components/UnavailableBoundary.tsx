@@ -1,5 +1,6 @@
-import { ArrowUpRight, ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import { VeyraBrand } from "@/components/VeyraBrand";
+import { WorkspaceReturnButton } from "@/components/WorkspaceReturnButton";
 
 type UnavailableBoundaryProps = {
   eyebrow: string;
@@ -29,9 +30,7 @@ export function UnavailableBoundary({ eyebrow, title, description, evidence }: U
         <div className="mt-8 border-y border-white/10 py-4 font-mono text-[9px] leading-5 tracking-[0.08em] text-[#AEB8BE]">
           {evidence}
         </div>
-        <a href="/" className="mt-8 inline-flex items-center gap-2 rounded-[10px] border border-[#F0563A]/45 px-4 py-3 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:border-[#F0563A] hover:bg-[#201815] active:scale-[0.97]">
-          RETURN TO VEYRA <ArrowUpRight size={14} aria-hidden="true" />
-        </a>
+        <WorkspaceReturnButton className="mt-8 border border-[#F0563A]/45 text-[#F3EEE5] hover:border-[#F0563A] hover:bg-[#201815]" />
       </section>
     </main>
   );

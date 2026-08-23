@@ -6,8 +6,8 @@ import { ArrowUpRight, Check, Copy, EyeOff, Fingerprint, Link2, LockKeyhole, Spa
 import { Button } from "@/components/ui/button";
 import { copyText } from "@/lib/clipboard";
 import { toast } from "sonner";
-import { useLocation } from "wouter";
 import { VeyraBrand } from "@/components/VeyraBrand";
+import { WorkspaceReturnButton } from "@/components/WorkspaceReturnButton";
 import { milestoneSteps, privateClaimDemoPath, privateSettlementState, type PrivatePrimitiveId } from "@shared/privatePrimitives";
 import { privateDisclosureFields, type PrivateDisclosureScope } from "@shared/operations";
 
@@ -18,7 +18,6 @@ const primitives = [
 ] as const;
 
 export default function PrivatePrimitives() {
-  const [, setLocation] = useLocation();
   const [activeId, setActiveId] = useState<PrivatePrimitiveId>("links");
   const [disclosureScope, setDisclosureScope] = useState<PrivateDisclosureScope>("aggregate");
   const [linkToken, setLinkToken] = useState<string | null>(null);
@@ -48,8 +47,8 @@ export default function PrivatePrimitives() {
   return (
     <div className="min-h-screen bg-[#111210] text-[#F3EEE5]">
       <header className="flex items-center justify-between border-b border-white/10 px-5 py-5 sm:px-8 lg:px-12">
-        <button onClick={() => setLocation("/")} aria-label="Return to Veyra workspace"><VeyraBrand compact /></button>
-        <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.12em] text-[#AEB8BE]"><span>PRIVATE PRIMITIVES</span><button onClick={() => setLocation("/")} className="text-[#F0563A]">BACK TO WORKSPACE</button></div>
+        <VeyraBrand compact />
+        <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.12em] text-[#AEB8BE]"><span>PRIVATE PRIMITIVES</span><WorkspaceReturnButton /></div>
       </header>
       <main className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
         <div className="max-w-3xl"><div className="eyebrow">STRK20 / PRIVATE SPRINT / PRODUCT LAB</div><h1 className="section-title">Three private primitives.<br /><span>One operating layer.</span></h1><p className="mt-6 max-w-2xl text-base leading-7 text-[#B7B0A6]">Inspired by the strongest patterns in StarkWare’s Private Sprint: private payment requests, selective disclosure, and evidence-gated milestone releases.</p></div>

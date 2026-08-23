@@ -18,6 +18,7 @@ import {
 import { Link, useLocation } from "wouter";
 import { useDemoMode } from "@/contexts/DemoModeContext";
 import { VeyraBrand } from "@/components/VeyraBrand";
+import { WorkspaceReturnButton } from "@/components/WorkspaceReturnButton";
 import {
   documentationChapters,
   documentationProductSurfaces,
@@ -143,17 +144,6 @@ export default function Documentation() {
             ))}
           </nav>
           <div className="mt-auto space-y-2 border-t border-white/10 pt-5">
-            {isDemoMode && (
-              <button
-                onClick={() => {
-                  exitDemo();
-                  setLocation("/");
-                }}
-                className="w-full border border-[#F0563A]/40 px-3 py-2 text-left font-mono text-[9px] uppercase tracking-[0.12em] text-[#F0563A]"
-              >
-                Exit Demo Mode
-              </button>
-            )}
             <Link
               href="/demo"
               className="group flex items-center gap-2 px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-[#A7A197] transition-colors duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6DE3A1]"
@@ -166,18 +156,10 @@ export default function Documentation() {
                 Open Demo Tour
               </span>
             </Link>
-            <Link
-              href="/"
-              className="group flex items-center gap-2 px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-[#A7A197] transition-colors duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6DE3A1]"
-            >
-              <ArrowUpRight
-                size={13}
-                className="transition-transform duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#F0563A]"
-              />
-              <span className="transition-transform duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5">
-                Back to workspace
-              </span>
-            </Link>
+            <WorkspaceReturnButton
+              onBeforeNavigate={isDemoMode ? exitDemo : undefined}
+              className="w-full justify-start text-[#A7A197] hover:bg-white/5 hover:text-white"
+            />
           </div>
         </div>
       </aside>
@@ -192,12 +174,7 @@ export default function Documentation() {
             <span className="hidden font-mono text-[9px] uppercase tracking-[0.12em] text-[#F0563A] sm:inline">
               STRK20 / PRIVACY-FIRST
             </span>
-            <Link
-              href="/"
-              className="border border-white/15 px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-[#D5CEC4] hover:border-white/35"
-            >
-              Workspace
-            </Link>
+            <WorkspaceReturnButton className="border border-white/15 text-[#D5CEC4] hover:border-white/35 hover:bg-white/5 hover:text-white" />
           </div>
         </header>
 
@@ -638,12 +615,7 @@ export default function Documentation() {
                 </p>
               </div>
               <div className="flex gap-3">
-                <Link
-                  href="/"
-                  className="border border-white/15 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-[#D5CEC4]"
-                >
-                  Workspace
-                </Link>
+                <WorkspaceReturnButton className="border border-white/15 px-4 py-3 text-[#D5CEC4] hover:bg-white/5 hover:text-white" />
                 <Link
                   href="/launchpad"
                   className="border border-white/15 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-[#D5CEC4]"
