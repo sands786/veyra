@@ -143,6 +143,24 @@ describe("STRK20 on-chain adapter", () => {
     });
   });
 
+  it("hydrates a wallet-api provider that omits account data from connect", async () => {
+    const requested: string[] = [];
+    const result = await connectVeilWallet({
+      request: async request => {
+        requested.push(request.type);
+        if (request.type === "wallet_requestAccounts") return ["0x9876"];
+        if (request.type === "wallet_requestChainId") return "SN_MAIN";
+        return undefined;
+      },
+    });
+    expect(requested).toContain("wallet_requestAccounts");
+    expect(result).toMatchObject({
+      address: "0x9876",
+      live: true,
+      network: "mainnet",
+    });
+  });
+
   it("reports standard wallet-api request support as executable only on Mainnet", () => {
     const wallet = {
       address: "0x1234",

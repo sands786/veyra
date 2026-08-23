@@ -590,3 +590,9 @@
 - [x] Diagnose why detected Braavos returned no usable account: the official injected-wallet wrapper’s connect result did not reliably expose its hydrated standard account to Veyra’s merge boundary.
 - [x] Implement the narrowest safe hydration correction with regression coverage; preserve Mainnet chain validation and fail-closed STRK20 capability checks.
 - [x] Re-run wallet tests, full verification, responsive smoke checks, and publish the verified correction.
+
+## Persistent Braavos provider account discovery
+
+- [x] Reproduce the provider shape where Braavos detects successfully but exposes no account through the current official wrapper response.
+- [x] Add only a validated wallet-API account discovery fallback, preserving strict Mainnet chain checks and refusing ambiguous account responses.
+- [x] Run regression, TypeScript, production build, and deployed runtime checks before retrying the user’s wallet.

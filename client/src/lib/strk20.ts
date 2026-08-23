@@ -359,6 +359,8 @@ function chainIdFromValue(value: unknown): string | undefined {
 }
 
 function addressFromValue(value: unknown): string | undefined {
+  if (typeof value === "string" && /^0x[0-9a-fA-F]+$/.test(value.trim()))
+    return value.trim();
   if (Array.isArray(value)) return addressFromValue(value[0]);
   if (typeof value !== "object" || value === null) return undefined;
   const record = value as Record<string, unknown>;
@@ -384,6 +386,34 @@ function mergeWalletConnection(
     ...(address ? { address } : {}),
     ...(chainId ? { chainId } : {}),
   };
+}
+
+async function hydrateWalletApiAccount(
+  wallet: VeilWallet
+): Promise<VeilWallet> {
+  if (!wallet.request || addressFromWallet(wallet)) return wallet;
+  const accounts = await wallet.request.call(wallet, {
+    type: "wallet_requestAccounts",
+  });
+  const address = addressFromValue(accounts);
+  if (!address) return wallet;
+  const accountResultChainId = Array.isArray(accounts)
+    ? typeof accounts[0] === "object" && accounts[0] !== null
+      ? chainIdFromValue(accounts[0])
+      : undefined
+    : chainIdFromValue(accounts);
+  let chainId = wallet.chainId ?? accountResultChainId;
+  if (!wallet.chainId) {
+    try {
+      chainId =
+        chainIdFromValue(
+          await wallet.request.call(wallet, { type: "wallet_requestChainId" })
+        ) ?? chainId;
+    } catch {
+      // Strict Mainnet verification remains enforced by assertWalletNetwork.
+    }
+  }
+  return mergeWalletConnection(wallet, { accounts: [{ address, chainId }] });
 }
 
 export function networkFromChainId(chainId?: string): VeilNetwork | undefined {
@@ -434,10 +464,8 @@ export async function connectVeilWallet(selectedWallet?: VeilWallet): Promise<{
   const connectionResult = adaptedWallet.connect
     ? await adaptedWallet.connect({ mode: "browser" })
     : await adaptedWallet.enable?.();
-  const connectedWallet = mergeWalletConnection(
-    adaptedWallet,
-    connectionResult
-  );
+  const mergedWallet = mergeWalletConnection(adaptedWallet, connectionResult);
+  const connectedWallet = await hydrateWalletApiAccount(mergedWallet);
   const enhancedWallet = withWalletStandardMethods(connectedWallet);
   const address = addressFromWallet(enhancedWallet);
   return {
