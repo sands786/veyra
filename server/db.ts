@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, inArray, isNull, lt, or } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { RpcProvider } from "starknet";
@@ -39,6 +39,7 @@ import {
   privateMarketRiskPolicies,
   privateMarketAlerts,
   localAccounts,
+  passwordResetTokens,
   recipients,
   routeRecipients,
   users,
@@ -200,6 +201,31 @@ export async function touchUserLastSignedIn(userId: number) {
   const db = await getDb();
   if (!db) return;
   await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, userId));
+}
+
+export async function createPasswordResetRecord(input: { userId: number; tokenHash: string; expiresAt: Date }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  await db.update(passwordResetTokens).set({ usedAt: new Date() }).where(and(eq(passwordResetTokens.userId, input.userId), isNull(passwordResetTokens.usedAt)));
+  await db.insert(passwordResetTokens).values(input);
+}
+
+export async function consumePasswordResetToken(input: { tokenHash: string; passwordHash: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  return db.transaction(async tx => {
+    const now = new Date();
+    const token = await tx.select().from(passwordResetTokens).where(eq(passwordResetTokens.tokenHash, input.tokenHash)).limit(1);
+    const reset = token[0];
+    if (!reset || reset.usedAt || reset.expiresAt <= now) return null;
+    const updated = await tx.update(passwordResetTokens).set({ usedAt: now }).where(and(eq(passwordResetTokens.id, reset.id), isNull(passwordResetTokens.usedAt), gt(passwordResetTokens.expiresAt, now)));
+    const affectedRows = Number((updated as unknown as { affectedRows?: number }).affectedRows ?? 0);
+    if (!affectedRows) return null;
+    await tx.update(localAccounts).set({ passwordHash: input.passwordHash }).where(eq(localAccounts.userId, reset.userId));
+    await tx.update(users).set({ sessionVersion: sql`${users.sessionVersion} + 1` }).where(eq(users.id, reset.userId));
+    const user = await tx.select().from(users).where(eq(users.id, reset.userId)).limit(1);
+    return user[0] ?? null;
+  });
 }
 
 export function buildInitialWorkspaceIdentity(

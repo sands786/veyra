@@ -6,11 +6,15 @@ const dbMocks = vi.hoisted(() => ({
   createLocalAccount: vi.fn(),
   getLocalAccountByEmail: vi.fn(),
   touchUserLastSignedIn: vi.fn(),
+  createPasswordResetRecord: vi.fn(),
+  consumePasswordResetToken: vi.fn(),
 }));
 
 const authMocks = vi.hoisted(() => ({
   createLocalOpenId: vi.fn((email: string) => `local_${email}`),
   createVeyraSessionToken: vi.fn(async (openId: string) => `session-${openId}`),
+  createPasswordResetToken: vi.fn(() => ({ token: "a".repeat(43), tokenHash: "hash-for-reset" })),
+  hashPasswordResetToken: vi.fn(() => "hash-for-reset"),
   hashAccountPassword: vi.fn(async () => "scrypt$16384$8$1$fake$verifier"),
   normalizeAccountEmail: vi.fn((email: string) => email.trim().toLowerCase()),
   verifyAccountPassword: vi.fn(async () => true),
@@ -39,6 +43,7 @@ const user = {
   createdAt: new Date(),
   updatedAt: new Date(),
   lastSignedIn: new Date(),
+  sessionVersion: 3,
 };
 
 function context() {
@@ -59,6 +64,8 @@ describe("Veyra-owned auth router", () => {
     dbMocks.createLocalAccount.mockResolvedValue(user);
     dbMocks.getLocalAccountByEmail.mockResolvedValue({ account: { passwordHash: "scrypt$16384$8$1$fake$verifier" }, user });
     dbMocks.touchUserLastSignedIn.mockResolvedValue(undefined);
+    dbMocks.createPasswordResetRecord.mockResolvedValue(undefined);
+    dbMocks.consumePasswordResetToken.mockResolvedValue(user);
     authMocks.verifyAccountPassword.mockResolvedValue(true);
   });
 
@@ -76,6 +83,24 @@ describe("Veyra-owned auth router", () => {
     const { ctx, cookies } = context();
     await expect(appRouter.createCaller(ctx).auth.signIn({ email: "operator@veyra.test", password: "correct horse battery staple" })).rejects.toThrow("Invalid email or password");
     expect(cookies).toEqual([]);
+  });
+
+  it("returns a generic forgot-password response and exposes only a local development preview link", async () => {
+    const { ctx } = context();
+    const result = await appRouter.createCaller(ctx).auth.requestPasswordReset({ email: "operator@veyra.test" });
+
+    expect(result.message).toContain("If an account exists");
+    expect(result).toHaveProperty("previewResetUrl");
+    expect(dbMocks.createPasswordResetRecord).toHaveBeenCalledWith(expect.objectContaining({ userId: user.id, tokenHash: "hash-for-reset" }));
+  });
+
+  it("consumes a reset token, invalidates prior sessions, and emits a fresh session", async () => {
+    const { ctx, cookies } = context();
+    const result = await appRouter.createCaller(ctx).auth.resetPassword({ token: "a".repeat(43), password: "new secure password 123" });
+
+    expect(result).toEqual({ id: user.id, openId: user.openId, name: user.name, email: user.email, loginMethod: user.loginMethod, role: user.role });
+    expect(dbMocks.consumePasswordResetToken).toHaveBeenCalledWith(expect.objectContaining({ tokenHash: "hash-for-reset" }));
+    expect(cookies[0]).toMatchObject({ name: COOKIE_NAME, value: "session-local_operator" });
   });
 
   it("signs in a verified Veyra account and refreshes its activity timestamp", async () => {

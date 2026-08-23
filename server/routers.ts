@@ -3,14 +3,15 @@ import { COOKIE_NAME } from "@shared/const";
 import { parse as parseCookieHeader } from "cookie";
 import { createHeartbeatJob, updateHeartbeatJob } from "./_core/heartbeat";
 import { getSessionCookieOptions } from "./_core/cookies";
-import { createLocalOpenId, createVeyraSessionToken, hashAccountPassword, normalizeAccountEmail, VEYRA_SESSION_MS, verifyAccountPassword } from "./_core/localAuth";
+import { createLocalOpenId, createPasswordResetToken, createVeyraSessionToken, hashAccountPassword, hashPasswordResetToken, normalizeAccountEmail, VEYRA_SESSION_MS, verifyAccountPassword } from "./_core/localAuth";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { parseWorkspaceId } from "./workspaceSelection";
 import { buildPayrollCron } from "@shared/operations";
 import { resolveWorkspaceSelection } from "./workspaceResolver";
+import { ENV } from "./_core/env";
 import { archiveRecipient, createPaymentRoute, updatePaymentRoute, createRecipient, createTreasuryPolicy, listWorkspaceTreasuryPolicies, listWorkspaceTreasuryBalances, recordTreasuryBalanceSnapshot, simulateTreasuryPolicy, createRecipientClaimLink, getPublicClaim, claimRecipientLink, ensureWorkspaceForUser, getWorkspaceForUser, listWorkspaceAuditEvents, listWorkspacesForUser, listWorkspaceRecipients, listWorkspaceRoutes, listRouteRecipientIds, getWorkspaceByIdForUser, recordBlockchainTransaction, confirmBlockchainTransaction, verifyWorkspaceStarknetReceipt, restoreRecipient, transitionPaymentRoute, updateRecipient, createPayrollSchedule, listWorkspaceSchedules, updatePayrollSchedule, setPayrollScheduleTaskUid, updateWorkspaceApprovalThreshold, listRouteApprovals, upsertRouteApproval, createShareableProof, getPublicProof, listWorkspaceAnalytics, listWorkspaceOperationsHealth, exportWorkspaceAuditCsv, createLaunchpadProject, listWorkspaceLaunchpadProjects, createLaunchpadMilestone, listPrivateMarkets, getPrivateMarketInsights, listPrivateMarketQuotes, createPrivateMarketQuote, updatePrivateMarketQuoteStatus, getPrivateMarketRiskPolicy, upsertPrivateMarketRiskPolicy, exportPrivateMarketBook, listPrivateMarketAlerts, acknowledgePrivateMarketAlert, createPrivateMarket, updatePrivateMarketStatus, commitPrivateMarketBid, createLaunchpadAllocation, updateLaunchpadProjectStatus, updateLaunchpadMilestoneStatus, getPublicLaunchpadProject, getLaunchpadProjectOps, updateLaunchpadProjectOps, getLaunchpadReadiness, listLaunchpadActivity, listLaunchpadAllocations, listLaunchpadReleaseRequests, createLaunchpadReleaseRequest, decideLaunchpadReleaseRequest } from "./db";
-import { createLocalAccount, getLocalAccountByEmail, touchUserLastSignedIn } from "./db";
+import { consumePasswordResetToken, createLocalAccount, createPasswordResetRecord, getLocalAccountByEmail, touchUserLastSignedIn } from "./db";
 
 async function workspaceFor(ctx: { user: { id: number; name?: string | null } | null; req?: { headers?: Record<string, string | string[] | undefined> } }) {
   if (!ctx.user) throw new Error("Authentication required");
@@ -52,7 +53,7 @@ export const appRouter = router({
         passwordHash: await hashAccountPassword(input.password),
         openId: createLocalOpenId(email),
       });
-      const token = await createVeyraSessionToken(user.openId);
+      const token = await createVeyraSessionToken(user.openId, user.sessionVersion);
       ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: VEYRA_SESSION_MS });
       return authUserPayload(user);
     }),
@@ -61,9 +62,33 @@ export const appRouter = router({
       const valid = account ? await verifyAccountPassword(input.password, account.account.passwordHash) : false;
       if (!account || !valid) throw new Error("Invalid email or password");
       await touchUserLastSignedIn(account.user.id);
-      const token = await createVeyraSessionToken(account.user.openId);
+      const token = await createVeyraSessionToken(account.user.openId, account.user.sessionVersion);
       ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: VEYRA_SESSION_MS });
       return authUserPayload(account.user);
+    }),
+    requestPasswordReset: publicProcedure.input(z.object({ email: accountEmail })).mutation(async ({ ctx, input }) => {
+      const generic = { message: "If an account exists for that email, recovery instructions have been sent." } as const;
+      const account = await getLocalAccountByEmail(normalizeAccountEmail(input.email));
+      if (!account) return generic;
+      const { token, tokenHash } = createPasswordResetToken();
+      await createPasswordResetRecord({ userId: account.user.id, tokenHash, expiresAt: new Date(Date.now() + 15 * 60 * 1000) });
+      const origin = typeof ctx.req.headers.origin === "string" ? ctx.req.headers.origin : "";
+      const baseUrl = origin || `https://${ctx.req.headers.host ?? "localhost"}`;
+      const resetUrl = `${baseUrl.replace(/\/$/, "")}/sign-in?mode=reset&token=${encodeURIComponent(token)}`;
+      if (ENV.resendApiKey && ENV.resendFromEmail) {
+        const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${ENV.resendApiKey}`, "Content-Type": "application/json" }, body: JSON.stringify({ from: ENV.resendFromEmail, to: [account.user.email ?? input.email], subject: "Reset your Veyra password", html: `<p>Reset your Veyra password within 15 minutes.</p><p><a href="${resetUrl}">Reset password</a></p><p>If you did not request this, you can ignore this email.</p>` }) });
+        if (!response.ok) throw new Error("Recovery delivery is temporarily unavailable. Please try again later.");
+        return generic;
+      }
+      if (!ENV.isProduction) return { ...generic, previewResetUrl: resetUrl };
+      return generic;
+    }),
+    resetPassword: publicProcedure.input(z.object({ token: z.string().min(40).max(100), password: accountPassword })).mutation(async ({ ctx, input }) => {
+      const user = await consumePasswordResetToken({ tokenHash: hashPasswordResetToken(input.token), passwordHash: await hashAccountPassword(input.password) });
+      if (!user) throw new Error("This reset link is invalid or expired. Request a new one.");
+      const sessionToken = await createVeyraSessionToken(user.openId, user.sessionVersion);
+      ctx.res.cookie(COOKIE_NAME, sessionToken, { ...getSessionCookieOptions(ctx.req), maxAge: VEYRA_SESSION_MS });
+      return authUserPayload(user);
     }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);

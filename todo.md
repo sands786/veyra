@@ -442,3 +442,18 @@
 - [x] Resolve persistent live Vercel signup server/transform error after the first JSON-safe auth response fix; screenshot was from retired `mma-gold.vercel.app`, while corrected release is live at `veyra-gamma-gold.vercel.app`
 - [x] Resolve signup transform failure still reproduced on the current `veyra-gamma-gold.vercel.app` deployment after the JSON-safe auth projection; live proxied POST now reaches tRPC and returns a normal validation response
 - [x] Audit every interactive button, link, form, mutation, wallet action, and navigation path; fix confirmed defects and add regression coverage
+- [x] Add secure forgot-password and reset-password recovery with single-use expiry, generic account responses, session invalidation, UI, migration, tests, and documented email delivery requirements
+- [ ] Configure Resend transactional email delivery for password-reset links after the required API key and verified sender identity are supplied
+- [x] Implement approved development-safe password recovery fallback with explicit production delivery gating and no production token disclosure
+
+
+## Secure password recovery
+- [x] Add single-use, expiring password-reset token persistence with hashed token storage.
+- [x] Add session-version invalidation when a password reset is consumed.
+- [x] Add generic forgot-password response, optional Resend delivery, and development-only preview fallback.
+- [x] Add forgot-password and reset-password UI modes with URL token handling and safe client-side navigation.
+- [x] Add router regression coverage and pass typecheck, 109 Vitest tests, and production build.
+- [ ] User-owned delivery configuration: provide a verified Resend sender domain and `RESEND_API_KEY`/`RESEND_FROM_EMAIL` through project secrets for production email delivery.
+
+## Final evidence and receipt pass
+- [ ] User-owned final evidence: sign in, connect a real STRK20 wallet, run authenticated CRUD/transaction flows, publish the public repository, record three mainnet transactions, and submit the demo video.

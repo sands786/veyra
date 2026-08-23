@@ -14,8 +14,19 @@ export const VEYRA_SESSION_MS = 30 * 24 * 60 * 60 * 1000;
 
 type VeyraSessionPayload = {
   openId: string;
+  sessionVersion: number;
   auth: "veyra-password";
 };
+
+export function createPasswordResetToken() {
+  const token = randomBytes(32).toString("base64url");
+  const tokenHash = createHash("sha256").update(token).digest("hex");
+  return { token, tokenHash };
+}
+
+export function hashPasswordResetToken(token: string) {
+  return createHash("sha256").update(token).digest("hex");
+}
 
 function secretKey() {
   return new TextEncoder().encode(ENV.cookieSecret);
@@ -77,8 +88,8 @@ export async function verifyAccountPassword(password: string, encodedHash: strin
   }
 }
 
-export async function createVeyraSessionToken(openId: string) {
-  return new SignJWT({ openId, auth: "veyra-password" satisfies VeyraSessionPayload["auth"] })
+export async function createVeyraSessionToken(openId: string, sessionVersion = 1) {
+  return new SignJWT({ openId, sessionVersion, auth: "veyra-password" satisfies VeyraSessionPayload["auth"] })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt()
     .setExpirationTime(Math.floor((Date.now() + VEYRA_SESSION_MS) / 1000))
@@ -91,8 +102,10 @@ export async function authenticateVeyraRequest(req: Request) {
   try {
     const { payload } = await jwtVerify(sessionToken, secretKey(), { algorithms: ["HS256"] });
     const session = payload as unknown as VeyraSessionPayload;
-    if (session.auth !== "veyra-password" || typeof session.openId !== "string") return null;
-    return (await db.getUserByOpenId(session.openId)) ?? null;
+    if (session.auth !== "veyra-password" || typeof session.openId !== "string" || !Number.isInteger(session.sessionVersion)) return null;
+    const user = await db.getUserByOpenId(session.openId);
+    if (!user || user.sessionVersion !== session.sessionVersion) return null;
+    return user;
   } catch {
     return null;
   }
