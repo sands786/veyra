@@ -557,3 +557,5 @@
 - [x] Document user-owned contract deployment/configuration and wallet approval prerequisites without exposing credentials
 - [x] Re-run full tests, typecheck, build, dependency audit, runtime checks, and publish the final safe release
 - [x] Fix reported Braavos/Mainnet wallet chain-ID normalization so genuine Mainnet wallets pass strict network verification
+- [x] Resolve persistent STRK20 capability error reported with Braavos/Mainnet wallet without weakening the fail-closed execution boundary
+- [x] Integrate the official StarknetInjectedWallet wrapper for legacy Braavos-compatible injection and verify wallet-standard request hydration with the full 143-test, TypeScript, and production-build suite

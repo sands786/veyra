@@ -1,3 +1,5 @@
+import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
+
 export type VeilNetwork = "mainnet";
 
 export const STRK_TOKEN =
@@ -179,6 +181,61 @@ async function requestInvoke(
  * for private actions.
  */
 function withWalletStandardMethods(wallet: VeilWallet): VeilWallet {
+  if (
+    wallet.request &&
+    typeof (wallet as VeilWallet & { on?: unknown }).on === "function"
+  ) {
+    try {
+      const injected = {
+        ...wallet,
+        request: async (request: {
+          type: string;
+          params?: Record<string, unknown>;
+        }) => {
+          const value = await wallet.request!.call(wallet, request);
+          if (
+            request.type === "wallet_requestChainId" &&
+            networkFromChainId(chainIdFromValue(value)) === "mainnet"
+          ) {
+            return MAINNET_CHAIN_ID;
+          }
+          return value;
+        },
+      } as unknown as ConstructorParameters<typeof StarknetInjectedWallet>[0];
+      const standard = new StarknetInjectedWallet(injected);
+      const walletApi = standard.features["starknet:walletApi"];
+      const standardConnect = standard.features["standard:connect"];
+      // Veyra keeps the STRK20 action union broad enough for the protocol’s
+      // deposit + transfer flow; the wallet-standard declaration currently
+      // exposes a narrower transfer-only generated type. Runtime validation
+      // remains at the protocol readiness and route guards below this seam.
+      const standardRequest = walletApi.request as unknown as WalletRequest;
+      const account = standard.accounts[0];
+      const chainId = account?.chains[0]?.split(":").at(-1);
+      return {
+        ...wallet,
+        name: standard.name || wallet.name,
+        icon: standard.icon || wallet.icon,
+        address: account?.address ?? wallet.address,
+        chainId: chainId ?? wallet.chainId,
+        request: standardRequest,
+        connect: async () => standardConnect.connect({}),
+        strk20InvokeTransaction:
+          wallet.strk20InvokeTransaction ??
+          (actions =>
+            standardRequest({
+              type: "wallet_strk20InvokeTransaction",
+              params: { actions },
+            }).then(value => ({
+              transaction_hash: transactionHashFromWalletResponse(value),
+            }))),
+        execute: wallet.execute ?? (calls => requestInvoke(wallet, calls)),
+      };
+    } catch {
+      // Fall through to the direct wallet-api adapter when a legacy provider
+      // does not expose the event methods required by the standard wrapper.
+    }
+  }
   if (!wallet.request) return wallet;
   return {
     ...wallet,
@@ -278,7 +335,8 @@ function chainIdFromValue(value: unknown): string | undefined {
   const account = Array.isArray(record.accounts)
     ? record.accounts[0]
     : record.account;
-  return chainIdFromValue(account);
+  if (account !== undefined) return chainIdFromValue(account);
+  return chainIdFromValue(record.chains);
 }
 
 function addressFromValue(value: unknown): string | undefined {
@@ -312,9 +370,12 @@ function mergeWalletConnection(
 export function networkFromChainId(chainId?: string): VeilNetwork | undefined {
   if (!chainId) return undefined;
   const normalized = chainId.trim().toLowerCase();
-  const normalizedHex = /^\d+$/.test(normalized)
-    ? `0x${BigInt(normalized).toString(16)}`
+  const namespaceless = normalized.startsWith("starknet:")
+    ? normalized.slice("starknet:".length)
     : normalized;
+  const normalizedHex = /^\d+$/.test(namespaceless)
+    ? `0x${BigInt(namespaceless).toString(16)}`
+    : namespaceless;
   if (
     normalizedHex === MAINNET_CHAIN_ID.toLowerCase() ||
     normalizedHex === "sn_main" ||
@@ -350,10 +411,14 @@ export async function connectVeilWallet(selectedWallet?: VeilWallet): Promise<{
 }> {
   const wallet = selectedWallet ?? detectWallet();
   if (!wallet) return { live: false };
-  const connectionResult = wallet.enable
-    ? await wallet.enable()
-    : await wallet.connect?.({ mode: "browser" });
-  const connectedWallet = mergeWalletConnection(wallet, connectionResult);
+  const adaptedWallet = withWalletStandardMethods(wallet);
+  const connectionResult = adaptedWallet.connect
+    ? await adaptedWallet.connect({ mode: "browser" })
+    : await adaptedWallet.enable?.();
+  const connectedWallet = mergeWalletConnection(
+    adaptedWallet,
+    connectionResult
+  );
   const enhancedWallet = withWalletStandardMethods(connectedWallet);
   const address = addressFromWallet(enhancedWallet);
   return {

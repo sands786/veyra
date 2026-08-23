@@ -158,6 +158,49 @@ describe("STRK20 on-chain adapter", () => {
     });
   });
 
+  it("hydrates and submits through an injected Braavos-shaped wallet-standard provider", async () => {
+    let received: unknown;
+    const wallet = {
+      id: "braavos",
+      name: "Braavos",
+      icon: "data:image/svg+xml;base64,AA==",
+      on: (_event: string, _listener: (...args: unknown[]) => void) => () =>
+        undefined,
+      request: async (request: {
+        type: string;
+        params?: Record<string, unknown>;
+      }) => {
+        if (request.type === "wallet_requestAccounts") return ["0x1234"];
+        if (request.type === "wallet_requestChainId") return "SN_MAIN";
+        received = request;
+        return { transaction_hash: "0xabc" };
+      },
+    };
+    const connected = await connectVeilWallet(wallet);
+    expect(connected).toMatchObject({
+      address: "0x1234",
+      live: true,
+      network: "mainnet",
+    });
+    await expect(
+      submitShieldedRoute(connected.wallet, 2n, "mainnet", "0x4567", STRK_TOKEN)
+    ).resolves.toEqual({ transaction_hash: "0xabc" });
+    expect(received).toEqual({
+      type: "wallet_strk20InvokeTransaction",
+      params: {
+        actions: [
+          { type: "deposit", token: STRK_TOKEN, amount: "0x2" },
+          {
+            type: "transfer",
+            token: STRK_TOKEN,
+            amount: "0x2",
+            recipient: "0x4567",
+          },
+        ],
+      },
+    });
+  });
+
   it("submits through the official wallet_strk20InvokeTransaction request", async () => {
     let received: unknown;
     const wallet = {
