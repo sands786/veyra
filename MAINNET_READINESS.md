@@ -24,6 +24,8 @@ For a real first-phase STRK20 transaction, the user must use the Privacy or Shie
 
 Veyra's route-builder private-action request remains fail-closed until an official developer-facing STRK20 wallet API/SDK release, verified privacy-pool deployment configuration, and compatible wallet action support are available. Veyra must not route around this limitation with a public ERC-20 transfer or an unverified contract call.
 
+For a private transfer, the recipient must also have the wallet-native STRK20 receiver or channel context required by the supporting wallet. A `Missing channel context for recipient` error does not create a completed transfer and must be rejected rather than retried with a public-transfer workaround.
+
 ## User-owned completion steps
 
 For wallet-native evidence, the user must connect Ready X or Xverse on Starknet Mainnet, complete a small intended Shield action only after inspecting the wallet request, record the returned hash, confirm the contract and token on Starkscan, wait for a receipt, and run Veyra receipt verification. Only the verified receipt should be recorded as confirmed evidence.

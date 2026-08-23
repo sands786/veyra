@@ -537,7 +537,7 @@
 - [x] Audit finding: replace precision-unsafe market utilization arithmetic with exact decimal comparisons
 - [x] Audit finding: route tRPC workspace headers through the shared safe browser-storage boundary
 - [x] Publish the audited Veyra source revision to the public GitHub repository at https://github.com/sands786/veyra.
-- [ ] User-owned evidence still required: connect a real Starknet mainnet wallet, execute and verify the intended mainnet flows, record the resulting transaction hashes, and submit the final demo materials.
+- [ ] User-owned final submission remains: include the verified Ready X Mainnet STRK shield receipt in the final hackathon materials and submit them.
 - [x] Audit finding: prevent a production route from advancing to shielded/routed stages when the connected wallet cannot submit the required STRK20 transaction
 - [x] Fix reported Braavos wallet capability detection so supported Starknet Mainnet submission is recognized without weakening the fail-closed guard
 - [x] Fix reported Mainnet asset-integrity gap: prevent a visible USDC route from invoking a hardcoded STRK token action
@@ -621,5 +621,15 @@
 
 ## Wallet-native Mainnet evidence path
 
-- [ ] Receive a user-approved Ready X or Xverse STRK20 privacy transaction hash created through the supported wallet-native shield/transfer flow.
-- [ ] Verify the submitted hash and receipt on Starknet Mainnet, then record only public evidence in Veyra’s proof materials.
+- [x] Receive a user-approved Ready X or Xverse STRK20 privacy transaction hash created through the supported wallet-native shield/transfer flow.
+- [x] Verify the submitted hash and receipt on Starknet Mainnet, then record only public evidence in Veyra’s proof materials.
+
+## Private recipient channel-context boundary
+
+- [x] Preserve the failed Ready X private-transfer attempt as non-evidence and document that a recipient needs supported STRK20 receiver/channel context.
+- [x] Capture and verify only the confirmed wallet-native STRK shield transaction as public Mainnet evidence.
+
+## Shielded self-transfer verification
+
+- [x] Obtain the user-provided hash for the reported 1 STRK wallet-native shield and verify its public Mainnet receipt before inferring any balance outcome.
+- [x] Explain the verified public receipt alongside the wallet’s shielded-versus-public balance display without exposing private note data.
