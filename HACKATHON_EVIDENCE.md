@@ -39,3 +39,7 @@ The official hub verifies each transaction against Starknet Mainnet and the STRK
 | Demo video | `demo_video` in `strk20.json` | HTTP `200`, `video/mp4`, 17,369,355 bytes at validation time. |
 
 This availability check does not replace the registry pull request or the user-owned final submission action.
+
+## Public repository metadata correction — 23 August 2026
+
+The public GitHub `main` branch was initially found to expose an obsolete `strk20.json` with an empty `transactions` array. The corrected local history was published to `sands786/veyra` at commit `b930df0ba928e509564dca68242dc674fc4004ee`. GitHub’s repository Contents API then confirmed that `main` contains the three verified transaction hashes in the active file. The unauthenticated `raw.githubusercontent.com` response continued to show its prior empty content during the same validation window, which is treated as a cache-propagation discrepancy rather than the authoritative source-of-branch check.

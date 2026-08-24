@@ -660,8 +660,8 @@
 - [x] Inventory and verify the live Veyra app URL, repository, demo materials, documentation, and real Mainnet evidence URL.
 - [x] Prepare concise submission-ready product, architecture, privacy, and evidence copy that does not overclaim direct wallet execution.
 - [x] Deliver the final checklist for the user-owned submission action in the repository submission pack.
-- [ ] Publish the local verified three-hash `strk20.json` to the public GitHub `main` branch; the public repository currently exposes an obsolete empty transaction list.
-- [ ] Revalidate the public raw GitHub metadata after publication before asserting repository-level submission readiness.
+- [x] Publish the local verified three-hash `strk20.json` to the public GitHub `main` branch; the public repository initially exposed an obsolete empty transaction list.
+- [x] Revalidate the public GitHub repository metadata after publication through the authoritative Contents API; it confirms all three verified hashes, while the raw endpoint remained temporarily cache-stale.
 
 ## Official STRK20 evidence-count reconciliation
 
