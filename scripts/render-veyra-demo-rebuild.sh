@@ -10,6 +10,7 @@ PRIMITIVES_CAPTURE="/home/ubuntu/screenshots/webdev-preview-private_primitives-1
 MARKETS_CAPTURE="/home/ubuntu/screenshots/webdev-preview-private_markets-1787608474995335040-8052.png"
 LAUNCHPAD_CAPTURE="/home/ubuntu/screenshots/webdev-preview-launchpad-1787608473393965539-5034.png"
 LOGO="$ROOT/veyra-lockup.png"
+TEASER="/home/ubuntu/webdev-static-assets/veyra-30s-logo-led-stable-teaser.mp4"
 mkdir -p "$WORK"
 
 node /home/ubuntu/veilpay-private-sprint/scripts/build-veyra-demo-compact-captions.mjs
@@ -30,15 +31,16 @@ make_scroll_clip() {
   ffmpeg -y -loop 1 -framerate 60 -i "$source" -filter_complex "[0:v]crop=1920:1080:0:'$start_y+($end_y-$start_y)*t/$duration',eq=contrast=1.11:saturation=1.12,drawbox=x=0:y=0:w=1920:h=1080:color=0x071015@0.08:t=fill,drawbox=x=80:y=54:w=1760:h=972:color=0xF0563A@0.28:t=2,drawtext=fontfile=$FONT:text='$label':x=120:y=92:fontsize=26:fontcolor=0xF0563A:box=1:boxcolor=0x111210@0.74:boxborderw=12,drawtext=fontfile=$FONT:text='$description':x=120:y=132:fontsize=34:fontcolor=0xF3EEE5:box=1:boxcolor=0x111210@0.58:boxborderw=9,drawtext=fontfile=$FONT:text='➤':x=$cursor_x:y=$cursor_y:fontsize=76:fontcolor=white:borderw=3:bordercolor=0x111210:enable='between(t,1.15,3.75)',drawtext=fontfile=$FONT:text='◎':x=$cursor_x+22:y=$cursor_y+18:fontsize=84:fontcolor=0xF0563A:enable='between(t,2.55,3.05)',drawtext=fontfile=$FONT:text='VEYRA / STARKNET MAINNET':x=120:y=1010:fontsize=18:fontcolor=0xF3EEE5@0.9:box=1:boxcolor=0x111210@0.62:boxborderw=9,fade=t=in:st=0:d=0.18,fade=t=out:st=$fade_start:d=0.18,format=yuv420p[v]" -map "[v]" -t "$duration" -r 60 -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p "$WORK/$file"
 }
 
-make_problem_open() {
-  ffmpeg -y -loop 1 -framerate 60 -i "$ROOT_CAPTURE" -loop 1 -framerate 60 -i "$LOGO" -filter_complex "[0:v]crop=1920:1080:0:'30+110*t/12',eq=contrast=1.14:saturation=1.12,drawbox=x=0:y=0:w=1920:h=1080:color=0x071015@0.36:t=fill,drawbox=x=80:y=54:w=1760:h=972:color=0xF0563A@0.36:t=2,drawtext=fontfile=$FONT:text='PUBLIC DATA IS A LIABILITY.':x=120:y=158:fontsize=64:fontcolor=0xF3EEE5:enable='between(t,0,4.8)',drawtext=fontfile=$FONT:text='The roster should not become the product.':x=124:y=246:fontsize=32:fontcolor=0xF3EEE5@0.84:enable='between(t,0.6,5.5)',drawtext=fontfile=$FONT:text='PRIVATE FINANCE SHOULD STILL OPERATE.':x=120:y=158:fontsize=54:fontcolor=0xF3EEE5:enable='gte(t,5.0)',drawtext=fontfile=$FONT:text='Wallet-owned authorization. Receipt-gated proof.':x=124:y=236:fontsize=30:fontcolor=0xF3EEE5@0.84:enable='gte(t,5.6)'[bg];[1:v]format=rgba,fade=t=in:st=4.2:d=1:alpha=1[mark];[bg][mark]overlay=(W-w)/2:670:enable='gte(t,4.2)',drawtext=fontfile=$FONT:text='VEYRA / PRIVATE FINANCIAL COORDINATION':x=120:y=1010:fontsize=18:fontcolor=0xF3EEE5@0.9:box=1:boxcolor=0x111210@0.62:boxborderw=9,fade=t=in:st=0:d=0.2,fade=t=out:st=11.8:d=0.2,format=yuv420p[v]" -map "[v]" -t 12 -r 60 -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p "$WORK/01_hook.mp4"
+make_teaser_segment() {
+  local start="$1"
+  local duration="$2"
+  local file="$3"
+  local fade_start
+  fade_start=$(awk "BEGIN { printf \"%.2f\", $duration - 0.18 }")
+  ffmpeg -y -ss "$start" -i "$TEASER" -t "$duration" -vf "scale=1920:1080:flags=lanczos,fps=60,fade=t=in:st=0:d=0.18,fade=t=out:st=$fade_start:d=0.18" -an -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p "$WORK/$file"
 }
 
-make_final_resolve() {
-  ffmpeg -y -loop 1 -framerate 60 -i "$ROOT_CAPTURE" -loop 1 -framerate 60 -i "$LOGO" -filter_complex "[0:v]crop=1920:1080:0:'1900+(2600-1900)*t/22',eq=contrast=1.12:saturation=1.12,drawbox=x=0:y=0:w=1920:h=1080:color=0x071015@0.10:t=fill,drawbox=x=80:y=54:w=1760:h=972:color=0xF0563A@0.30:t=2,drawtext=fontfile=$FONT:text='THE PRODUCT IS STILL RUNNING.':x=120:y=92:fontsize=26:fontcolor=0xF0563A:box=1:boxcolor=0x111210@0.74:boxborderw=12,drawtext=fontfile=$FONT:text='Coordinate privately.':x=120:y=720:fontsize=62:fontcolor=0xF3EEE5:enable='between(t,0,13.2)',drawtext=fontfile=$FONT:text='Verify openly.':x=120:y=798:fontsize=62:fontcolor=0xF0563A:enable='between(t,0.6,13.2)'[bg];[1:v]format=rgba,fade=t=in:st=13.0:d=1:alpha=1[mark];[bg][mark]overlay=(W-w)/2:360:enable='gte(t,13.0)',drawtext=fontfile=$FONT:text='PRIVATE FINANCIAL COORDINATION, WITHOUT THE PUBLIC ROSTER.':x=(w-text_w)/2:y=720:fontsize=28:fontcolor=0xF3EEE5:enable='gte(t,13.4)',drawtext=fontfile=$FONT:text='WALLET → RECEIPT → PROOF':x=(w-text_w)/2:y=774:fontsize=24:fontcolor=0x70D49D:enable='gte(t,14.1)',drawtext=fontfile=$FONT:text='VEYRA / STARKNET MAINNET':x=120:y=1010:fontsize=18:fontcolor=0xF3EEE5@0.9:box=1:boxcolor=0x111210@0.62:boxborderw=9,fade=t=in:st=0:d=0.2,format=yuv420p[v]" -map "[v]" -t 22 -r 60 -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p "$WORK/09_close.mp4"
-}
-
-make_problem_open
+make_teaser_segment 0 12 "01_hook.mp4"
 make_scroll_clip "$ROOT_CAPTURE" 14 "THE SYSTEM" "A private finance operating layer for STRK20." "02_system.mp4" 250 625 140 420
 make_scroll_clip "$DEMO_CAPTURE" 22 "01 / PRIVATE PAYROLL" "Build the route. Gate the action. Confirm the receipt." "03_payroll.mp4" 1480 945 0 260
 make_scroll_clip "$ROOT_CAPTURE" 10 "PAYROLL OUTCOME" "Intent, policy, proof, and a visible execution boundary." "04_payroll_outcome.mp4" 1520 700 420 900
@@ -46,7 +48,7 @@ make_scroll_clip "$PRIMITIVES_CAPTURE" 24 "02 / PRIVATE PRIMITIVES" "Private lin
 make_scroll_clip "$MARKETS_CAPTURE" 26 "03 / PRIVATE MARKETS" "Aggregate signal stays public. The actor stays private." "06_markets.mp4" 1570 880 0 0
 make_scroll_clip "$LAUNCHPAD_CAPTURE" 24 "04 / PRIVATE LAUNCHPAD" "Allocation, milestone, and release readiness — privately coordinated." "07_launchpad.mp4" 1300 790 0 0
 make_scroll_clip "$ROOT_CAPTURE" 22 "THE TRUST BOUNDARY" "Veyra coordinates. Wallets sign. Receipts decide confirmation." "08_technical.mp4" 1260 760 900 1900
-make_final_resolve
+make_teaser_segment 8 22 "09_close.mp4"
 
 cat > "$WORK/concat.txt" <<'EOF'
 file '01_hook.mp4'

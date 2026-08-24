@@ -2,8 +2,6 @@ import { writeFileSync } from "node:fs";
 
 const output = "/home/ubuntu/webdev-static-assets/veyra-demo-v2/captions_compact.ass";
 const cues = [
-  [0.4, 4.6, "A payroll run should not become a public spreadsheet."],
-  [5.0, 10.9, "Privacy cannot mean operating blind."],
   [12.4, 17.8, "Mainnet-only financial coordination for STRK20."],
   [18.2, 24.8, "The operating record stays private. The wallet signs."],
   [26.0, 32.2, "PRIVATE PAYROLL · governed route intent"],
@@ -21,9 +19,6 @@ const cues = [
   [126.0, 133.6, "Veyra coordinates. The wallet owns the STRK20 action."],
   [134.0, 142.2, "Policy, idempotency, audit state, and receipt verification."],
   [143.0, 151.2, "Three verified Mainnet privacy-pool receipts — public evidence only."],
-  [154.0, 161.4, "Coordinate privately. Authorize with the wallet."],
-  [162.0, 170.2, "Verify the receipt. Reveal only the proof."],
-  [170.6, 175.4, "VEYRA · PRIVATE FINANCIAL COORDINATION"],
 ];
 
 function time(seconds) {

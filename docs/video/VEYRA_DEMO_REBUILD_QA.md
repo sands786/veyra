@@ -15,3 +15,7 @@ Both rebuild masters are 176 seconds, 1920×1080, 60 fps, H.264 with approximate
 ## Intro and final resolve revision
 
 The cold open now starts with the pain point over a real Veyra workspace frame, then resolves into the Veyra lockup and the statement that private finance must still operate. The final sequence retains a live proof-ledger and wallet-boundary product frame under the closing line, **“Private financial coordination, without the public roster.”** The Veyra shield and wordmark fade in as the final brand resolve; the video does not end on a black frame or a logo-only slate.
+
+## Teaser-framed replacement
+
+The rejected custom intro and custom ending overlays are retired. The revised master uses the user-approved teaser from 0–12 seconds for the opening and from 8–30 seconds for the conclusion. The reviewed opening frame contains only the teaser’s clean Veyra shield, wordmark, and original art direction. The reviewed conclusion remains the teaser’s own Launchpad sequence at 2:48 in the master, with original typography and cursor treatment; no additional Veyra demo overlay, custom punchline, or caption is placed over it. The final teaser lockup follows in the last seconds of the 176-second master.
