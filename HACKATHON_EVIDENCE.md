@@ -33,6 +33,7 @@ The official hub verifies each transaction against Starknet Mainnet and the STRK
 | Asset | Verified public location | Result |
 | --- | --- | --- |
 | Live application | [veilpay-spri-t4knu9mv.manus.space](https://veilpay-spri-t4knu9mv.manus.space) | Resolved to the Veyra public product entry point. |
+| GitHub Website / judge-facing link | [veyra-gamma-gold.vercel.app](https://veyra-gamma-gold.vercel.app) | Public Vercel deployment resolves to the current Veyra entry point; retained as the repository Website field at the user’s direction. |
 | Source repository | [github.com/sands786/veyra](https://github.com/sands786/veyra) | Public repository; default branch `main`; description identifies Veyra as privacy-first Starknet financial coordination. |
 | Repository license | [MIT License](https://github.com/sands786/veyra/blob/main/LICENSE) | Publicly available and verified through the GitHub repository license endpoint. |
 | Active metadata | [`strk20.json`](./strk20.json) | Valid JSON with exactly the three verified public Mainnet hashes, no fake placeholder, an empty contracts list, and the public app URL. |

@@ -664,6 +664,7 @@
 - [x] Revalidate the public GitHub repository metadata after publication through the authoritative Contents API; it confirms all three verified hashes, while the raw endpoint remained temporarily cache-stale.
 - [x] Remove the obsolete registry/Telegram submission guidance and replace it with the official repository-at-deadline entry rule.
 - [x] Verify the public Veyra repository against the official live-demo, 189.97-second demo-video, three-hash, public-license, and working-Mainnet-product criteria, preserving the recipient-delivery caveat.
+- [x] Preserve the Vercel deployment as Veyra’s public GitHub Website field and verify that exact public URL resolves to the current Veyra entry point for judges.
 
 ## Official STRK20 evidence-count reconciliation
 
