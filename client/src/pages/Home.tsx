@@ -525,6 +525,9 @@ export default function Home() {
   const [walletQrLoading, setWalletQrLoading] = useState(false);
   const walletNetwork = networkFromChainId(wallet?.chainId);
   const executionCapability = onchainCapability(wallet, selectedNetwork);
+  const walletCanSubmitStrk20 = Boolean(
+    wallet?.strk20InvokeTransaction || wallet?.request
+  );
   const [copied, setCopied] = useState(false);
   const [recipientName, setRecipientName] = useState("");
   const [recipientWallet, setRecipientWallet] = useState("");
@@ -719,10 +722,10 @@ export default function Home() {
       });
       return;
     }
-    if (!isDemoMode && stage === 1 && !wallet?.strk20InvokeTransaction) {
+    if (!isDemoMode && stage === 1 && !walletCanSubmitStrk20) {
       toast("This wallet cannot submit the STRK20 Mainnet action.", {
         description:
-          "Use a Starknet wallet with STRK20 invocation support before creating a production route.",
+          "Use a wallet exposing the official STRK20 wallet action before creating a production route. Veyra will not substitute a generic invoke or public transfer.",
       });
       return;
     }
@@ -755,7 +758,7 @@ export default function Home() {
         return;
       }
     }
-    if (wallet?.strk20InvokeTransaction && stage === 1) {
+    if (wallet && walletCanSubmitStrk20 && stage === 1) {
       try {
         const amountSmallestUnit = decimalToScaledBigInt(
           normalizedAmount,
@@ -866,10 +869,10 @@ export default function Home() {
       openWalletPicker();
       return;
     }
-    if (!wallet.strk20InvokeTransaction) {
+    if (!walletCanSubmitStrk20) {
       toast("This wallet cannot submit the STRK20 Mainnet action.", {
         description:
-          "No private transaction was created. Use a wallet that implements the official STRK20 invocation capability.",
+          "No private transaction was created. Use a wallet exposing the official STRK20 wallet action; Veyra will not substitute a generic invoke or public transfer.",
       });
       return;
     }
@@ -2748,7 +2751,7 @@ export default function Home() {
                               ? "WALLET ACTION IN PROGRESS"
                               : !connected
                                 ? "CONNECT WALLET TO REVIEW"
-                                : !wallet?.strk20InvokeTransaction
+                                : !walletCanSubmitStrk20
                                   ? "STRK20 WALLET REQUIRED"
                                   : "REVIEW & SUBMIT PRIVATE TRANSACTION"}
                       </Button>

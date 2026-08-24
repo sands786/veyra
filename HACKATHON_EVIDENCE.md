@@ -4,12 +4,13 @@ Veyra’s source code includes a full-stack privacy-finance workspace, wallet-co
 
 ## Required before the August 31, 2026 deadline
 
-The official STRK20 repository states that there is **nothing to submit manually**: whatever the public repository shows at the deadline is the entry. The Veyra repository must therefore remain public, open-source, licensed, and accessible at the deadline. [Official submission rules](https://github.com/starkience/strk20-hackathon#submitting)
+The official STRK20 process has two distinct steps. First, each project opens **one registry pull request** with its public repository URL and team Telegram usernames; this is how it appears on the hub. Second, there is **no separate manual final-submission form**: the public repository state at the deadline is what the panel scores. [Official application and submission rules](https://github.com/starkience/strk20-hackathon)
 
-1. Keep the public repository and its `LICENSE` available through the deadline.
-2. The official transaction-count prerequisite is met with the three verified Mainnet privacy-pool hashes below. Do not replace them with placeholders or add an unverified hash.
-3. Keep the public three-minute demo video and live Veyra demo URL reachable. The metadata file is what the scoring panel reads.
-4. If the Veyra payroll registry is deployed, add its real deployed address to the `contracts` list in `strk20.json`; otherwise leave the list empty.
+1. Open the one-time registry pull request before the deadline. It requires the public repository URL and public Telegram username(s); do not include wallet secrets or any private data.
+2. Keep the public repository and its `LICENSE` available through the deadline.
+3. The official transaction-count prerequisite is met with the three verified Mainnet privacy-pool hashes below. Do not replace them with placeholders or add an unverified hash.
+4. Keep the public three-minute demo video and live Veyra demo URL reachable. The metadata file is what the scoring panel reads.
+5. If the Veyra payroll registry is deployed, add its real deployed address to the `contracts` list in `strk20.json`; otherwise leave the list empty.
 
 ## Final `strk20.json` shape
 
@@ -22,7 +23,7 @@ The official STRK20 repository states that there is **nothing to submit manually
   ],
   "contracts": [],
   "demo_video": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4",
-  "demo_url": "https://veilpay-spri-t4knu9mv.manus.space"
+  "demo_url": "https://veyra-gamma-gold.vercel.app"
 }
 ```
 
@@ -32,14 +33,14 @@ The official hub verifies each transaction against Starknet Mainnet and the STRK
 
 | Asset | Verified public location | Result |
 | --- | --- | --- |
-| Live application | [veilpay-spri-t4knu9mv.manus.space](https://veilpay-spri-t4knu9mv.manus.space) | Resolved to the Veyra public product entry point. |
+| Live application / primary judge link | [veyra-gamma-gold.vercel.app](https://veyra-gamma-gold.vercel.app) | Resolved to the Veyra public product entry point; retained in the GitHub Website field. |
 | GitHub Website / judge-facing link | [veyra-gamma-gold.vercel.app](https://veyra-gamma-gold.vercel.app) | Public Vercel deployment resolves to the current Veyra entry point; retained as the repository Website field at the user’s direction. |
 | Source repository | [github.com/sands786/veyra](https://github.com/sands786/veyra) | Public repository; default branch `main`; description identifies Veyra as privacy-first Starknet financial coordination. |
 | Repository license | [MIT License](https://github.com/sands786/veyra/blob/main/LICENSE) | Publicly available and verified through the GitHub repository license endpoint. |
 | Active metadata | [`strk20.json`](./strk20.json) | Valid JSON with exactly the three verified public Mainnet hashes, no fake placeholder, an empty contracts list, and the public app URL. |
 | Demo video | `demo_video` in `strk20.json` | HTTP `200`, `video/mp4`, 17,369,355 bytes at validation time; the matching retained source asset runs **189.97 seconds** (3:09.97), satisfying the three-minute demo criterion. |
 
-This availability check is the preparation for the repository-at-deadline entry rule; no registry pull request or Telegram field is required by the current official submission instructions.
+This availability check supports the repository-at-deadline evaluation. It does **not** replace the one-time registry application, which requires a public Telegram username and a registry pull request before the deadline.
 
 ## Public repository metadata correction — 23 August 2026
 

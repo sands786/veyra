@@ -29,16 +29,16 @@
 
 ## 3. Reviewer path
 
-1. Open the [live workspace](https://veilpay-spri-t4knu9mv.manus.space) and sign in through Manus OAuth.
+1. Open the [live workspace](https://veyra-gamma-gold.vercel.app) and use the Veyra account flow.
 2. Create a recipient and a route from the **Payment routes** surface; inspect the persisted and unsigned labels before treating any action as a transfer.
 3. Open **Operations** and **Treasury** to inspect approval, schedule, policy, and audit controls.
 4. Open **Private Markets** to inspect the persisted RFQ, sealed-bid, policy, alert, and lifecycle views.
-5. Open [Documentation](https://veilpay-spri-t4knu9mv.manus.space/documentation) for the architecture narrative, receipt boundary, and function films.
-6. Treat the mainnet evidence list as incomplete until the owner has recorded real hashes in `strk20.json`; the current repository deliberately contains no fabricated transaction evidence.
+5. Open [Documentation](https://veyra-gamma-gold.vercel.app/documentation) for the architecture narrative, receipt boundary, and function films.
+6. Verify the three public Mainnet STRK20 privacy-pool hashes in [`strk20.json`](../strk20.json); they are receipt evidence only and do not establish recipient-private-note delivery.
 
 ## 4. Local verification
 
-The current suite comprises **14 Vitest files and 64 tests**. It covers shared operations, workspace selection and resolution, launchpad router behavior, Demo Mode, documentation data, authentication logout behavior, route editing, STRK20 helpers, private primitives, and clipboard/on-chain configuration utilities.
+The latest hardening verification completed **152 Vitest tests across 37 files**. It covers shared operations, workspace selection and resolution, launchpad router behavior, Demo Mode, documentation data, account authentication, route editing, STRK20 helpers, private primitives, claimed-route hash recovery, and clipboard/on-chain configuration utilities.
 
 ```bash
 pnpm install

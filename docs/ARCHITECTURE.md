@@ -58,25 +58,17 @@ The application is a single full-stack project: the client and API are developed
 sequenceDiagram
   participant U as User browser
   participant C as Veyra client
-  participant M as Manus OAuth
-  participant O as /api/oauth/callback
+  participant A as Veyra account API
   participant D as User + workspace tables
 
-  U->>C: Select Sign in
-  C->>C: Generate nonce; write one-time host cookie
-  C->>M: OAuth request with encoded state
-  M-->>O: code + state
-  O->>O: Decode state and compare nonce cookie
-  alt nonce mismatch
-    O-->>U: 403 invalid oauth state
-  else nonce valid
-    O->>M: Exchange code; read user info
-    O->>D: Upsert user and resolve membership
-    O->>U: Secure session cookie; redirect to /
-  end
+  U->>C: Select Sign in or Create account
+  C->>A: Same-origin protected account request
+  A->>A: Validate request and derive password verifier
+  A->>D: Create or resolve user and workspace membership
+  A-->>U: Server-signed HttpOnly session cookie; redirect to requested route
 ```
 
-The callback implementation is in [`server/_core/oauth.ts`](../server/_core/oauth.ts). It rejects a missing or mismatched nonce before exchanging an authorization code. The application then creates a session token and uses protected tRPC procedures for workspace data access.
+The active Vercel deployment rewrites same-origin `/api/*` traffic to the managed backend. Account verification, session signing, workspace resolution, and protected tRPC procedures remain server-side; no external OAuth callback allowlist or backend secret is exposed to Vercel. See the [Vercel deployment guide](VERCEL_DEPLOYMENT.md) for the current deployment contract.
 
 ## 4. Route, wallet, receipt, and proof sequence
 
@@ -220,7 +212,7 @@ flowchart TB
 | `BUILT_IN_FORGE_API_URL` / `BUILT_IN_FORGE_API_KEY`      | API              | Built-in platform service access.                             |
 | `STARKNET_MAINNET_RPC_URL` or `STARKNET_SEPOLIA_RPC_URL` | Receipt verifier | Optional RPC override; a public fallback is used when absent. |
 
-The current managed deployment is available at [veilpay-spri-t4knu9mv.manus.space](https://veilpay-spri-t4knu9mv.manus.space). A Vercel frontend deployment is intentionally deferred until the Vercel owner completes GitHub OAuth authorization and the OAuth callback origin is configured for that domain.
+The primary public product and GitHub Website link is [veyra-gamma-gold.vercel.app](https://veyra-gamma-gold.vercel.app). Vercel serves the frontend and transparently rewrites authenticated `/api/*` and `/manus-storage/*` requests to the managed backend, where protected business logic, database access, receipt verification, and session secrets remain isolated.
 
 ## 9. Code map
 

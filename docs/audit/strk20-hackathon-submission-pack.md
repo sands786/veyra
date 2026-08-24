@@ -1,7 +1,7 @@
 # Veyra — STRK20 Hackathon Submission Pack
 
 **Prepared:** 23 August 2026  
-**Submission status:** **Repository-level entry package verified.** The official rules state that the repository state at the deadline is the entry; there is no manual registry submission. [1]
+**Submission status:** **Repository-level scoring package verified; registry application pending.** The official rules require one registry pull request to appear on the hub, while the public repository state at the deadline is the final scored entry. [1]
 
 ## Submission copy
 
@@ -13,7 +13,7 @@
 
 | Category | Evidence |
 | --- | --- |
-| Live product | [Veyra app](https://veilpay-spri-t4knu9mv.manus.space) |
+| Live product | [Veyra app](https://veyra-gamma-gold.vercel.app) |
 | Source | [Public GitHub repository](https://github.com/sands786/veyra) |
 | Demo | [Three-minute product demo](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4) — verified runtime: 189.97 seconds |
 | Submission metadata | [`strk20.json`](../../strk20.json) |
@@ -38,7 +38,7 @@ An additional successful claimed-route pool action is documented separately as p
 | Public repository | Verified | Keep `sands786/veyra` public with its `LICENSE` available. |
 | App and demo links | Verified | Keep the live Veyra app and `demo_video` URL reachable through judging. |
 | Three required transaction hashes | Verified | Keep the three real hashes in `strk20.json`; do not add placeholders. |
-| Manual registry form / Telegram | Not required | The official submission instructions state that there is nothing to submit manually; the public repository state at the deadline is the entry. |
+| Official registry application | **Pending** | Open the one permitted pull request against the official registry with `https://github.com/sands786/veyra` and the team’s public Telegram username(s). This must happen before the deadline; it is distinct from the no-separate-final-submission rule. |
 | Optional contract address | Pending only if deployed | Leave `contracts: []` unless there is a real deployed Veyra payroll-registry address. |
 | Recipient-note reconciliation | Separate operational issue | Do not claim resolution until the recipient Ready X wallet discovers the private note. |
 | Historic Veyra route record | Separate operational issue | Use the safe no-signature recovery control with the already returned hash before a receipt confirmation attempt. |

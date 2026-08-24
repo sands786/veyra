@@ -80,7 +80,7 @@ describe("Veyra interaction contracts", () => {
       "This Mainnet asset is not configured for STRK20 execution."
     );
     expect(home).toContain(
-      "if (!isDemoMode && stage === 1 && !wallet?.strk20InvokeTransaction)"
+      "if (!isDemoMode && stage === 1 && !walletCanSubmitStrk20)"
     );
     expect(home).toContain("if (!isDemoMode && stage >= 2)");
     expect(home).toContain("Receipt verification is required.");
@@ -120,7 +120,8 @@ describe("Veyra interaction contracts", () => {
     expect(home).toContain("SELECT A SAVED ROUTE FOR CLAIM REVIEW");
     expect(home).toContain("REVIEW & SUBMIT PRIVATE TRANSACTION");
     expect(home).toContain("async function submitClaimedRecipientRoute()");
-    expect(home).toContain("wallet.strk20InvokeTransaction");
+    expect(home).toContain("const walletCanSubmitStrk20 = Boolean(");
+    expect(home).toContain("wallet?.strk20InvokeTransaction || wallet?.request");
     expect(home).toContain("await submitShieldedRoute(");
     expect(home).toContain("The wallet returned no transaction hash.");
     expect(home).toMatch(/No\s+public-transfer fallback\s+is available\./);

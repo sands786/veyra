@@ -70,7 +70,7 @@ describe("documentation contract", () => {
     expect(readme).toContain("[![Open Film 01");
     expect(readme).toContain("[![Open Film 00");
     expect(readme).toContain(
-      "https://veilpay-spri-t4knu9mv.manus.space/documentation#overview"
+      "https://veyra-gamma-gold.vercel.app/documentation#overview"
     );
   });
 

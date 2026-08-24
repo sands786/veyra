@@ -666,6 +666,13 @@
 - [x] Verify the public Veyra repository against the official live-demo, 189.97-second demo-video, three-hash, public-license, and working-Mainnet-product criteria, preserving the recipient-delivery caveat.
 - [x] Preserve the Vercel deployment as Veyra’s public GitHub Website field and verify that exact public URL resolves to the current Veyra entry point for judges.
 
+## Final competitive hardening pass
+
+- [x] Score the current Veyra package against the official STRK20 judging weights and identify only evidence-backed high-impact gaps in `docs/audit/final-competitive-readiness-2026-08-25.md`.
+- [x] Audit and correct the final code-owned private-route defect: request-capable Mainnet wallets now reach the same fail-closed `submitShieldedRoute` boundary without a generic-invoke or public-transfer fallback.
+- [x] Refine the public README and judge-facing demo path to foreground real Mainnet evidence, private-finance differentiation, and fail-closed wallet integrity.
+- [x] Re-run complete automated, build, visual, and public-artifact verification: 152 tests across 37 files, TypeScript, production build, diff hygiene, desktop and mobile smoke checks, plus public Vercel and GitHub metadata checks.
+
 ## Official STRK20 evidence-count reconciliation
 
 - [x] Reconcile the official three-transaction Mainnet evidence requirement with the three verified Ready X STRK20 pool transactions now recorded.
@@ -714,3 +721,14 @@
 - [x] Correct verified code-owned persistence, duplicate-prevention, and receipt-state defects with atomic persistence and retry-safe state transitions.
 - [x] Add focused tests for every corrected private-payment failure path and rerun the complete production verification suite.
 - [x] Publish an evidence-based hardening report that separates corrected SaaS behavior from user-owned wallet and privacy-pool outcomes.
+
+## Final competitive hardening pass
+
+- [x] Score the current Veyra package against the official STRK20 judging weights and identify only evidence-backed high-impact gaps in `docs/audit/final-competitive-readiness-2026-08-25.md`.
+- [x] Audit and correct the final code-owned private-route defect: request-capable Mainnet wallets now reach the same fail-closed `submitShieldedRoute` boundary without a generic-invoke or public-transfer fallback.
+- [x] Refine the public README and judge-facing demo path to foreground real Mainnet evidence, private-finance differentiation, and fail-closed wallet integrity.
+- [x] Re-run complete automated, build, visual, and public-artifact verification: 152 tests across 37 files, TypeScript, production build, diff hygiene, desktop and mobile smoke checks, plus public Vercel and GitHub metadata checks.
+- [x] Correct submission documentation to distinguish the one-time official registry application from the no-manual-final-submission rule.
+- [x] Obtain the team’s public Telegram username and explicit approval, then prepare the minimal official registry branch containing only `https://github.com/sands786/veyra` and `Forgeclaw` for user-owned pull-request submission.
+- [ ] User-owned: open the already prepared official registry pull request from `https://github.com/starkience/strk20-hackathon/compare/main...sands786:strk20-hackathon:register-veyra?expand=1`.
+- [x] Remove the UI’s stale direct-method-only STRK20 gate so Mainnet-verified wallets exposing the standard request capability can reach the existing fail-closed `submitShieldedRoute` adapter without enabling any generic-invoke or public-transfer fallback; verified by the 152-test suite, `tsc --noEmit`, and the production build.

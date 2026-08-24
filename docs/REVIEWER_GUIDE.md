@@ -11,7 +11,7 @@
 |      Time | Open                                                                                                                      | Verify                                                                                                        |
 | --------: | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | **00:00** | [30-second teaser](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4) | The product thesis: a private operating record should not become a public roster.                             |
-| **00:30** | [Live workspace](https://veilpay-spri-t4knu9mv.manus.space)                                                               | Route creation is persisted intent; the wallet and receipt states are visibly distinct.                       |
+| **00:30** | [Live workspace](https://veyra-gamma-gold.vercel.app)                                                                      | Route creation is persisted intent; the wallet and receipt states are visibly distinct.                       |
 | **01:00** | [Architecture](ARCHITECTURE.md) and [Trust Model](THREAT_MODEL.md)                                                        | Read exactly where identity, workspace data, wallet approval, RPC confirmation, and public proof sit.         |
 | **01:30** | [`server/db.ts`](../server/db.ts) and tests                                                                               | Confirm proof gating, receipt verification, approval threshold, risk-policy, and lifecycle enforcement paths. |
 
@@ -39,7 +39,7 @@ pnpm test
 pnpm build
 ```
 
-The current suite has **14 Vitest files / 64 tests**. It covers core operations, workspace isolation and resolution, protected flows, Demo Mode, documentation registry, launchpad behavior, STRK20 helpers, private primitives, route editing, and client utilities.
+The latest hardening verification completed **152 Vitest tests across 37 files**. It covers core operations, workspace isolation and resolution, protected flows, Demo Mode, documentation registry, launchpad behavior, STRK20 helpers, private primitives, route editing, claim recovery, and client utilities.
 
 ## Review boundaries
 

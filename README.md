@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="https://veilpay-spri-t4knu9mv.manus.space">Live workspace</a> ·
+  <a href="https://veyra-gamma-gold.vercel.app">Live workspace</a> ·
   <a href="docs/REVIEWER_GUIDE.md">90-second reviewer path</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="docs/THREAT_MODEL.md">Threat model</a> ·
@@ -42,27 +42,27 @@ This repository is designed to make that sequence inspectable. It is not a landi
 |      Time | Do this                                                                                                                             | What it demonstrates                                                                                                       |
 | --------: | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | **00:00** | [Watch the cinematic teaser](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4) | The core thesis: a private roster must not become a public payment record.                                                 |
-| **00:30** | [Open the live workspace](https://veilpay-spri-t4knu9mv.manus.space)                                                                | Routes, roles, operations, wallet state, proof ledger, Launchpad, and Private Markets are product surfaces—not mock cards. |
-| **01:00** | [Read the architecture](docs/ARCHITECTURE.md)                                                                                       | The browser, OAuth, API, database, wallet, RPC provider, and Cairo registry sit in distinct trust domains.                 |
-| **01:30** | [Verify the evidence](docs/REVIEWER_GUIDE.md)                                                                                       | Follow the exact code paths for receipt verification, proof gating, risk enforcement, and the 64-test suite.               |
+| **00:30** | [Open the live workspace](https://veyra-gamma-gold.vercel.app)                                                                       | Routes, roles, operations, wallet state, proof ledger, Launchpad, and Private Markets are product surfaces—not mock cards. |
+| **01:00** | [Read the architecture](docs/ARCHITECTURE.md)                                                                                       | The browser, account API, database, wallet, RPC provider, and Cairo registry sit in distinct trust domains.                |
+| **01:30** | [Verify the evidence](docs/REVIEWER_GUIDE.md)                                                                                       | Follow the exact code paths for receipt verification, proof gating, risk enforcement, and the 152-test suite.             |
 
 ---
 
 ## Film library
 
-> **Playback note.** GitHub sanitizes external HTML `<video>` embeds in repository Markdown, which can leave a film heading with no visible player. The previews below are intentionally clickable: each opens the original MP4, while the [live Veyra Documentation room](https://veilpay-spri-t4knu9mv.manus.space/documentation#overview) provides the native, inline video players.
+> **Playback note.** GitHub sanitizes external HTML `<video>` embeds in repository Markdown, which can leave a film heading with no visible player. The previews below are intentionally clickable: each opens the original MP4, while the [live Veyra Documentation room](https://veyra-gamma-gold.vercel.app/documentation#overview) provides the native, inline video players.
 
 ### Film 01 — The thesis
 
 [![Open Film 01 — The Veyra thesis](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/eeAuPiqfhiOlCqpM.png)](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4)
 
-The stable 30-second teaser establishes Veyra’s visual system and its private-to-proof operating principle. **[Play the original MP4](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4)** or **[watch inline in the Veyra Documentation room](https://veilpay-spri-t4knu9mv.manus.space/documentation#overview)**.
+The stable 30-second teaser establishes Veyra’s visual system and its private-to-proof operating principle. **[Play the original MP4](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4)** or **[watch inline in the Veyra Documentation room](https://veyra-gamma-gold.vercel.app/documentation#overview)**.
 
 ### Film 00 — The operating model
 
 [![Open Film 00 — The Veyra operating model](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/QrIoqSGetmaJtKjn.png)](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4)
 
-The 3:10 product walkthrough traces private routes, wallet/receipt boundaries, claims, governance, Private Markets, and the documentation library without presenting Demo Mode as chain evidence. **[Play the original MP4](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4)** or **[watch inline in the Veyra Documentation room](https://veilpay-spri-t4knu9mv.manus.space/documentation#overview)**.
+The 3:10 product walkthrough traces private routes, wallet/receipt boundaries, claims, governance, Private Markets, and the documentation library without presenting Demo Mode as chain evidence. **[Play the original MP4](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4)** or **[watch inline in the Veyra Documentation room](https://veyra-gamma-gold.vercel.app/documentation#overview)**.
 
 ---
 
@@ -148,13 +148,13 @@ Read the complete **[Decision Record](docs/DECISIONS.md)** to understand the tra
 
 | Evidence            | Where to inspect                                                          | What it proves                                                                                                   |
 | ------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Product**         | [Live workspace](https://veilpay-spri-t4knu9mv.manus.space)               | The designed operational surface and state language are live.                                                    |
+| **Product**         | [Live workspace](https://veyra-gamma-gold.vercel.app)                      | The designed operational surface and state language are live.                                                    |
 | **Film**            | Direct players in the [Film library](#film-library)                       | Product narrative and end-to-end guided context.                                                                 |
 | **Backend**         | [`server/routers.ts`](server/routers.ts) · [`server/db.ts`](server/db.ts) | Protected procedures, workspace scoping, policy and receipt gates, persistence, audit behavior.                  |
 | **Lifecycle logic** | [`shared/operations.ts`](shared/operations.ts)                            | Shared market transition, risk, policy, disclosure, and scheduling logic.                                        |
 | **Data model**      | [`drizzle/schema.ts`](drizzle/schema.ts)                                  | Typed tables for workspaces, routes, claims, policy, launch governance, markets, transactions, and audit events. |
 | **Cairo boundary**  | [`contracts/veyra_payroll`](contracts/veyra_payroll)                      | Non-custodial commitment registry and its explicit deployment boundary.                                          |
-| **Verification**    | `pnpm test && pnpm build`                                                 | **14 test files / 64 tests** and a production bundle build.                                                      |
+| **Verification**    | `pnpm test && pnpm build`                                                 | **152 Vitest tests across 37 files** and a production bundle build at the latest hardening verification.         |
 
 ---
 
@@ -208,13 +208,13 @@ scarb build
 
 ## Manual Vercel frontend deployment
 
-The repository now includes a Vercel-ready **frontend deployment package**. It serves the Vite application from Vercel and rewrites same-origin API and storage paths to the managed Veyra backend, preserving the existing tRPC and Manus OAuth callback contract without exposing backend secrets to the browser.
+The repository includes a Vercel-ready **frontend deployment package**. It serves the Vite application from Vercel and rewrites same-origin API and storage paths to the managed Veyra backend, preserving Veyra’s same-origin tRPC account contract without exposing backend secrets to the browser.
 
 | Included                                                                                                                                 | Intentional boundary                                                                                                                                                  |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`vercel.json`](vercel.json), [`.env.vercel.example`](.env.vercel.example), and [`docs/VERCEL_DEPLOYMENT.md`](docs/VERCEL_DEPLOYMENT.md) | Vercel hosts the client and proxies `/api/*`; Manus continues to hold the database, protected API, OAuth exchange, receipt verification, and server-only credentials. |
+| [`vercel.json`](vercel.json), [`.env.vercel.example`](.env.vercel.example), and [`docs/VERCEL_DEPLOYMENT.md`](docs/VERCEL_DEPLOYMENT.md) | Vercel hosts the client and proxies `/api/*`; the managed backend retains the database, protected API, Veyra account verification, receipt verification, and server-only credentials. |
 
-Before a manual Vercel deployment, set the safe public Vite values in the Vercel dashboard and add `https://YOUR-VERCEL-DOMAIN/api/oauth/callback` to the Manus application’s allowed redirect origins. The [deployment guide](docs/VERCEL_DEPLOYMENT.md) provides the exact import, environment, verification, and rollback-safe sequence.
+Before a manual Vercel deployment, set only the documented safe public Vite values. The deployed account flow uses same-origin `/api/*` rewrites to the managed backend; it does not require an external OAuth callback allowlist. The [deployment guide](docs/VERCEL_DEPLOYMENT.md) provides the exact import, environment, verification, and rollback-safe sequence.
 
 ---
 
@@ -222,9 +222,9 @@ Before a manual Vercel deployment, set the safe public Vite values in the Vercel
 
 | Ready now                                                                                                                                                                                                   | Requires owner-operated evidence or further engineering                                                                                                                                                                   |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Full-stack workspace, typed API, database model, protected workflow, lifecycle semantics, audit events, policy/risk controls, documentation system, product films, test suite, and Cairo commitment source. | Real STRK20 pool interactions, public transaction hashes, any fund-moving Cairo interface, Sepolia deployment validation, independent contract review, owned production observability, Vercel OAuth origin configuration. |
+| Full-stack workspace, typed API, database model, protected workflow, lifecycle semantics, audit events, policy/risk controls, documentation system, product films, Vercel judge path, three verified public STRK20 pool receipts, and Cairo commitment source. | Recipient-wallet private-note discovery for the historic transfer, any fund-moving Cairo interface, independent contract review, and owned production observability. |
 
-The `transactions` array in `strk20.json` remains empty by design until the project owner performs real successful STRK20 pool interactions and records their public hashes. No transaction hash, deployed contract address, settlement status, audit result, or testimonial is fabricated in this repository.
+Root [`strk20.json`](strk20.json) contains exactly three verified successful Mainnet STRK20 privacy-pool transaction hashes. These public receipts establish pool interaction, not Veyra-originated recipient-note delivery; the historic recipient outcome remains explicitly unresolved. No transaction hash, deployed contract address, settlement status, audit result, or testimonial is fabricated in this repository.
 
 For STRK20 program context, see the [Starknet STRK20 Private Sprint page](https://strk20.starknet.io/hackathon) [1].
 
