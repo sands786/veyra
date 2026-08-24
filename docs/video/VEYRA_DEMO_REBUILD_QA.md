@@ -11,3 +11,7 @@ The rebuilt cut uses the current Veyra captures for the workspace, Demo Mode pay
 ## Export verification
 
 Both rebuild masters are 176 seconds, 1920×1080, 60 fps, H.264 with approximately 8.0 Mbps video streams, and AAC stereo audio. This is within the requested under-three-minute and 8–12 Mbps delivery requirements.
+
+## Intro and final resolve revision
+
+The cold open now starts with the pain point over a real Veyra workspace frame, then resolves into the Veyra lockup and the statement that private finance must still operate. The final sequence retains a live proof-ledger and wallet-boundary product frame under the closing line, **“Private financial coordination, without the public roster.”** The Veyra shield and wordmark fade in as the final brand resolve; the video does not end on a black frame or a logo-only slate.
