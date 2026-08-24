@@ -1,16 +1,28 @@
 # Veyra Hackathon Demo — Delivery Manifest
 
-## Delivered masters
+## Recommended submission master
 
-| Version | File | Runtime | Video | Audio |
-|---|---|---:|---|---|
-| **Recommended clean rebuild** | `veyra_hackathon_demo_rebuild_clean_1080p60.mp4` | 176 seconds | H.264, 1920×1080, 60 fps, approximately 8 Mbps | AAC stereo with narrated voiceover and ducked institutional score |
-| **Compact-caption rebuild** | `veyra_hackathon_demo_rebuild_captioned_1080p60.mp4` | 176 seconds | H.264, 1920×1080, 60 fps, approximately 8 Mbps | Same mix, with restrained lower-third accessibility captions |
+| Version | File | Runtime | Video | Audio | Captions |
+|---|---|---:|---|---|---|
+| **Recommended clean live judge cut** | `veyra_120s_live_judge_cut_clean.mp4` | **112.0 seconds** | H.264, 1920×1080, 60 fps, 7.99 Mbps video bitrate | AAC stereo, 198.6 kbps; original Veyra narration plus ducked institutional score | Clean master; no burned captions |
 
-Both rebuild masters are below the three-minute limit and preserve the same approved story: Private Payroll, Private Primitives, Private Markets, Launchpad, the wallet/custody boundary, Mainnet receipt verification, and Veyra’s three verified STRK20 privacy-pool receipts. The earlier caption-wall cut is retired and should not be submitted.
+The recommended export is intentionally below the requested 120-second maximum. It replaces every rejected 176-second screenshot-panned or overlay-heavy recommendation. The product middle is assembled from browser-native Veyra recordings rather than still-image motion: private payroll simulation, Private Primitives, Private Markets, and the stateful Demo Mode Launchpad/governance surface all appear in sequence. The opening and close use the approved Veyra teaser; the closing logo is held cleanly, with no caption, UI, or punchline collision.
 
-## Evidence and production boundary
+## Story and evidence boundary
 
-The demo uses captured Veyra product surfaces and controlled motion framing. The soundtrack is Veyra’s pre-existing institutional score, ducked below new voiceover. The first generated opening transition contains no claim of transaction settlement. The demo does **not** claim that recipient private-note delivery can be inferred from public receipt data, and it does not substitute public token transfers or generic wallet invocations for the STRK20 private-action boundary.
+The voiceover and visible interface distinguish the Demo Mode walkthrough from production settlement. Demo Mode states are represented as local and simulated. The production statement is limited to the actual application boundary: a connected Mainnet wallet, explicit user approval, a returned hash, and receipt confirmation are required before a route is called settled.
 
-The daily generative-video allowance was exhausted after the opening transition. Rather than fabricate additional footage, the remaining edit uses authentic product captures with controlled scrolls, restrained cursor/click cues, compact captions, and narrated evidence boundaries.
+The master does **not** fabricate a Mainnet settlement, recipient encrypted-note delivery, a wallet capability, a private-note balance, or a transaction hash. It does not show a generic wallet invoke or public-transfer fallback. Private Markets and Launchpad are shown as live interfaces and visibly gated workflows; their interaction clips are not used as evidence of completed capital movement.
+
+## Production QA record
+
+| Check | Result |
+|---|---|
+| Runtime | 112.000 seconds; within the 120-second maximum |
+| Canvas and frame rate | 1920×1080 at 60 fps |
+| Delivery codec | H.264 video and AAC stereo audio |
+| Video bitrate | 7.99 Mbps, intentionally constrained to the requested 8–12 Mbps delivery range |
+| Visual review | Verified teaser opening, browser-native Payroll/Primitives/Markets/Launchpad progression, and clean teaser-logo close |
+| Safety review | Demo states remain visibly simulated; no unverified settlement, delivery, or wallet claim is narrated |
+
+The 112-second clean master is the only recommended submission video. A captioned version is intentionally not designated for submission because previous full-frame caption treatments were rejected. If accessibility captions are required after review, they should be a separate lower-third-only pass with dedicated timing QA; they must not overlay controls or teaser brand scenes.

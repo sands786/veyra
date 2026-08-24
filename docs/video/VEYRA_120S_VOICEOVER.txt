@@ -1,0 +1,17 @@
+Financial coordination should not require publishing your team, counterparties, or allocation logic to the world.
+
+This is Veyra: the privacy-first layer for Starknet financial coordination.
+
+We begin with private payroll. An operator edits a route, keeps the recipient roster inside the workspace, and prepares the payment logic without turning every participant into public data.
+
+Demo Mode is local only. Real settlement still requires a connected Mainnet wallet, explicit approval, and a confirmed Starknet receipt.
+
+Private Primitives make that boundary reusable: recipient-scoped claims, selective proofs, and milestones gated until evidence is ready. Disclosure is narrow: aggregate information can be shared while raw rosters and encrypted terms remain private.
+
+Private Markets applies it to capital. The public surface can show a market signal. The participant graph, bid terms, and identity stay private. The live interface keeps creation and settlement explicitly gated; nothing here pretends a transaction has happened.
+
+Launchpad applies that discipline to project capital. A project room moves from readiness to a reserved allocation and then to a governed milestone release. In this guided tour, those changes are visibly simulated; the workflow is real, the settlement claim is not.
+
+For production execution, Veyra uses the privacy-wallet action, records a returned hash, and waits for receipt confirmation before it calls a route settled.
+
+Veyra. Move the money. Keep the roster private.

@@ -742,3 +742,5 @@
 - [x] Add a stronger problem-first cold open and a non-fade final resolve that retains a working Veyra product frame, lands the final punchline, and reveals the Veyra shield/wordmark; verified in the 176-second 1080p60 rebuilt master.
 - [x] Replace the rejected intro and ending overlay treatment: construct clean full-frame brand scenes and separate product-only proof scenes so logo, caption, punchline, and dense UI never collide in one composition.
 - [x] Replace both rejected brand scenes with the user-approved teaser opening and ending clips, keeping the middle exclusively for real Veyra product footage; the clean master’s opening, 2:48 product handoff, and final punchline lockup were visually verified.
+- [x] Replace the animated screenshot middle with concise authentic live Veyra interaction recordings that demonstrate real navigation, input, state change, and a visible outcome before recommending the hackathon video for submission.
+- [x] Rebuild the demo as a maximum 120-second teaser-framed judge cut that contains only authentic live interaction proof, highest-value Veyra features, and the approved teaser closing sequence.
