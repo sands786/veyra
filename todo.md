@@ -732,3 +732,9 @@
 - [x] Obtain the team’s public Telegram username and explicit approval, then prepare the minimal official registry branch containing only `https://github.com/sands786/veyra` and `Forgeclaw` for user-owned pull-request submission.
 - [ ] User-owned: open the already prepared official registry pull request from `https://github.com/starkience/strk20-hackathon/compare/main...sands786:strk20-hackathon:register-veyra?expand=1`.
 - [x] Remove the UI’s stale direct-method-only STRK20 gate so Mainnet-verified wallets exposing the standard request capability can reach the existing fail-closed `submitShieldedRoute` adapter without enabling any generic-invoke or public-transfer fallback; verified by the 152-test suite, `tsc --noEmit`, and the production build.
+
+## Approval-first hackathon demo refresh
+
+- [x] Draft an evidence-grounded, timestamped Veyra three-minute demo script with voiceover, screen actions, caption emphasis, and audio direction for user approval before any video generation in `docs/video/VEYRA_HACKATHON_DEMO_SCRIPT_v2.md`.
+- [x] After approval, produce a clean and a burned-caption Veyra demo export at 1080p60, H.264, 8–12 Mbps, at or under three minutes; both masters are 1920×1080 at 60 fps, H.264 at approximately 8 Mbps, with a 176-second runtime.
+- [x] Revise the production narrative so Private Payroll, Private Primitives, Private Markets, and Launchpad each receive an explicit evidence-accurate feature demonstration while preserving the user-specified capture, captions, sound, and runtime requirements.
