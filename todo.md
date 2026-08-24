@@ -662,6 +662,8 @@
 - [x] Deliver the final checklist for the user-owned submission action in the repository submission pack.
 - [x] Publish the local verified three-hash `strk20.json` to the public GitHub `main` branch; the public repository initially exposed an obsolete empty transaction list.
 - [x] Revalidate the public GitHub repository metadata after publication through the authoritative Contents API; it confirms all three verified hashes, while the raw endpoint remained temporarily cache-stale.
+- [x] Remove the obsolete registry/Telegram submission guidance and replace it with the official repository-at-deadline entry rule.
+- [x] Verify the public Veyra repository against the official live-demo, 189.97-second demo-video, three-hash, public-license, and working-Mainnet-product criteria, preserving the recipient-delivery caveat.
 
 ## Official STRK20 evidence-count reconciliation
 

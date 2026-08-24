@@ -1,7 +1,7 @@
 # Veyra — STRK20 Hackathon Submission Pack
 
 **Prepared:** 23 August 2026  
-**Submission status:** **Package verified; final registry submission remains user-owned.**
+**Submission status:** **Repository-level entry package verified.** The official rules state that the repository state at the deadline is the entry; there is no manual registry submission. [1]
 
 ## Submission copy
 
@@ -15,7 +15,7 @@
 | --- | --- |
 | Live product | [Veyra app](https://veilpay-spri-t4knu9mv.manus.space) |
 | Source | [Public GitHub repository](https://github.com/sands786/veyra) |
-| Demo | [Three-minute product demo](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4) |
+| Demo | [Three-minute product demo](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4) — verified runtime: 189.97 seconds |
 | Submission metadata | [`strk20.json`](../../strk20.json) |
 | Mainnet evidence record | [Public receipt audit](./mainnet-evidence-2026-08-23.md) |
 | Architecture and hardening | [Private-payment hardening audit](./private-payment-hardening-2026-08-23.md) |
@@ -38,7 +38,7 @@ An additional successful claimed-route pool action is documented separately as p
 | Public repository | Verified | Keep `sands786/veyra` public with its `LICENSE` available. |
 | App and demo links | Verified | Keep the live Veyra app and `demo_video` URL reachable through judging. |
 | Three required transaction hashes | Verified | Keep the three real hashes in `strk20.json`; do not add placeholders. |
-| Registry details | Pending | Create/update the required `starkience/strk20-hackathon` registry pull request with project URL, repository URL, and the user’s Telegram usernames. |
+| Manual registry form / Telegram | Not required | The official submission instructions state that there is nothing to submit manually; the public repository state at the deadline is the entry. |
 | Optional contract address | Pending only if deployed | Leave `contracts: []` unless there is a real deployed Veyra payroll-registry address. |
 | Recipient-note reconciliation | Separate operational issue | Do not claim resolution until the recipient Ready X wallet discovers the private note. |
 | Historic Veyra route record | Separate operational issue | Use the safe no-signature recovery control with the already returned hash before a receipt confirmation attempt. |
@@ -49,7 +49,8 @@ Veyra’s public Mainnet receipts establish that wallet-submitted STRK20 pool ac
 
 ## References
 
-[1] [Starknet Privacy SDK repository](https://github.com/starkware-libs/starknet-privacy).  
-[2] [Starknet developer tools — STRK20 by Example](https://docs.starknet.io/learn/cheatsheets/tools).  
-[3] [Official STRK20 live privacy announcement](https://www.starknet.io/blog/privacy-live-on-starknet/).  
-[4] [Veyra public evidence handoff](../../HACKATHON_EVIDENCE.md).
+[1] [Official STRK20 Hackathon rules and submission instructions](https://github.com/starkience/strk20-hackathon#submitting).  
+[2] [Starknet Privacy SDK repository](https://github.com/starkware-libs/starknet-privacy).  
+[3] [Starknet developer tools — STRK20 by Example](https://docs.starknet.io/learn/cheatsheets/tools).  
+[4] [Official STRK20 live privacy announcement](https://www.starknet.io/blog/privacy-live-on-starknet/).  
+[5] [Veyra public evidence handoff](../../HACKATHON_EVIDENCE.md).

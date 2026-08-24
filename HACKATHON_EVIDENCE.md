@@ -4,12 +4,12 @@ Veyra’s source code includes a full-stack privacy-finance workspace, wallet-co
 
 ## Required before the August 31, 2026 deadline
 
-1. Confirm the public repository and `LICENSE` remain available at submission time.
-2. Add the public repository URL and Telegram usernames to the official `starkience/strk20-hackathon` registry through the required registration pull request.
-3. The official transaction-count prerequisite is now met with the three verified Mainnet privacy-pool hashes below. Do not add any further hash unless it is publicly verifiable on Starknet Mainnet and touches the live STRK20 pool.
-4. If the Veyra payroll registry is deployed, add its real deployed address to the `contracts` list in `strk20.json`.
-5. The three-minute Veyra cinematic walkthrough is published as `demo_video` in `strk20.json`. Keep that URL available through judging.
-6. Keep the public demo URL in `strk20.json` current. The currently configured Veyra deployment URL is included as a starting value.
+The official STRK20 repository states that there is **nothing to submit manually**: whatever the public repository shows at the deadline is the entry. The Veyra repository must therefore remain public, open-source, licensed, and accessible at the deadline. [Official submission rules](https://github.com/starkience/strk20-hackathon#submitting)
+
+1. Keep the public repository and its `LICENSE` available through the deadline.
+2. The official transaction-count prerequisite is met with the three verified Mainnet privacy-pool hashes below. Do not replace them with placeholders or add an unverified hash.
+3. Keep the public three-minute demo video and live Veyra demo URL reachable. The metadata file is what the scoring panel reads.
+4. If the Veyra payroll registry is deployed, add its real deployed address to the `contracts` list in `strk20.json`; otherwise leave the list empty.
 
 ## Final `strk20.json` shape
 
@@ -36,9 +36,9 @@ The official hub verifies each transaction against Starknet Mainnet and the STRK
 | Source repository | [github.com/sands786/veyra](https://github.com/sands786/veyra) | Public repository; default branch `main`; description identifies Veyra as privacy-first Starknet financial coordination. |
 | Repository license | [MIT License](https://github.com/sands786/veyra/blob/main/LICENSE) | Publicly available and verified through the GitHub repository license endpoint. |
 | Active metadata | [`strk20.json`](./strk20.json) | Valid JSON with exactly the three verified public Mainnet hashes, no fake placeholder, an empty contracts list, and the public app URL. |
-| Demo video | `demo_video` in `strk20.json` | HTTP `200`, `video/mp4`, 17,369,355 bytes at validation time. |
+| Demo video | `demo_video` in `strk20.json` | HTTP `200`, `video/mp4`, 17,369,355 bytes at validation time; the matching retained source asset runs **189.97 seconds** (3:09.97), satisfying the three-minute demo criterion. |
 
-This availability check does not replace the registry pull request or the user-owned final submission action.
+This availability check is the preparation for the repository-at-deadline entry rule; no registry pull request or Telegram field is required by the current official submission instructions.
 
 ## Public repository metadata correction — 23 August 2026
 
