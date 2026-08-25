@@ -2,9 +2,44 @@
   "transactions": [
     "0x0336a6a8d3cc51290ed19e17b3f927d253389dea5f5408ff6b33cf926c3bed57",
     "0x03dd3037a3d6cada35b764e57f94f3fac0fc5f55cd6592bb214c1a5ec2c11890",
-    "0x02437fc5f800a691602781a26fa98e3eea494eb94c909f6db347ae3003743c9f"
+    "0x02437fc5f800a691602781a26fa98e3eea494eb94c909f6db347ae3003743c9f",
+    "0x01d9c3a39754beeb9f9b320d721678b94a0471bdd4c53684a6544cbb057f3bfa",
+    "0x0461a9bac1c42cc3b7d42c8569d25c4d3dedc58fc99f3168f4d888937c278f03",
+    "0x024f30dde491a6167ff66e4c55dbe31b1fba7e3c7671af25805f81090dabe77a",
+    "0x0273c1a65199ba16ff0992069b751849fcb47ac13cd7a1a736251ea9ce7cc881",
+    "0x03a95eb41459e79e9016f71c3bb6e1dfb1cbec72e6342d9a67c3275f4e5913c6",
+    "0x0012be49f9c13f63ffba3baae9eed3f5415331ce485f2fcc97e3a1cb1eb34d86",
+    "0x06e00858408afcc1aa3ec84e7517d92f8a15231131150f21327d15803e0dae93"
   ],
-  "contracts": [],
+  "contracts": [
+    "0x005d7cb0f5ea0cda8b046d524eaa45e38f3a5c54357f2e4b211da7e2c435bb15",
+    "0x05476ca7064583238f3e82a6815a7f662b14228e1fb585d480838a282b9d7cf2"
+  ],
   "demo_video": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4",
-  "demo_url": "https://veyra-gamma-gold.vercel.app"
+  "demo_url": "https://veyra-gamma-gold.vercel.app",
+  "onchain_evidence": {
+    "private_markets": {
+      "network": "mainnet",
+      "contract": "0x05476ca7064583238f3e82a6815a7f662b14228e1fb585d480838a282b9d7cf2",
+      "declared_class_hash": "0x038b051114f7827ffba57a71cc39a91fc22737ca19b0bd11cf755688dd0a8ca9",
+      "declaration": "0x10b33cb550ec31f37e61a87bff587925ea96fbb1a6d5223fa27fa94aba406a6",
+      "deployment": "0x018ae7706c51ea0987f1e04c85a5778b2ff19b85a574fcf038dd09db8c4a781c",
+      "lifecycle": {
+        "create_market": "0x01d9c3a39754beeb9f9b320d721678b94a0471bdd4c53684a6544cbb057f3bfa",
+        "open_market": "0x0461a9bac1c42cc3b7d42c8569d25c4d3dedc58fc99f3168f4d888937c278f03",
+        "strk_approval": "0x024f30dde491a6167ff66e4c55dbe31b1fba7e3c7671af25805f81090dabe77a",
+        "commit_bid": "0x0273c1a65199ba16ff0992069b751849fcb47ac13cd7a1a736251ea9ce7cc881",
+        "close_market": "0x03a95eb41459e79e9016f71c3bb6e1dfb1cbec72e6342d9a67c3275f4e5913c6",
+        "accept_bid": "0x0012be49f9c13f63ffba3baae9eed3f5415331ce485f2fcc97e3a1cb1eb34d86",
+        "settle_bid": "0x06e00858408afcc1aa3ec84e7517d92f8a15231131150f21327d15803e0dae93"
+      },
+      "final_state": {
+        "market_id": 1,
+        "market_state": "SETTLED",
+        "bid_id": 1,
+        "bid_state": "SETTLED",
+        "committed_balance": "0"
+      }
+    }
+  }
 }

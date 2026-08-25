@@ -812,5 +812,7 @@
 - [x] Audit current Private Markets UI, server procedures, schema, and wallet boundaries.
 - [x] Implement and locally validate a minimal non-upgradable Private Markets Mainnet contract.
 - [x] Wire strict wallet calls and receipt-first state into the Private Markets UI.
-- [ ] Deploy and verify one complete Private Markets Mainnet lifecycle with owner-signed actions.
-- [ ] Update STRK20 metadata and documentation with verified Private Markets evidence.
+- [x] Deploy and verify one complete Private Markets Mainnet lifecycle with owner-signed actions.
+- [x] Update STRK20 metadata and documentation with verified Private Markets evidence.
+- [x] Add live Mainnet receipt polling and contract-state reads to the Private Markets browser panel; keep submitted hashes distinct from confirmed settlement.
+- [x] Configure an approved HTTPS Starknet Mainnet RPC URL so browser-side receipt/state verification is available in production.

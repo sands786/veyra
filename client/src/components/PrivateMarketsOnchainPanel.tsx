@@ -7,6 +7,8 @@ import {
   discoverStarknetWallets,
   STRK_TOKEN,
   submitPrivateMarketsCall,
+  readPrivateMarketsChainState,
+  readPrivateMarketsReceipt,
   type PrivateMarketsAction,
   type VeilWallet,
 } from "@/lib/strk20";
@@ -35,6 +37,9 @@ export function PrivateMarketsOnchainPanel({ isDemoMode }: { isDemoMode: boolean
   const [bidAmount, setBidAmount] = useState("1");
   const [commitmentHash, setCommitmentHash] = useState("");
   const [lastHash, setLastHash] = useState("");
+  const [receiptStatus, setReceiptStatus] = useState("NOT VERIFIED");
+  const [chainState, setChainState] = useState<{ marketState: bigint; bidState: bigint; committed: bigint }>();
+  const [verifying, setVerifying] = useState(false);
 
   async function connect(option: VeilWallet) {
     if (connecting) return;
@@ -57,9 +62,28 @@ export function PrivateMarketsOnchainPanel({ isDemoMode }: { isDemoMode: boolean
         : buildPrivateMarketsCall(marketsAddress, action);
       const result = await submitPrivateMarketsCall(wallet, "mainnet", call);
       setLastHash(result.transaction_hash);
-      toast("Private Markets transaction submitted.", { description: "Wait for a verified receipt before treating state as settled." });
+      setReceiptStatus("SUBMITTED / VERIFY REQUIRED");
+      setChainState(undefined);
+      toast("Private Markets transaction submitted.", { description: "Use Verify Receipt and Read Chain State before treating state as settled." });
     } catch (error) { toast("Private Markets transaction was not submitted.", { description: String(error).slice(0, 180) }); }
     finally { setSubmitting(false); }
+  }
+
+  async function verifyMainnetEvidence() {
+    if (!lastHash || !marketsAddress || verifying) return;
+    setVerifying(true);
+    try {
+      const [receipt, state] = await Promise.all([
+        readPrivateMarketsReceipt(lastHash),
+        readPrivateMarketsChainState(marketsAddress, parsedMarketId, parsedBidId),
+      ]);
+      setReceiptStatus(`${receipt.finalityStatus} / ${receipt.executionStatus}`);
+      setChainState(state);
+      toast("Mainnet evidence verified.", { description: "Receipt and current market state were read from Starknet." });
+    } catch (error) {
+      setReceiptStatus("VERIFICATION UNAVAILABLE");
+      toast("Mainnet verification unavailable.", { description: String(error).slice(0, 180) });
+    } finally { setVerifying(false); }
   }
 
   if (isDemoMode) return null;
@@ -79,6 +103,6 @@ export function PrivateMarketsOnchainPanel({ isDemoMode }: { isDemoMode: boolean
       <div className="mt-4 flex flex-wrap gap-2"><Button disabled={disabled} onClick={() => submit({ type: "approve_token", amountSmallestUnit: parseStrk(bidAmount) })} className="h-10 rounded-[9px] border border-[#70D49D]/40 px-4 font-mono text-[9px] text-[#70D49D]">1. APPROVE STRK</Button><Button disabled={disabled} onClick={() => submit({ type: "commit_bid", marketId: parsedMarketId, bidId: parsedBidId, commitmentHash, amountSmallestUnit: parseStrk(bidAmount) })} className="h-10 rounded-[9px] border border-white/20 px-4 font-mono text-[9px] text-[#F3EEE5]">2. COMMIT BID</Button><Button disabled={disabled} onClick={() => submit({ type: "accept_bid", marketId: parsedMarketId, bidId: parsedBidId })} className="h-10 rounded-[9px] border border-white/20 px-4 font-mono text-[9px] text-[#F3EEE5]">3. ACCEPT BID</Button><Button disabled={disabled} onClick={() => submit({ type: "settle_bid", marketId: parsedMarketId, bidId: parsedBidId })} className="h-10 rounded-[9px] bg-[#70D49D] px-4 font-mono text-[9px] text-[#111210]">4. SETTLE</Button><Button disabled={disabled} onClick={() => submit({ type: "refund_bid", marketId: parsedMarketId, bidId: parsedBidId })} className="h-10 rounded-[9px] border border-[#F0563A]/40 px-4 font-mono text-[9px] text-[#F0563A]">REFUND BID</Button></div>
       <p className="mt-3 font-mono text-[9px] leading-4 text-[#F0563A]">Only sign actions you intend to execute. Contract state is not considered settled until its Mainnet receipt is verified.</p>
     </>}
-    {lastHash && <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[9px] text-[#AEB8BE]">SUBMITTED RECEIPT / {lastHash}</div>}
+    {lastHash && <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[9px] text-[#AEB8BE]">SUBMITTED RECEIPT / {lastHash}<div className="mt-2 flex flex-wrap items-center gap-2"><Button disabled={verifying} onClick={verifyMainnetEvidence} className="h-8 rounded-[8px] border border-[#70D49D]/40 px-3 text-[9px] text-[#70D49D]">{verifying ? "VERIFYING…" : "VERIFY RECEIPT + STATE"}</Button><span className="text-[#F3EEE5]">{receiptStatus}</span>{chainState && <span className="text-[#70D49D]">MARKET {chainState.marketState.toString()} / BID {chainState.bidState.toString()} / ESCROW {chainState.committed.toString()} LOWEST</span>}</div></div>}
   </section>;
 }

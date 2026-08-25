@@ -827,3 +827,81 @@ export function networkLabel(network: VeilNetwork): string {
 export function evidenceLabel(network: VeilNetwork): string {
   return NETWORKS[network].evidenceLabel;
 }
+
+export type PrivateMarketsReceiptStatus = {
+  transactionHash: string;
+  finalityStatus: string;
+  executionStatus: string;
+};
+
+export type PrivateMarketsChainState = {
+  marketState: bigint;
+  bidState: bigint;
+  committed: bigint;
+};
+
+function privateMarketsRpcUrl(): string {
+  const url = String(import.meta.env.VITE_STARKNET_MAINNET_RPC_URL ?? "").trim();
+  if (!url || !/^https:\/\//i.test(url)) {
+    throw new Error("A verified HTTPS Starknet Mainnet RPC URL is not configured.");
+  }
+  return url;
+}
+
+async function privateMarketsRpc<T>(method: string, params: unknown[]): Promise<T> {
+  const response = await fetch(privateMarketsRpcUrl(), {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: Date.now(), method, params }),
+  });
+  if (!response.ok) throw new Error(`Starknet RPC returned HTTP ${response.status}.`);
+  const payload = (await response.json()) as { result?: T; error?: { message?: string } };
+  if (payload.error) throw new Error(payload.error.message || "Starknet RPC request failed.");
+  if (payload.result === undefined) throw new Error("Starknet RPC returned no result.");
+  return payload.result;
+}
+
+async function readPrivateMarketsCall(contractAddress: string, entrypoint: string, calldata: string[]): Promise<string[]> {
+  assertContractAddress(contractAddress, "Private Markets contract address");
+  const { hash } = await import("starknet");
+  return privateMarketsRpc<string[]>("starknet_call", [{
+    contract_address: contractAddress,
+    entry_point_selector: hash.getSelectorFromName(entrypoint),
+    calldata,
+  }, "latest"]);
+}
+
+function u256FromFelts(values: string[], label: string): bigint {
+  if (values.length < 2) throw new Error(`${label} returned an invalid u256 response.`);
+  return BigInt(values[0]) + (BigInt(values[1]) << BigInt("128"));
+}
+
+export async function readPrivateMarketsChainState(
+  contractAddress: string,
+  marketId: bigint,
+  bidId: bigint
+): Promise<PrivateMarketsChainState> {
+  const [marketState, bidState, committed] = await Promise.all([
+    readPrivateMarketsCall(contractAddress, "get_market_state", [marketId.toString()]),
+    readPrivateMarketsCall(contractAddress, "get_bid_state", [marketId.toString(), bidId.toString()]),
+    readPrivateMarketsCall(contractAddress, "get_market_committed", [marketId.toString()]),
+  ]);
+  return {
+    marketState: BigInt(marketState[0] ?? "0"),
+    bidState: BigInt(bidState[0] ?? "0"),
+    committed: u256FromFelts(committed, "get_market_committed"),
+  };
+}
+
+export async function readPrivateMarketsReceipt(transactionHash: string): Promise<PrivateMarketsReceiptStatus> {
+  if (!/^0x[0-9a-f]+$/i.test(transactionHash)) throw new Error("Invalid Starknet transaction hash.");
+  const receipt = await privateMarketsRpc<{
+    finality_status?: string;
+    execution_status?: string;
+  }>("starknet_getTransactionReceipt", [transactionHash]);
+  return {
+    transactionHash,
+    finalityStatus: receipt.finality_status ?? "UNKNOWN",
+    executionStatus: receipt.execution_status ?? "UNKNOWN",
+  };
+}
