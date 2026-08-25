@@ -871,3 +871,7 @@
 ## Authentication control visibility change
 - [x] Remove visible Sign In, Sign Up, and sign-out controls from every user-facing Veyra surface while preserving session and authorization logic.
 - [x] Verify no visible authentication-control labels remain in rendered UI, then run tests, TypeScript, build, and responsive QA.
+
+## Homepage geometric surface refinement
+- [x] Replace the uniform homepage function boxes with a deliberate mixed-shape treatment using curved, circular, hexagonal, pentagonal, and triangular geometry without sacrificing label readability.
+- [x] Verify the new geometry on desktop and mobile, then run tests, TypeScript, build, and save a checkpoint.

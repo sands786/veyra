@@ -606,3 +606,84 @@ small {
     cursor: pointer;
   }
 }
+
+/* Institutional surface geometry: varied silhouettes keep the system map from reading as a generic card grid. */
+.surface-map-card {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border: 1px solid rgb(243 238 229 / 15%);
+  background:
+    linear-gradient(140deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 3%)),
+    #151d21 !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 18px 48px rgb(0 0 0 / 14%);
+  backdrop-filter: blur(20px) saturate(118%);
+  -webkit-backdrop-filter: blur(20px) saturate(118%);
+}
+.surface-map-card::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid rgb(112 212 157 / 11%);
+  opacity: 0.7;
+}
+.surface-map-card--capsule {
+  border-radius: 999px;
+}
+.surface-map-card--capsule::before {
+  border-radius: 999px;
+}
+.surface-map-card--circle {
+  border-radius: 48% 52% 45% 55% / 42% 48% 52% 58%;
+}
+.surface-map-card--circle::before {
+  border-radius: 46% 50% 43% 53% / 40% 46% 50% 56%;
+}
+.surface-map-card--hexagon {
+  clip-path: polygon(13% 0, 87% 0, 100% 21%, 100% 79%, 87% 100%, 13% 100%, 0 79%, 0 21%);
+}
+.surface-map-card--hexagon::before {
+  clip-path: polygon(14% 0, 86% 0, 100% 22%, 100% 78%, 86% 100%, 14% 100%, 0 78%, 0 22%);
+}
+.surface-map-card--pentagon {
+  clip-path: polygon(15% 0, 85% 0, 100% 25%, 92% 100%, 8% 100%, 0 25%);
+}
+.surface-map-card--pentagon::before {
+  clip-path: polygon(16% 0, 84% 0, 100% 26%, 91% 100%, 9% 100%, 0 26%);
+}
+.surface-map-card--angled {
+  clip-path: polygon(0 14%, 11% 0, 100% 0, 89% 86%, 78% 100%, 0 100%);
+}
+.surface-map-card--angled::before {
+  clip-path: polygon(1% 15%, 12% 1%, 99% 1%, 88% 85%, 77% 99%, 1% 99%);
+}
+.surface-map-card--triangle {
+  clip-path: polygon(50% 0, 100% 22%, 100% 100%, 0 100%, 0 22%);
+  padding-top: 3.3rem !important;
+}
+.surface-map-card--triangle::before {
+  clip-path: polygon(50% 0, 100% 23%, 100% 100%, 0 100%, 0 23%);
+}
+.surface-map-icon {
+  flex: 0 0 auto;
+}
+@media (max-width: 639px) {
+  .surface-map-card {
+    min-height: 252px;
+    padding: 1.45rem !important;
+  }
+  .surface-map-card--capsule {
+    border-radius: 999px;
+  }
+  .surface-map-card--circle {
+    border-radius: 44% 56% 42% 58% / 38% 46% 54% 62%;
+  }
+  .surface-map-card--circle::before,
+  .surface-map-card--capsule::before {
+    border-radius: 999px;
+  }
+}

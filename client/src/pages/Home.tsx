@@ -133,6 +133,7 @@ const productSurfaces = [
     signal: "CORE FLOW",
     action: "OPEN PAYMENT ROUTES",
     icon: WalletCards,
+    shape: "capsule",
     targetType: "section",
     target: "routes",
   },
@@ -143,6 +144,7 @@ const productSurfaces = [
     signal: "RECEIPT-FIRST",
     action: "OPEN PROOF LEDGER",
     icon: Shield,
+    shape: "circle",
     targetType: "section",
     target: "ledger",
   },
@@ -153,6 +155,7 @@ const productSurfaces = [
     signal: "WALLET CONTEXT",
     action: "OPEN IDENTITY KEYS",
     icon: KeyRound,
+    shape: "hexagon",
     targetType: "section",
     target: "identity",
   },
@@ -163,6 +166,7 @@ const productSurfaces = [
     signal: "OPERATING LAYER",
     action: "OPEN OPERATIONS",
     icon: Workflow,
+    shape: "pentagon",
     targetType: "section",
     target: "operations",
   },
@@ -173,6 +177,7 @@ const productSurfaces = [
     signal: "POLICY BEFORE CAPITAL",
     action: "OPEN TREASURY",
     icon: LockKeyhole,
+    shape: "angled",
     targetType: "section",
     target: "treasury",
   },
@@ -183,6 +188,7 @@ const productSurfaces = [
     signal: "PRIVATE CLAIMS",
     action: "OPEN CLAIMS",
     icon: Link2,
+    shape: "triangle",
     targetType: "section",
     target: "claims",
   },
@@ -193,6 +199,7 @@ const productSurfaces = [
     signal: "WALLET-NATIVE",
     action: "VIEW PRIMITIVES",
     icon: Blocks,
+    shape: "hexagon",
     targetType: "route",
     target: "/private-primitives",
   },
@@ -203,6 +210,7 @@ const productSurfaces = [
     signal: "MAINNET ESCROW",
     action: "VIEW PRIVATE MARKETS",
     icon: LineChart,
+    shape: "capsule",
     targetType: "route",
     target: "/private-markets",
   },
@@ -213,6 +221,7 @@ const productSurfaces = [
     signal: "MILESTONE ESCROW",
     action: "VIEW LAUNCHPAD",
     icon: Sparkles,
+    shape: "pentagon",
     targetType: "route",
     target: "/launchpad",
   },
@@ -223,6 +232,7 @@ const productSurfaces = [
     signal: "COMMIT–REVEAL",
     action: "VIEW AGENT",
     icon: Bot,
+    shape: "circle",
     targetType: "route",
     target: "/agent",
   },
@@ -1573,7 +1583,7 @@ export default function Home() {
                   <h2 id="system-map-title" className="mt-5 font-display text-[clamp(3rem,6vw,6.8rem)] font-semibold leading-[0.86] tracking-[-0.08em] text-[#F3EEE5]">
                     One system.
                     <br />
-                    <span className="text-[#F0563A]">Nine operating surfaces.</span>
+                    <span className="text-[#F0563A]">Ten operating surfaces.</span>
                   </h2>
                   <p className="mt-6 max-w-2xl text-[15px] leading-7 text-[#BDB5A9]">
                     Veyra is not a single transfer screen. It is an institutional operating layer for private financial coordination on Starknet: prepare the intent, govern the risk, coordinate the protocol, and leave an inspectable proof trail.
@@ -1586,20 +1596,22 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-8 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {productSurfaces.map(surface => {
                   const Icon = surface.icon;
                   return (
-                    <article key={surface.title} className="group flex min-h-[260px] flex-col justify-between bg-[#151D21] p-5 transition-colors hover:bg-[#1B2930] sm:p-6">
+                    <article key={surface.title} className={`surface-map-card surface-map-card--${surface.shape} group flex min-h-[280px] flex-col justify-between bg-[#151D21] p-6 transition-colors hover:bg-[#1B2930] sm:p-7`}>
                       <div>
                         <div className="flex items-center justify-between gap-3 font-mono text-[9px] tracking-[0.12em] text-[#7F8F97]">
                           <span className="text-[#F0563A]">{surface.group}</span>
-                          <Icon size={17} className="text-[#70D49D]" aria-hidden="true" />
+                          <span className="surface-map-icon flex size-9 items-center justify-center rounded-full border border-[#70D49D]/30 bg-[#70D49D]/8">
+                            <Icon size={17} className="text-[#70D49D]" aria-hidden="true" />
+                          </span>
                         </div>
-                        <h3 className="mt-6 font-display text-2xl font-semibold tracking-[-0.04em] text-[#F3EEE5]">{surface.title}</h3>
-                        <p className="mt-3 text-sm leading-6 text-[#AEB8BE]">{surface.copy}</p>
+                        <h3 className="mt-7 font-display text-2xl font-semibold tracking-[-0.04em] text-[#F3EEE5]">{surface.title}</h3>
+                        <p className="mt-3 max-w-[31ch] text-sm leading-6 text-[#AEB8BE]">{surface.copy}</p>
                       </div>
-                      <div className="mt-7 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+                      <div className="mt-8 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
                         <span className="font-mono text-[9px] tracking-[0.1em] text-[#70D49D]">{surface.signal}</span>
                         <button type="button" onClick={() => openProductSurface(surface)} className="inline-flex items-center gap-1 font-mono text-[9px] tracking-[0.1em] text-[#F3EEE5] transition-colors hover:text-[#F0563A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0563A]/70">
                           {surface.action} <ArrowUpRight size={12} aria-hidden="true" />
