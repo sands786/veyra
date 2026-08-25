@@ -826,3 +826,7 @@
 ## Production route regression
 - [x] Fix production `/private-primitives` failure: dynamically imported `PrivatePrimitives` chunk is not fetchable from the deployed asset URL.
 - [x] Rebuild, checkpoint, and verify the production Private Primitives route after the chunk fix.
+
+## Global scale regression
+- [x] Restore readable global typography and icon sizing across desktop and mobile without changing wallet/privacy behavior.
+- [x] Verify the scale correction with typecheck, tests, production build, and responsive screenshots.
