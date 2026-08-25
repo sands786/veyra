@@ -11,23 +11,24 @@ const styleSource = fs.readFileSync(
   "utf8"
 );
 
-describe("homepage surface geometry", () => {
-  it("keeps all canonical surface shapes assigned in the system map", () => {
-    expect(homeSource).toContain('shape: "capsule"');
-    expect(homeSource).toContain('shape: "circle"');
-    expect(homeSource).toContain('shape: "hexagon"');
-    expect(homeSource).toContain('shape: "pentagon"');
-    expect(homeSource).toContain('shape: "angled"');
-    expect(homeSource).toContain('shape: "triangle"');
+describe("homepage circular surface geometry", () => {
+  it("assigns the circular silhouette to every canonical surface", () => {
+    const circleAssignments = homeSource.match(/shape: "circle"/g) ?? [];
+
+    expect(circleAssignments).toHaveLength(10);
+    expect(homeSource).not.toContain('shape: "capsule"');
+    expect(homeSource).not.toContain('shape: "hexagon"');
+    expect(homeSource).not.toContain('shape: "pentagon"');
+    expect(homeSource).not.toContain('shape: "angled"');
+    expect(homeSource).not.toContain('shape: "triangle"');
   });
 
-  it("defines reusable geometric silhouettes for the surface cards", () => {
-    expect(styleSource).toContain(".surface-map-card--capsule");
-    expect(styleSource).toContain(".surface-map-card--circle");
-    expect(styleSource).toContain(".surface-map-card--hexagon");
-    expect(styleSource).toContain(".surface-map-card--pentagon");
-    expect(styleSource).toContain(".surface-map-card--angled");
-    expect(styleSource).toContain(".surface-map-card--triangle");
-    expect(styleSource).toContain("clip-path: polygon");
+  it("keeps every surface datum inside a clipped circular boundary", () => {
+    expect(styleSource).toContain(".surface-map-card {");
+    expect(styleSource).toContain("aspect-ratio: 1 / 1");
+    expect(styleSource).toContain("border-radius: 50% !important");
+    expect(styleSource).toContain("clip-path: circle(50% at 50% 50%) !important");
+    expect(styleSource).toContain("overflow: hidden");
+    expect(styleSource).toContain("max-width: 10rem");
   });
 });

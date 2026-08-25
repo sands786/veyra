@@ -687,3 +687,47 @@ small {
     border-radius: 999px;
   }
 }
+
+/* Unified circular surface treatment: every datum stays inside a true circular boundary. */
+.surface-map-card {
+  width: 100%;
+  min-height: 0 !important;
+  aspect-ratio: 1 / 1;
+  border-radius: 50% !important;
+  clip-path: circle(50% at 50% 50%) !important;
+  overflow: hidden;
+  padding: clamp(1.35rem, 3.2vw, 2.5rem) !important;
+}
+.surface-map-card::before {
+  inset: 7%;
+  border-radius: 50% !important;
+  clip-path: circle(50% at 50% 50%) !important;
+}
+.surface-map-card > div {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+.surface-map-card p {
+  max-width: 25ch;
+}
+.surface-map-card > div:last-child {
+  align-items: flex-end;
+}
+.surface-map-card button {
+  max-width: 10rem;
+  white-space: normal;
+  text-align: right;
+  line-height: 1.35;
+}
+@media (max-width: 639px) {
+  .surface-map-card {
+    width: min(100%, 22rem);
+    justify-self: center;
+    aspect-ratio: 1 / 1;
+    padding: 1.65rem !important;
+  }
+  .surface-map-card p {
+    max-width: 24ch;
+  }
+}

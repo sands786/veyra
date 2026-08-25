@@ -875,3 +875,7 @@
 ## Homepage geometric surface refinement
 - [x] Replace the uniform homepage function boxes with a deliberate mixed-shape treatment using curved, circular, hexagonal, pentagonal, and triangular geometry without sacrificing label readability.
 - [x] Verify the new geometry on desktop and mobile, then run tests, TypeScript, build, and save a checkpoint.
+
+## Homepage circular surface containment
+- [x] Convert every homepage function-directory tile to a circular or controlled oval silhouette with all visible content contained inside the curved boundary.
+- [x] Verify circle containment and responsive readability, then run tests, TypeScript, build, and save a checkpoint.
