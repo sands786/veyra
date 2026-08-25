@@ -1,0 +1,1 @@
+{"version":1,"contracts":[{"id":"65ls03iii9ciq","package_name":"veyra_agent","contract_name":"VeyraAgentCoordinator","module_path":"veyra_agent::VeyraAgentCoordinator","artifacts":{"sierra":"veyra_agent_VeyraAgentCoordinator.contract_class.json","casm":"veyra_agent_VeyraAgentCoordinator.compiled_contract_class.json"}}]}

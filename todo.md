@@ -830,3 +830,19 @@
 ## Global scale regression
 - [x] Restore readable global typography and icon sizing across desktop and mobile without changing wallet/privacy behavior.
 - [x] Verify the scale correction with typecheck, tests, production build, and responsive screenshots.
+
+## Veyra Agent commit–reveal capability
+- [x] Audit the agent surface, current Starknet adapter, and commit–reveal protocol requirements.
+- [x] Implement and locally validate a Starknet-native non-upgradable commit–reveal Cairo contract.
+- [x] Add strict calldata builders, wallet-signed commit/reveal controls, and receipt/state verification to Veyra.
+- [x] Add honest documentation that commit–reveal hides committed values until reveal but does not make wallet identities or transfers anonymous.
+- [x] Deploy and verify a fresh Mainnet commit/reveal lifecycle with owner-signed transactions.
+
+## Veyra Agent selected architecture
+- [x] Build Approach A: wallet-assisted commit–reveal Agent; no autonomous signer or private-key custody.
+- [x] Add Starknet-native sealed-bid contract with commit/reveal verification, replay protection, and explicit round states.
+- [x] Add Agent UI for payload preparation, wallet review/signing, receipt polling, and chain-state evidence.
+
+## Veyra Agent mount regression
+- [x] Fix the malformed Private Markets JSX mount and pass the required `isDemoMode` props for both on-chain panels.
+- [x] Re-run TypeScript, 161 Vitest tests, and the production build after the mount fix.

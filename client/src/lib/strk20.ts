@@ -928,3 +928,77 @@ export async function readLaunchpadChainState(
     projectBalance: u256FromFelts(projectBalance, "get_project_balance"),
   };
 }
+
+export type VeyraAgentAction =
+  | { type: "create_round"; roundId: bigint; coordinator: string; roundType: string }
+  | { type: "open_round"; roundId: bigint }
+  | { type: "commit"; roundId: bigint; itemId: bigint; commitment: string }
+  | { type: "close_round"; roundId: bigint }
+  | { type: "reveal"; roundId: bigint; itemId: bigint; value: string; nonce: string }
+  | { type: "resolve"; roundId: bigint; itemId: bigint; winner: string };
+
+export function buildVeyraAgentCall(
+  contractAddress: string,
+  action: VeyraAgentAction
+): StarknetContractCall {
+  assertContractAddress(contractAddress, "Veyra Agent contract");
+  switch (action.type) {
+    case "create_round":
+      assertPositiveId(action.roundId, "Round id");
+      assertContractAddress(action.coordinator, "Coordinator");
+      if (!action.roundType.trim()) throw new Error("Round type is required.");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.roundId), action.coordinator, action.roundType] };
+    case "open_round":
+    case "close_round":
+      assertPositiveId(action.roundId, "Round id");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.roundId)] };
+    case "commit":
+      assertPositiveId(action.roundId, "Round id");
+      assertPositiveId(action.itemId, "Item id");
+      if (!/^0x[0-9a-fA-F]+$/.test(action.commitment) || BigInt(action.commitment) === BigInt(0)) throw new Error("Commitment must be a non-zero felt.");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.roundId), bigintToHex(action.itemId), action.commitment] };
+    case "reveal":
+      assertPositiveId(action.roundId, "Round id");
+      assertPositiveId(action.itemId, "Item id");
+      if (!action.value.trim() || !action.nonce.trim()) throw new Error("Reveal value and nonce are required.");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.roundId), bigintToHex(action.itemId), action.value, action.nonce] };
+    case "resolve":
+      assertPositiveId(action.roundId, "Round id");
+      assertPositiveId(action.itemId, "Item id");
+      assertContractAddress(action.winner, "Winner");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.roundId), bigintToHex(action.itemId), action.winner] };
+  }
+}
+
+export async function submitVeyraAgentCall(
+  wallet: VeilWallet,
+  network: VeilNetwork,
+  call: StarknetContractCall
+): Promise<{ transaction_hash: string }> {
+  return submitPrivateMarketsCall(wallet, network, call);
+}
+
+export type VeyraAgentChainState = {
+  roundState: bigint;
+  commitment: string;
+  reveal: string;
+};
+
+export async function readVeyraAgentChainState(
+  contractAddress: string,
+  roundId: bigint,
+  itemId: bigint,
+  participant: string
+): Promise<VeyraAgentChainState> {
+  assertContractAddress(participant, "Participant");
+  const [roundState, commitment, reveal] = await Promise.all([
+    readPrivateMarketsCall(contractAddress, "get_round_state", [roundId.toString()]),
+    readPrivateMarketsCall(contractAddress, "get_commitment", [roundId.toString(), itemId.toString(), participant]),
+    readPrivateMarketsCall(contractAddress, "get_reveal", [roundId.toString(), itemId.toString(), participant]),
+  ]);
+  return { roundState: BigInt(roundState[0] ?? "0"), commitment: commitment[0] ?? "0x0", reveal: reveal[0] ?? "0x0" };
+}
+
+export async function readVeyraAgentReceipt(transactionHash: string): Promise<PrivateMarketsReceiptStatus> {
+  return readPrivateMarketsReceipt(transactionHash);
+}
