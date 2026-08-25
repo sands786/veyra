@@ -10,6 +10,7 @@ import { VeyraBrand } from "@/components/VeyraBrand";
 import { WorkspaceReturnButton } from "@/components/WorkspaceReturnButton";
 import { milestoneSteps, privateClaimDemoPath, privateSettlementState, type PrivatePrimitiveId } from "@shared/privatePrimitives";
 import { privateDisclosureFields, type PrivateDisclosureScope } from "@shared/operations";
+import PrivatePrimitivesOnchainPanel from "@/components/PrivatePrimitivesOnchainPanel";
 
 const primitives = [
   { id: "links", label: "PRIVATE LINKS", kicker: "WHISPER PAY PATTERN", icon: Link2, title: "Request payment without exposing the roster.", description: "Create a recipient-scoped link, share it through any channel, and keep the underlying route private.", points: ["Single-recipient scope", "Expiry-aware claim state", "No public recipient directory"] },
@@ -63,6 +64,7 @@ export default function PrivatePrimitives() {
           </section>
           <section className="mt-6 border border-[#F0563A]/20 bg-[#1B2930] p-5 sm:p-6 lg:col-span-2"><div className="flex flex-wrap items-center justify-between gap-4"><div><div className="eyebrow text-[#F0563A]">DISCLOSURE STUDIO</div><h2 className="mt-2 font-display text-2xl font-bold">Choose who gets to see what.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#CFC7BC]">Preview the smallest verifiable packet for each audience. Raw roster, plaintext amounts, and encrypted terms stay private by default.</p></div><div className="font-mono text-[9px] text-[#70D49D]">{disclosureFields.length} FIELDS / {disclosureScope.toUpperCase()}</div></div><div className="mt-5 flex flex-wrap gap-2">{(["aggregate", "counterparty", "auditor"] as const).map((scope) => <button key={scope} type="button" onClick={() => setDisclosureScope(scope)} className={`rounded-full border px-3 py-2 font-mono text-[9px] tracking-[0.08em] ${disclosureScope === scope ? "border-[#F0563A] bg-[#F0563A] text-[#111210]" : "border-white/15 text-[#CFC7BC] hover:border-white/35"}`}>{scope.toUpperCase()}</button>)}</div><div className="mt-5 grid gap-3 sm:grid-cols-4">{disclosureFields.map((field) => <div key={field} className="border-t border-white/15 pt-3 font-mono text-[10px] text-[#F3EEE5]">{field.replaceAll("_", " ").toUpperCase()}</div>)}</div><div className="mt-5 border-t border-white/10 pt-4 font-mono text-[9px] leading-5 text-[#A99A8D]">PUBLICATION GATE: SETTLEMENT RECEIPT REQUIRED · NO DISCLOSURE IS PUBLISHED FROM THIS PREVIEW ALONE</div></section>
         </div>
+        <PrivatePrimitivesOnchainPanel />
         <div className="mt-10 flex items-center gap-2 font-mono text-[9px] tracking-[0.1em] text-[#AEB8BE]"><Check size={13} className="text-[#70D49D]" /> BACKEND RECORDS ARE REAL, BUT THESE PRIMITIVES DO NOT MOVE FUNDS BY THEMSELVES. ONLY A WALLET-SIGNED TRANSACTION WITH A CONFIRMED STARKNET RECEIPT CAN MARK A ROUTE SETTLED OR CREATE A RECEIPT-BACKED PROOF.</div>
       </main>
     </div>

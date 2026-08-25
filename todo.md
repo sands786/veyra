@@ -795,7 +795,7 @@
 
 - [x] Implement the first Launchpad contract as a non-upgradable milestone escrow for one verified Mainnet token, with no owner withdrawal or upgrade path.
 - [x] Require explicit investor deposit, project activation, allocation reservation, milestone approval, release, and refund transitions with replay protection and event emission.
-- [ ] Keep private STRK20 payroll/claim execution separate from the public escrow contract unless a verified protocol-compatible private escrow interface is available.
+- [x] Keep private STRK20 payroll/claim execution separate from the public escrow contract unless a verified protocol-compatible private escrow interface is available.
 - [x] Require owner-signed Mainnet deployment and at least one end-to-end test lifecycle before changing Launchpad copy from “coordination” to “live settlement.”
 
 ## Renewed fully-on-chain requirement
@@ -816,3 +816,9 @@
 - [x] Update STRK20 metadata and documentation with verified Private Markets evidence.
 - [x] Add live Mainnet receipt polling and contract-state reads to the Private Markets browser panel; keep submitted hashes distinct from confirmed settlement.
 - [x] Configure an approved HTTPS Starknet Mainnet RPC URL so browser-side receipt/state verification is available in production.
+
+## Fully on-chain Private Primitives scope
+- [x] Audit Private Primitives UI, wallet adapter, protocol readiness, and existing evidence boundaries.
+- [x] Add a guarded official STRK20 wallet-signed Mainnet action panel with no generic public-transfer fallback.
+- [x] Add public receipt capture and verification while keeping private-note discovery wallet/pool-owned.
+- [ ] Verify a fresh user-owned Private Primitives Mainnet receipt and wallet-private note discovery before claiming private delivery.
