@@ -1,0 +1,1 @@
+{"version":1,"contracts":[{"id":"59dhu9i0hd2hc","package_name":"veyra_markets","contract_name":"VeyraPrivateMarkets","module_path":"veyra_markets::VeyraPrivateMarkets","artifacts":{"sierra":"veyra_markets_VeyraPrivateMarkets.contract_class.json","casm":null}}]}

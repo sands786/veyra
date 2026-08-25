@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   buildLaunchpadEscrowCall,
+  buildPrivateMarketsCall,
+  buildPrivateMarketsTokenApprovalCall,
   buildPayrollRegistryCreateCall,
   buildShieldedRouteActions,
   describeStrk20Readiness,
@@ -84,6 +86,37 @@ describe("STRK20 on-chain adapter", () => {
         amountSmallestUnit: 200n,
       }).entrypoint
     ).toBe("reserve_allocation");
+  });
+
+  it("builds Private Markets market and bid calls with explicit entrypoints and u256 calldata", () => {
+    expect(buildPrivateMarketsCall("0x1234", {
+      type: "create_market",
+      marketId: 4n,
+      creator: "0xabc",
+      targetSmallestUnit: 2_840_000_000n,
+    })).toEqual({
+      contractAddress: "0x1234",
+      entrypoint: "create_market",
+      calldata: ["0x4", "0xabc", "0xa946f600", "0x0"],
+    });
+    expect(buildPrivateMarketsCall("0x1234", {
+      type: "commit_bid",
+      marketId: 4n,
+      bidId: 2n,
+      commitmentHash: "0xdeadbeef",
+      amountSmallestUnit: 200n,
+    }).calldata).toEqual(["0x4", "0x2", "0xdeadbeef", "0xc8", "0x0"]);
+    expect(buildPrivateMarketsTokenApprovalCall("0x999", "0x1234", 200n)).toEqual({
+      contractAddress: "0x999",
+      entrypoint: "approve",
+      calldata: ["0x1234", "0xc8", "0x0"],
+    });
+  });
+
+  it("rejects unsafe Private Markets calls before any wallet request", () => {
+    expect(() => buildPrivateMarketsCall("0x0", { type: "open_market", marketId: 1n })).toThrow("contract address is invalid");
+    expect(() => buildPrivateMarketsCall("0x1234", { type: "commit_bid", marketId: 1n, bidId: 1n, commitmentHash: "", amountSmallestUnit: 1n })).toThrow("Commitment hash is required");
+    expect(() => buildPrivateMarketsCall("0x1234", { type: "create_market", marketId: 1n, creator: "0xabc", targetSmallestUnit: 0n })).toThrow("Market target must be greater than zero");
   });
 
   it("rejects unsafe Launchpad escrow call inputs before any wallet request", () => {

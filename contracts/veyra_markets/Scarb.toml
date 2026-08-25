@@ -1,0 +1,12 @@
+[package]
+name = "veyra_markets"
+version = "0.1.0"
+edition = "2023_11"
+
+[dependencies]
+starknet = "2.20.0"
+
+[dev-dependencies]
+snforge_std = "0.63.0"
+
+[[target.starknet-contract]]

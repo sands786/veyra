@@ -808,3 +808,9 @@
 
 - [x] Re-estimate Mainnet declaration after contract-footprint review; never treat willingness to add STRK as proof the contract is safe to deploy.
 - [x] Obtain explicit owner confirmation immediately before any real declaration/deployment transaction and record only public hashes and addresses.
+## Fully on-chain Private Markets scope
+- [x] Audit current Private Markets UI, server procedures, schema, and wallet boundaries.
+- [x] Implement and locally validate a minimal non-upgradable Private Markets Mainnet contract.
+- [x] Wire strict wallet calls and receipt-first state into the Private Markets UI.
+- [ ] Deploy and verify one complete Private Markets Mainnet lifecycle with owner-signed actions.
+- [ ] Update STRK20 metadata and documentation with verified Private Markets evidence.

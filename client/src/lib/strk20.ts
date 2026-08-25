@@ -89,6 +89,15 @@ export type LaunchpadEscrowAction =
   | { type: "release_milestone"; projectId: bigint; milestoneId: bigint }
   | { type: "refund"; projectId: bigint; amountSmallestUnit: bigint };
 
+export type PrivateMarketsAction =
+  | { type: "create_market"; marketId: bigint; creator: string; targetSmallestUnit: bigint }
+  | { type: "open_market"; marketId: bigint }
+  | { type: "commit_bid"; marketId: bigint; bidId: bigint; commitmentHash: string; amountSmallestUnit: bigint }
+  | { type: "close_market"; marketId: bigint }
+  | { type: "accept_bid"; marketId: bigint; bidId: bigint }
+  | { type: "settle_bid"; marketId: bigint; bidId: bigint }
+  | { type: "refund_bid"; marketId: bigint; bidId: bigint };
+
 type WalletRequest = (request: {
   type: string;
   params?: Record<string, unknown>;
@@ -230,6 +239,16 @@ async function requestInvoke(
  * private STRK20 route: a public escrow contract uses wallet_addInvokeTransaction,
  * while private payments may only use wallet_strk20InvokeTransaction.
  */
+export async function submitPrivateMarketsCall(
+  wallet: VeilWallet,
+  network: VeilNetwork,
+  call: StarknetContractCall
+): Promise<{ transaction_hash: string }> {
+  assertWalletNetwork(wallet, network);
+  if (!wallet.request) throw new Error("This wallet does not expose the Starknet wallet API.");
+  return requestInvoke(wallet, [call]);
+}
+
 export async function submitLaunchpadEscrowCall(
   wallet: VeilWallet,
   network: VeilNetwork,
@@ -582,6 +601,48 @@ function u256Calldata(value: bigint, label: string): string[] {
   if (value <= BigInt(0)) throw new Error(`${label} must be greater than zero.`);
   const lowMask = (BigInt(1) << BigInt(128)) - BigInt(1);
   return [bigintToHex(value & lowMask), bigintToHex(value >> BigInt(128))];
+}
+
+export function buildPrivateMarketsTokenApprovalCall(
+  tokenAddress: string,
+  spenderAddress: string,
+  amountSmallestUnit: bigint
+): StarknetContractCall {
+  assertContractAddress(tokenAddress, "Token");
+  assertContractAddress(spenderAddress, "Spender");
+  return {
+    contractAddress: tokenAddress,
+    entrypoint: "approve",
+    calldata: [spenderAddress, ...u256Calldata(amountSmallestUnit, "Approval amount")],
+  };
+}
+
+export function buildPrivateMarketsCall(
+  contractAddress: string,
+  action: PrivateMarketsAction
+): StarknetContractCall {
+  assertContractAddress(contractAddress, "Private Markets contract");
+  switch (action.type) {
+    case "create_market":
+      assertPositiveId(action.marketId, "Market id");
+      assertContractAddress(action.creator, "Creator");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.marketId), action.creator, ...u256Calldata(action.targetSmallestUnit, "Market target")] };
+    case "open_market":
+    case "close_market":
+      assertPositiveId(action.marketId, "Market id");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.marketId)] };
+    case "commit_bid":
+      assertPositiveId(action.marketId, "Market id");
+      assertPositiveId(action.bidId, "Bid id");
+      if (!action.commitmentHash.trim()) throw new Error("Commitment hash is required.");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.marketId), bigintToHex(action.bidId), action.commitmentHash, ...u256Calldata(action.amountSmallestUnit, "Bid amount")] };
+    case "accept_bid":
+    case "settle_bid":
+    case "refund_bid":
+      assertPositiveId(action.marketId, "Market id");
+      assertPositiveId(action.bidId, "Bid id");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.marketId), bigintToHex(action.bidId)] };
+  }
 }
 
 export function buildLaunchpadEscrowCall(

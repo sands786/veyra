@@ -1,0 +1,84 @@
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  buildPrivateMarketsCall,
+  buildPrivateMarketsTokenApprovalCall,
+  connectVeilWallet,
+  discoverStarknetWallets,
+  STRK_TOKEN,
+  submitPrivateMarketsCall,
+  type PrivateMarketsAction,
+  type VeilWallet,
+} from "@/lib/strk20";
+import { toast } from "sonner";
+
+const marketsAddress = import.meta.env.VITE_VEYRA_MARKETS_CONTRACT_MAINNET as string | undefined;
+const STRK_DECIMALS = BigInt("1000000000000000000");
+
+function shortHash(value: string) { return `${value.slice(0, 10)}…${value.slice(-8)}`; }
+function parseStrk(value: string): bigint {
+  const normalized = value.trim();
+  if (!/^\d+(\.\d{1,18})?$/.test(normalized)) throw new Error("Enter a valid STRK amount with up to 18 decimals.");
+  const [whole, fraction = ""] = normalized.split(".");
+  return BigInt(whole) * STRK_DECIMALS + BigInt((fraction + "0".repeat(18)).slice(0, 18));
+}
+
+export function PrivateMarketsOnchainPanel({ isDemoMode }: { isDemoMode: boolean }) {
+  const wallets = useMemo(() => discoverStarknetWallets(), []);
+  const [wallet, setWallet] = useState<VeilWallet>();
+  const [address, setAddress] = useState("");
+  const [connecting, setConnecting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [marketId, setMarketId] = useState("1");
+  const [bidId, setBidId] = useState("1");
+  const [target, setTarget] = useState("1");
+  const [bidAmount, setBidAmount] = useState("1");
+  const [commitmentHash, setCommitmentHash] = useState("");
+  const [lastHash, setLastHash] = useState("");
+
+  async function connect(option: VeilWallet) {
+    if (connecting) return;
+    setConnecting(true);
+    try {
+      const result = await connectVeilWallet(option);
+      if (!result.live || !result.wallet || !result.address || result.network !== "mainnet") throw new Error("Wallet did not return a verified Starknet Mainnet account.");
+      setWallet(result.wallet); setAddress(result.address);
+      toast("Private Markets wallet connected.", { description: "Mainnet wallet API is ready." });
+    } catch (error) { toast("Wallet connection failed.", { description: String(error).slice(0, 160) }); }
+    finally { setConnecting(false); }
+  }
+
+  async function submit(action: PrivateMarketsAction | { type: "approve_token"; amountSmallestUnit: bigint }) {
+    if (!marketsAddress || !wallet || !address || submitting) return;
+    setSubmitting(true);
+    try {
+      const call = action.type === "approve_token"
+        ? buildPrivateMarketsTokenApprovalCall(STRK_TOKEN, marketsAddress, action.amountSmallestUnit)
+        : buildPrivateMarketsCall(marketsAddress, action);
+      const result = await submitPrivateMarketsCall(wallet, "mainnet", call);
+      setLastHash(result.transaction_hash);
+      toast("Private Markets transaction submitted.", { description: "Wait for a verified receipt before treating state as settled." });
+    } catch (error) { toast("Private Markets transaction was not submitted.", { description: String(error).slice(0, 180) }); }
+    finally { setSubmitting(false); }
+  }
+
+  if (isDemoMode) return null;
+  const disabled = !wallet || !marketsAddress || submitting;
+  const parsedMarketId = BigInt(marketId || "1");
+  const parsedBidId = BigInt(bidId || "1");
+
+  return <section className="mt-6 rounded-[14px] border border-[#70D49D]/25 bg-[#70D49D]/[0.05] p-5">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div><div className="font-mono text-[9px] tracking-[0.13em] text-[#70D49D]">PRIVATE MARKETS / MAINNET ESCROW</div><p className="mt-2 max-w-3xl text-xs leading-5 text-[#CFC7BC]">This first contract keeps commitment terms private from the contract’s business logic, while wallet callers, token amounts, and settlement transfers remain public. Do not describe it as anonymous STRK20 settlement without the official privacy-pool proving and discovery path.</p></div>
+      <span className="font-mono text-[9px] text-[#AEB8BE]">{marketsAddress ? shortHash(marketsAddress) : "CONTRACT NOT DEPLOYED"}</span>
+    </div>
+    {!wallet ? <div className="mt-4 flex flex-wrap gap-2">{wallets.length ? wallets.map(option => <Button key={option.id} disabled={connecting} onClick={() => connect(option.wallet)} className="h-10 rounded-[9px] bg-[#F3EEE5] px-4 font-mono text-[9px] text-[#111210]">{connecting ? "CONNECTING…" : `CONNECT ${option.name.toUpperCase()}`}</Button>) : <span className="font-mono text-[9px] text-[#F0563A]">NO SUPPORTED MAINNET WALLET DETECTED</span>}</div> : <>
+      <div className="mt-4 flex flex-wrap items-center gap-3"><span className="font-mono text-[9px] text-[#70D49D]">CONNECTED / {shortHash(address)}</span><Button disabled={disabled} onClick={() => submit({ type: "create_market", marketId: parsedMarketId, creator: address, targetSmallestUnit: parseStrk(target) })} className="h-10 rounded-[9px] bg-[#F0563A] px-4 font-mono text-[9px] text-[#111210]">CREATE MARKET</Button><Button disabled={disabled} onClick={() => submit({ type: "open_market", marketId: parsedMarketId })} className="h-10 rounded-[9px] border border-white/20 px-4 font-mono text-[9px] text-[#F3EEE5]">OPEN MARKET</Button><Button disabled={disabled} onClick={() => submit({ type: "close_market", marketId: parsedMarketId })} className="h-10 rounded-[9px] border border-white/20 px-4 font-mono text-[9px] text-[#F3EEE5]">CLOSE MARKET</Button></div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-4"><label className="font-mono text-[9px] text-[#AEB8BE]">MARKET ID<input value={marketId} onChange={e => setMarketId(e.target.value)} className="mt-2 h-10 w-full rounded-[8px] border border-white/15 bg-black/20 px-3 text-xs text-[#F3EEE5]" inputMode="numeric" /></label><label className="font-mono text-[9px] text-[#AEB8BE]">BID ID<input value={bidId} onChange={e => setBidId(e.target.value)} className="mt-2 h-10 w-full rounded-[8px] border border-white/15 bg-black/20 px-3 text-xs text-[#F3EEE5]" inputMode="numeric" /></label><label className="font-mono text-[9px] text-[#AEB8BE]">TARGET STRK<input value={target} onChange={e => setTarget(e.target.value)} className="mt-2 h-10 w-full rounded-[8px] border border-white/15 bg-black/20 px-3 text-xs text-[#F3EEE5]" inputMode="decimal" /></label><label className="font-mono text-[9px] text-[#AEB8BE]">BID STRK<input value={bidAmount} onChange={e => setBidAmount(e.target.value)} className="mt-2 h-10 w-full rounded-[8px] border border-white/15 bg-black/20 px-3 text-xs text-[#F3EEE5]" inputMode="decimal" /></label></div>
+      <label className="mt-3 block font-mono text-[9px] text-[#AEB8BE]">COMMITMENT HASH<input value={commitmentHash} onChange={e => setCommitmentHash(e.target.value)} placeholder="felt252 commitment" className="mt-2 h-10 w-full rounded-[8px] border border-white/15 bg-black/20 px-3 text-xs text-[#F3EEE5]" /></label>
+      <div className="mt-4 flex flex-wrap gap-2"><Button disabled={disabled} onClick={() => submit({ type: "approve_token", amountSmallestUnit: parseStrk(bidAmount) })} className="h-10 rounded-[9px] border border-[#70D49D]/40 px-4 font-mono text-[9px] text-[#70D49D]">1. APPROVE STRK</Button><Button disabled={disabled} onClick={() => submit({ type: "commit_bid", marketId: parsedMarketId, bidId: parsedBidId, commitmentHash, amountSmallestUnit: parseStrk(bidAmount) })} className="h-10 rounded-[9px] border border-white/20 px-4 font-mono text-[9px] text-[#F3EEE5]">2. COMMIT BID</Button><Button disabled={disabled} onClick={() => submit({ type: "accept_bid", marketId: parsedMarketId, bidId: parsedBidId })} className="h-10 rounded-[9px] border border-white/20 px-4 font-mono text-[9px] text-[#F3EEE5]">3. ACCEPT BID</Button><Button disabled={disabled} onClick={() => submit({ type: "settle_bid", marketId: parsedMarketId, bidId: parsedBidId })} className="h-10 rounded-[9px] bg-[#70D49D] px-4 font-mono text-[9px] text-[#111210]">4. SETTLE</Button><Button disabled={disabled} onClick={() => submit({ type: "refund_bid", marketId: parsedMarketId, bidId: parsedBidId })} className="h-10 rounded-[9px] border border-[#F0563A]/40 px-4 font-mono text-[9px] text-[#F0563A]">REFUND BID</Button></div>
+      <p className="mt-3 font-mono text-[9px] leading-4 text-[#F0563A]">Only sign actions you intend to execute. Contract state is not considered settled until its Mainnet receipt is verified.</p>
+    </>}
+    {lastHash && <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[9px] text-[#AEB8BE]">SUBMITTED RECEIPT / {lastHash}</div>}
+  </section>;
+}
