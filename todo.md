@@ -879,3 +879,7 @@
 ## Homepage circular surface containment
 - [x] Convert every homepage function-directory tile to a circular or controlled oval silhouette with all visible content contained inside the curved boundary.
 - [x] Verify circle containment and responsive readability, then run tests, TypeScript, build, and save a checkpoint.
+
+## Homepage geometry rollback
+- [x] Restore the homepage function-directory cards to the prior rectangular Copper Veil treatment while keeping the institutional system map and footer.
+- [x] Verify the rollback removes circle clipping, preserves all destination actions, and passes tests, TypeScript, build, and responsive QA.

@@ -11,24 +11,20 @@ const styleSource = fs.readFileSync(
   "utf8"
 );
 
-describe("homepage circular surface geometry", () => {
-  it("assigns the circular silhouette to every canonical surface", () => {
-    const circleAssignments = homeSource.match(/shape: "circle"/g) ?? [];
-
-    expect(circleAssignments).toHaveLength(10);
-    expect(homeSource).not.toContain('shape: "capsule"');
-    expect(homeSource).not.toContain('shape: "hexagon"');
-    expect(homeSource).not.toContain('shape: "pentagon"');
-    expect(homeSource).not.toContain('shape: "angled"');
-    expect(homeSource).not.toContain('shape: "triangle"');
+describe("homepage rectangular surface geometry", () => {
+  it("keeps the ten-surface institutional map in its stable rectangular grid", () => {
+    expect(homeSource).toContain(
+      'className="mt-8 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3"'
+    );
+    expect(homeSource).toContain(
+      'className="group flex min-h-[260px] flex-col justify-between bg-[#151D21] p-5 transition-colors hover:bg-[#1B2930] sm:p-6"'
+    );
+    expect((homeSource.match(/targetType:/g) ?? []).length).toBe(10);
   });
 
-  it("keeps every surface datum inside a clipped circular boundary", () => {
-    expect(styleSource).toContain(".surface-map-card {");
-    expect(styleSource).toContain("aspect-ratio: 1 / 1");
-    expect(styleSource).toContain("border-radius: 50% !important");
-    expect(styleSource).toContain("clip-path: circle(50% at 50% 50%) !important");
-    expect(styleSource).toContain("overflow: hidden");
-    expect(styleSource).toContain("max-width: 10rem");
+  it("does not apply circular clipping to the rectangular surface map", () => {
+    expect(styleSource).not.toContain(".surface-map-card");
+    expect(styleSource).not.toContain("clip-path: circle(50% at 50% 50%)");
+    expect(styleSource).not.toContain("aspect-ratio: 1 / 1");
   });
 });
