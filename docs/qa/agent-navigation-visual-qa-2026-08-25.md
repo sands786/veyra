@@ -1,0 +1,3 @@
+# Agent navigation visual QA
+
+The dedicated `/agent` route renders the Copper Veil header, Mainnet contract label (`0x07d0e03a…a9d61f69`), protocol explanation, and honest privacy boundary. The desktop workspace sidebar now visibly includes `Veyra Agent` under `PROTOCOL`, directly below `Private markets`. The current preview is in persisted Demo Mode, so `/agent` shows an explicit `DEMO MODE / SIMULATED ONLY` boundary and a return-to-workspace action instead of presenting simulated wallet controls as live evidence. The route and navigation additions are ready for mobile verification and checkpointing.

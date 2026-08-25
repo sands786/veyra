@@ -23,9 +23,16 @@ describe("Veyra sidebar navigation", () => {
     expect(homePage).toContain(
       "<LineChart size={16} /> <span>Private markets</span>"
     );
+    expect(homePage).toContain(
+      "<Bot size={16} /> <span>Veyra Agent</span>"
+    );
+    expect(homePage).toContain('navigateTo("/agent")');
     expect(homePage).not.toContain(
       "<Fingerprint size={16} /> <span>Private primitives</span>"
     );
+
+    const app = fs.readFileSync(path.join(root, "client", "src", "App.tsx"), "utf8");
+    expect(app).toContain('<Route path="/agent" component={Agent} />');
   });
 
   it("uses a deliberate control-rail hierarchy for sidebar group labels and route states", () => {

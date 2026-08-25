@@ -13,6 +13,7 @@ import {
 import {
   ArrowUpRight,
   BarChart3,
+  Bot,
   Blocks,
   BookOpen,
   CalendarDays,
@@ -1117,6 +1118,14 @@ export default function Home() {
               >
                 <LineChart size={16} /> <span>Private markets</span>
               </button>
+              <button
+                onClick={() => {
+                  navigateTo("/agent");
+                }}
+                className="nav-item"
+              >
+                <Bot size={16} /> <span>Veyra Agent</span>
+              </button>
             </div>
             <div className="space-y-1">
               <div className="nav-group-label">RESOURCE</div>
@@ -1314,6 +1323,14 @@ export default function Home() {
                 className="nav-item w-full"
               >
                 <BarChart3 size={15} /> Private markets
+              </button>
+              <button
+                onClick={() => {
+                  navigateTo("/agent");
+                }}
+                className="nav-item w-full"
+              >
+                <Bot size={15} /> Veyra Agent
               </button>
               <button
                 onClick={() => {

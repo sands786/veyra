@@ -853,3 +853,7 @@
 - [x] Declare and deploy the Veyra Agent coordinator on Starknet Mainnet with owner confirmation.
 - [x] Verify declaration and deployment receipts, then execute and verify one complete commit–reveal round.
 - [x] Configure the verified Agent address and update public metadata without claiming anonymous identity or transfer privacy.
+
+## Veyra Agent visibility regression
+- [x] Expose the deployed Veyra Agent as a visible sidebar entry and navigable route, with direct access to the wallet-signed panel.
+- [x] Verify Agent visibility with focused tests, TypeScript, production build, and responsive route QA.

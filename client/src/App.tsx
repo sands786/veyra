@@ -16,6 +16,7 @@ const Claim = lazy(() => import("./pages/Claim"));
 const DemoMode = lazy(() => import("./pages/DemoMode"));
 const Documentation = lazy(() => import("./pages/Documentation"));
 const PrivateMarkets = lazy(() => import("./pages/PrivateMarkets"));
+const Agent = lazy(() => import("./pages/Agent"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 
 function RouteLoadingBoundary() {
@@ -54,6 +55,7 @@ function Router() {
         <Route path="/documentation" component={Documentation} />
         <Route path="/private-primitives" component={PrivatePrimitives} />
         <Route path="/private-markets" component={PrivateMarkets} />
+        <Route path="/agent" component={Agent} />
         <Route path="/markets" component={PrivateMarkets} />
         <Route path="/sign-in" component={SignIn} />
         <Route path="/proof/:slug" component={Proof} />
