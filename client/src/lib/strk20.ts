@@ -905,3 +905,26 @@ export async function readPrivateMarketsReceipt(transactionHash: string): Promis
     executionStatus: receipt.execution_status ?? "UNKNOWN",
   };
 }
+
+export type LaunchpadChainState = {
+  projectState: bigint;
+  milestoneState: bigint;
+  projectBalance: bigint;
+};
+
+export async function readLaunchpadChainState(
+  contractAddress: string,
+  projectId: bigint,
+  milestoneId: bigint
+): Promise<LaunchpadChainState> {
+  const [projectState, milestoneState, projectBalance] = await Promise.all([
+    readPrivateMarketsCall(contractAddress, "get_project_state", [projectId.toString()]),
+    readPrivateMarketsCall(contractAddress, "get_milestone_state", [projectId.toString(), milestoneId.toString()]),
+    readPrivateMarketsCall(contractAddress, "get_project_balance", [projectId.toString()]),
+  ]);
+  return {
+    projectState: BigInt(projectState[0] ?? "0"),
+    milestoneState: BigInt(milestoneState[0] ?? "0"),
+    projectBalance: u256FromFelts(projectBalance, "get_project_balance"),
+  };
+}

@@ -5,6 +5,8 @@ import {
   connectVeilWallet,
   discoverStarknetWallets,
   submitLaunchpadEscrowCall,
+  readPrivateMarketsReceipt,
+  readLaunchpadChainState,
   type VeilWallet,
 } from "@/lib/strk20";
 import { toast } from "sonner";
@@ -28,6 +30,9 @@ export function LaunchpadOnchainPanel({
   const [connecting, setConnecting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [lastHash, setLastHash] = useState("");
+  const [receiptStatus, setReceiptStatus] = useState("NOT VERIFIED");
+  const [chainState, setChainState] = useState<{ projectState: bigint; milestoneState: bigint; projectBalance: bigint }>();
+  const [verifying, setVerifying] = useState(false);
 
   async function connect(optionWallet: VeilWallet) {
     if (connecting) return;
@@ -59,14 +64,33 @@ export function LaunchpadOnchainPanel({
       );
       const result = await submitLaunchpadEscrowCall(wallet, "mainnet", call);
       setLastHash(result.transaction_hash);
+      setReceiptStatus("SUBMITTED / VERIFY REQUIRED");
+      setChainState(undefined);
       toast("Launchpad transaction submitted.", {
-        description: "Wait for the receipt before treating the on-chain state as settled.",
+        description: "Use Verify Receipt + State before treating the on-chain state as settled.",
       });
     } catch (error) {
       toast("Launchpad transaction was not submitted.", { description: String(error).slice(0, 180) });
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function verifyMainnetEvidence() {
+    if (!lastHash || !escrowAddress || verifying) return;
+    setVerifying(true);
+    try {
+      const [receipt, state] = await Promise.all([
+        readPrivateMarketsReceipt(lastHash),
+        readLaunchpadChainState(escrowAddress, BigInt(projectId), BigInt(1)),
+      ]);
+      setReceiptStatus(`${receipt.finalityStatus} / ${receipt.executionStatus}`);
+      setChainState(state);
+      toast("Launchpad Mainnet evidence verified.", { description: "Receipt and current project state were read from Starknet." });
+    } catch (error) {
+      setReceiptStatus("VERIFICATION UNAVAILABLE");
+      toast("Launchpad verification unavailable.", { description: String(error).slice(0, 180) });
+    } finally { setVerifying(false); }
   }
 
   if (isDemoMode) return null;
@@ -97,7 +121,7 @@ export function LaunchpadOnchainPanel({
           <Button disabled={submitting} onClick={() => submit("activate_project")} className="h-10 rounded-[9px] border border-white/20 px-4 font-mono text-[9px] text-[#F3EEE5]">ACTIVATE ON-CHAIN ROOM</Button>
         </div>
       )}
-      {lastHash && <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[9px] text-[#AEB8BE]">SUBMITTED RECEIPT / {lastHash}</div>}
+      {lastHash && <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[9px] text-[#AEB8BE]">SUBMITTED RECEIPT / {lastHash}<div className="mt-2 flex flex-wrap items-center gap-2"><Button disabled={verifying} onClick={verifyMainnetEvidence} className="h-8 rounded-[8px] border border-[#70D49D]/40 px-3 text-[9px] text-[#70D49D]">{verifying ? "VERIFYING…" : "VERIFY RECEIPT + STATE"}</Button><span className="text-[#F3EEE5]">{receiptStatus}</span>{chainState && <span className="text-[#70D49D]">PROJECT {chainState.projectState.toString()} / MILESTONE {chainState.milestoneState.toString()} / BALANCE {chainState.projectBalance.toString()} LOWEST</span>}</div></div>}
     </div>
   );
 }

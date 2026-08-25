@@ -787,22 +787,22 @@
 - [x] Audit Launchpad routes, schema, server procedures, existing wallet adapter, and official STRK20/Privacy references.
 - [x] Define a minimal audited-scope Launchpad contract model for projects, commitments, milestone approvals, and releases; do not add unverified token custody.
 - [x] Implement only the verified contract and wallet execution path that can be safely supported by the current Mainnet environment.
-- [ ] Integrate receipt-first on-chain state into server and UI, keeping database records as indexed coordination metadata rather than settlement authority.
-- [ ] Add Cairo/TypeScript regression tests, typecheck, production build, visual checks, and deployment documentation.
-- [ ] Do not claim the Launchpad is fully on-chain until a deployed Mainnet contract, verified wallet transaction, receipt, and state transition exist.
+- [x] Integrate receipt-first on-chain state into server and UI, keeping database records as indexed coordination metadata rather than settlement authority.
+- [x] Add Cairo/TypeScript regression tests, typecheck, production build, visual checks, and deployment documentation.
+- [x] Do not claim the Launchpad is fully on-chain until a deployed Mainnet contract, verified wallet transaction, receipt, and state transition exist.
 
 ### Selected architecture decision
 
 - [x] Implement the first Launchpad contract as a non-upgradable milestone escrow for one verified Mainnet token, with no owner withdrawal or upgrade path.
-- [ ] Require explicit investor deposit, project activation, allocation reservation, milestone approval, release, and refund transitions with replay protection and event emission.
+- [x] Require explicit investor deposit, project activation, allocation reservation, milestone approval, release, and refund transitions with replay protection and event emission.
 - [ ] Keep private STRK20 payroll/claim execution separate from the public escrow contract unless a verified protocol-compatible private escrow interface is available.
 - [x] Require owner-signed Mainnet deployment and at least one end-to-end test lifecycle before changing Launchpad copy from “coordination” to “live settlement.”
 
 ## Renewed fully-on-chain requirement
 
 - [x] Do not leave Launchpad mutations as the only execution path; expose guarded on-chain escrow actions only when a verified contract address and supported wallet capability are available.
-- [ ] Keep the Launchpad UI’s live/settled labels driven by verified receipt state rather than optimistic database status.
-- [ ] Reassess and mark the Launchpad as fully on-chain only after public Mainnet deployment and end-to-end receipt evidence.
+- [x] Keep the Launchpad UI’s live/settled labels driven by verified receipt state rather than optimistic database status.
+- [x] Reassess and mark the Launchpad as fully on-chain only after public Mainnet deployment and end-to-end receipt evidence.
 
 ### Deployment funding decision
 
