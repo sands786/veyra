@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { startLogin, startSignup } from "@/const";
+import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { prepareRouteEdit } from "@/lib/routeEdit";
 import {
@@ -52,7 +52,7 @@ import {
   connectVeilWallet,
   describeStrk20Readiness,
   describeStrk20SubmissionError,
-  disconnectVeilWallet,
+  
   discoverStarknetWallets,
   explorerUrl,
   networkFromChainId,
@@ -234,7 +234,7 @@ export default function Home() {
   // handler: onClick={() => startLogin()} (imported from "@/const"). Never call
   // startLogin() during render (no href={startLogin()}) — it mints a one-time
   // nonce cookie and must run only at the moment of navigation.
-  const { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { user, loading, error, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const { isDemoMode } = useDemoMode();
   const selectedNetwork = "mainnet" as const;
@@ -716,22 +716,6 @@ export default function Home() {
     }
   }
 
-  async function handleWalletSignOut() {
-    try {
-      await disconnectVeilWallet(wallet);
-    } finally {
-      setWallet(undefined);
-      setWalletAddress("");
-      setWalletName("");
-      setConnected(false);
-      setWalletPickerOpen(false);
-      setWalletQrUri("");
-      setWalletQrImage("");
-      toast("Wallet signed out.", {
-        description: "Veyra cleared the connected wallet from this session.",
-      });
-    }
-  }
 
   async function handleWalletQr(option: StarknetWalletOption) {
     setWalletQrLoading(true);
@@ -1305,29 +1289,6 @@ export default function Home() {
             </div>
 
             <div className="ml-auto flex min-w-0 items-center justify-end gap-2 sm:gap-3">
-              {!isAuthenticated ? (
-                <>
-                  <Button
-                    onClick={startLogin}
-                    className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10"
-                  >
-                    SIGN IN
-                  </Button>
-                  <Button
-                    onClick={startSignup}
-                    className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]"
-                  >
-                    SIGN UP
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  onClick={() => void logout()}
-                  className="h-9 rounded-full border border-white/15 bg-transparent px-4 font-mono text-[10px] tracking-[0.12em] text-[#F3EEE5] hover:bg-white/10"
-                >
-                  SIGN OUT
-                </Button>
-              )}
               <div className="shrink-0 rounded-full border border-[#F0563A]/40 bg-[#201815] px-2 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] sm:px-3">
                 <span className="sm:hidden">MAINNET</span>
                 <span className="hidden sm:inline">STARKNET MAINNET</span>
@@ -1874,7 +1835,7 @@ export default function Home() {
               <div className="mt-5 font-mono text-[9px] tracking-[0.1em] text-[#70D49D]">
                 {isAuthenticated
                   ? `${auditQuery.data?.length ?? 0} AUDIT EVENTS / WORKSPACE-BOUND`
-                  : "PUBLIC PREVIEW / AUDIT LEDGER AVAILABLE AFTER SIGN IN"}
+                  : "PUBLIC PREVIEW / WORKSPACE EVENTS NOT LOADED"}
               </div>
               <button
                 onClick={copyProof}
@@ -2025,7 +1986,7 @@ export default function Home() {
                   ))
                 ) : (
                   <div className="mt-3 font-mono text-[9px] text-[#7F8F97]">
-                    SIGN IN TO VIEW WORKSPACE EVENTS
+                    WORKSPACE CONTEXT REQUIRED FOR PRIVATE EVENTS
                   </div>
                 )}
               </div>
@@ -2177,28 +2138,11 @@ export default function Home() {
                           ? "CHANGE WALLET"
                           : "ADD WALLET"}
                     </Button>
-                    {connected && (
-                      <Button
-                        variant="outline"
-                        onClick={() => void handleWalletSignOut()}
-                        className="h-11 rounded-full border-white/15 px-5 font-mono text-[10px] tracking-[0.12em] text-[#AEB8BE] hover:bg-white/10 hover:text-[#F3EEE5]"
-                      >
-                        SIGN OUT WALLET
-                      </Button>
-                    )}
+
                   </>
                 ) : (
-                  <div className="flex flex-wrap items-center gap-3 border-t border-white/10 pt-5">
-                    <div className="font-mono text-[9px] leading-5 tracking-[0.1em] text-[#AEB8BE]">
-                      CREATE OR ACCESS A VEYRA ACCOUNT BEFORE DISCOVERING
-                      WALLETS.
-                    </div>
-                    <Button
-                      onClick={startSignup}
-                      className="h-10 rounded-full bg-[#F0563A] px-4 font-mono text-[9px] tracking-[0.1em] text-[#111210] hover:bg-[#FF7257]"
-                    >
-                      SIGN UP TO CONNECT
-                    </Button>
+                  <div className="border-t border-white/10 pt-5 font-mono text-[9px] leading-5 tracking-[0.1em] text-[#AEB8BE]">
+                    WALLET ACTIONS APPEAR AFTER WORKSPACE CONTEXT IS AVAILABLE.
                   </div>
                 )}
               </div>
@@ -2230,7 +2174,7 @@ export default function Home() {
                 <div className="font-mono text-[9px] text-[#70D49D]">
                   {isAuthenticated
                     ? `${recipientsQuery.data?.length ?? 0} ACTIVE`
-                    : "SIGN IN TO SAVE"}
+                    : "WORKSPACE CONTEXT REQUIRED"}
                 </div>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-[.8fr_1.2fr_auto]">
@@ -2339,7 +2283,7 @@ export default function Home() {
                 )}
                 {!isAuthenticated && (
                   <div className="py-5 text-center font-mono text-[10px] tracking-[0.1em] text-[#7F8F97]">
-                    SIGN IN TO LOAD YOUR WORKSPACE ROSTER
+                    WORKSPACE CONTEXT REQUIRED TO LOAD PRIVATE ROSTER
                   </div>
                 )}
               </div>
@@ -2393,8 +2337,8 @@ export default function Home() {
             </div>
             {!isAuthenticated ? (
               <div className="mt-8 rounded-[14px] border border-white/10 bg-[#151D21] p-5 font-mono text-[10px] tracking-[0.08em] text-[#AEB8BE]">
-                SIGN IN TO ACTIVATE OPERATIONS / THE PUBLIC PREVIEW NEVER
-                PERSISTS PRIVATE WORKSPACE DATA.
+                WORKSPACE CONTEXT REQUIRED TO ACTIVATE OPERATIONS / THE PUBLIC
+                PREVIEW NEVER PERSISTS PRIVATE WORKSPACE DATA.
               </div>
             ) : (
               <div className="mt-9 grid gap-4 xl:grid-cols-4">

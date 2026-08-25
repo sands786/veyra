@@ -13,14 +13,18 @@ describe("Veyra glass-interface presentation layer", () => {
     expect(styles).toContain("backdrop-filter: blur(20px) saturate(118%);");
     expect(styles).toContain(".min-h-screen[class*=\"bg-[#111210]\"]");
     expect(home).toContain('const selectedNetwork = "mainnet" as const;');
-    expect(home).toContain("SIGN UP TO CONNECT");
+    expect(home).toContain(
+      "WALLET ACTIONS APPEAR AFTER WORKSPACE CONTEXT IS AVAILABLE."
+    );
+    expect(home).not.toContain("SIGN UP TO CONNECT");
   });
 
-  it("keeps the Launchpad access gate wired to the established sign-in action", () => {
+  it("keeps the Launchpad access gate wired to the established workspace boundary", () => {
     const launchpad = fs.readFileSync(path.join(root, "client", "src", "pages", "Launchpad.tsx"), "utf8");
 
     expect(launchpad).toContain("PRIVATE ROOM / ACCESS GATE");
-    expect(launchpad).toContain("onClick={startLogin}");
+    expect(launchpad).toContain("WORKSPACE CONTEXT REQUIRED");
+    expect(launchpad).not.toContain("onClick={startLogin}");
     expect(launchpad).toContain("PUBLIC: PROJECT STATE / SHIELDED: CONTRIBUTORS, ALLOCATIONS, AND GOVERNANCE EVIDENCE");
   });
 });

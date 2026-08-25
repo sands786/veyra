@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const root = path.resolve(import.meta.dirname, "..");
 
 describe("account-first wallet access", () => {
-  it("sends explicit sign-up actions to Veyra registration rather than an external identity callback", () => {
+  it("keeps the internal registration launcher separate from external identity callbacks", () => {
     const authLauncher = fs.readFileSync(
       path.join(root, "client", "src", "const.ts"),
       "utf8"
@@ -28,10 +28,9 @@ describe("account-first wallet access", () => {
 
     expect(homePage).toContain("if (!isAuthenticated) {");
     expect(homePage).toContain(
-      "CREATE OR ACCESS A VEYRA ACCOUNT BEFORE DISCOVERING"
+      "WALLET ACTIONS APPEAR AFTER WORKSPACE CONTEXT IS AVAILABLE."
     );
-    expect(homePage).toContain("WALLETS.");
-    expect(homePage).toContain("SIGN UP TO CONNECT");
+    expect(homePage).not.toContain("SIGN UP TO CONNECT");
     expect(homePage).toContain("{isAuthenticated && walletPickerOpen && (");
     expect(homePage).toContain(
       "{isAuthenticated && (\n                <Button\n                  disabled={isWalletActionLocked(walletConnecting)}"

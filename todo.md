@@ -867,3 +867,7 @@
 ## Canonical homepage surface alignment
 - [x] Mirror the exact sidebar labels and ordering on the homepage system map, including Identity keys and the concise Treasury/Claims labels.
 - [x] Re-verify each canonical homepage action link and responsive presentation after alignment.
+
+## Authentication control visibility change
+- [x] Remove visible Sign In, Sign Up, and sign-out controls from every user-facing Veyra surface while preserving session and authorization logic.
+- [x] Verify no visible authentication-control labels remain in rendered UI, then run tests, TypeScript, build, and responsive QA.

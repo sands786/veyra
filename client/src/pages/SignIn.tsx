@@ -72,7 +72,7 @@ export default function SignIn() {
       toast(isRegister ? "Veyra account secured." : "Welcome back to Veyra.", { description: "Your private workspace session is active." });
       setLocation(returnTo);
     } catch (error) {
-      toast(isReset ? "Password reset failed." : isForgot ? "Recovery request could not be completed." : isRegister ? "Account creation failed." : "Sign in failed.", { description: error instanceof Error ? error.message : "Please verify the fields and retry." });
+      toast(isReset ? "Password reset failed." : isForgot ? "Recovery request could not be completed." : isRegister ? "Account creation failed." : "Workspace access failed.", { description: error instanceof Error ? error.message : "Please verify the fields and retry." });
     }
   }
 
@@ -100,7 +100,7 @@ export default function SignIn() {
           </div>
           <div className="relative border border-white/10 bg-[#151D21] p-6 shadow-[0_28px_100px_rgba(0,0,0,0.38)] sm:p-8">
             <div aria-hidden="true" className="absolute right-0 top-0 h-10 w-10 border-b border-l border-[#F0563A]/30 bg-[#201815]" />
-            {!isForgot && !isReset && <div className="flex gap-2 border-b border-white/10 pb-5"><button type="button" onClick={() => changeMode("signIn")} className={`rounded-full px-3 py-2 font-mono text-[9px] tracking-[0.1em] ${!isRegister ? "bg-[#F3EEE5] text-[#111210]" : "text-[#AEB8BE] hover:text-[#F3EEE5]"}`}>SIGN IN</button><button type="button" onClick={() => changeMode("register")} className={`rounded-full px-3 py-2 font-mono text-[9px] tracking-[0.1em] ${isRegister ? "bg-[#F3EEE5] text-[#111210]" : "text-[#AEB8BE] hover:text-[#F3EEE5]"}`}>CREATE ACCOUNT</button></div>}
+            {!isForgot && !isReset && <div className="flex gap-2 border-b border-white/10 pb-5"><button type="button" onClick={() => changeMode("signIn")} className={`rounded-full px-3 py-2 font-mono text-[9px] tracking-[0.1em] ${!isRegister ? "bg-[#F3EEE5] text-[#111210]" : "text-[#AEB8BE] hover:text-[#F3EEE5]"}`}>ACCESS WORKSPACE</button><button type="button" onClick={() => changeMode("register")} className={`rounded-full px-3 py-2 font-mono text-[9px] tracking-[0.1em] ${isRegister ? "bg-[#F3EEE5] text-[#111210]" : "text-[#AEB8BE] hover:text-[#F3EEE5]"}`}>CREATE ACCOUNT</button></div>}
             <div className="mt-7 flex flex-wrap items-center justify-between gap-3 font-mono text-[9px] tracking-[0.15em] text-[#F0563A]"><span>{eyebrow}</span><span className="border border-[#F0563A]/30 bg-[#201815] px-2 py-1 text-[8px]">SHIELDED / PASSWORD PROOF</span></div>
             <h2 className="mt-4 font-display text-3xl font-bold tracking-[-0.05em]">{title}</h2>
             <form className="mt-7 space-y-5" onSubmit={submit}>
@@ -110,10 +110,10 @@ export default function SignIn() {
               {isReset && !resetToken && <p className="font-mono text-[9px] leading-5 text-[#F0563A]">This recovery link is missing or invalid. Request a new link.</p>}
               {!isForgot && <p className="font-mono text-[9px] leading-5 text-[#7F8F97]">PUBLIC: account identity and session state. SHIELDED: your password and its verifier. Use at least 12 characters.</p>}
               {isForgot && <p className="font-mono text-[9px] leading-5 text-[#7F8F97]">For privacy, Veyra returns the same confirmation whether or not the email exists.</p>}
-              <Button type="submit" disabled={!canSubmit || pending} className="h-12 w-full rounded-[10px] bg-[#F0563A] font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]">{pending ? "PROCESSING…" : isForgot ? "SEND RECOVERY LINK" : isReset ? "UPDATE PASSWORD" : isRegister ? "CREATE VEYRA ACCOUNT" : "SIGN IN TO VEYRA"} <ArrowUpRight size={14} className="ml-2" /></Button>
+              <Button type="submit" disabled={!canSubmit || pending} className="h-12 w-full rounded-[10px] bg-[#F0563A] font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]">{pending ? "PROCESSING…" : isForgot ? "SEND RECOVERY LINK" : isReset ? "UPDATE PASSWORD" : isRegister ? "CREATE VEYRA ACCOUNT" : "ACCESS VEYRA WORKSPACE"} <ArrowUpRight size={14} className="ml-2" /></Button>
             </form>
             {previewResetUrl && <div className="mt-5 border border-[#70D49D]/30 bg-[#70D49D]/[0.08] p-3 font-mono text-[9px] leading-5 text-[#B8E9CB]">DEVELOPMENT DELIVERY PREVIEW<br /><a className="break-all underline" href={previewResetUrl}>Open the local recovery link</a></div>}
-            {isForgot ? <button type="button" onClick={() => changeMode("signIn")} className="mt-5 font-mono text-[9px] tracking-[0.1em] text-[#AEB8BE] underline hover:text-[#F3EEE5]">RETURN TO SIGN IN</button> : isReset ? <button type="button" onClick={() => changeMode("signIn")} className="mt-5 font-mono text-[9px] tracking-[0.1em] text-[#AEB8BE] underline hover:text-[#F3EEE5]">BACK TO SIGN IN</button> : !isRegister && <button type="button" onClick={() => changeMode("forgot")} className="mt-5 font-mono text-[9px] tracking-[0.1em] text-[#AEB8BE] underline hover:text-[#F3EEE5]">FORGOT PASSWORD?</button>}
+            {isForgot ? <button type="button" onClick={() => changeMode("signIn")} className="mt-5 font-mono text-[9px] tracking-[0.1em] text-[#AEB8BE] underline hover:text-[#F3EEE5]">RETURN TO WORKSPACE ACCESS</button> : isReset ? <button type="button" onClick={() => changeMode("signIn")} className="mt-5 font-mono text-[9px] tracking-[0.1em] text-[#AEB8BE] underline hover:text-[#F3EEE5]">BACK TO WORKSPACE ACCESS</button> : !isRegister && <button type="button" onClick={() => changeMode("forgot")} className="mt-5 font-mono text-[9px] tracking-[0.1em] text-[#AEB8BE] underline hover:text-[#F3EEE5]">FORGOT PASSWORD?</button>}
           </div>
         </section>
         <footer className="border-t border-white/10 pt-5 font-mono text-[9px] tracking-[0.1em] text-[#7F8F97]">VEYRA IDENTITY / APPLICATION-OWNED ACCESS / NO EXTERNAL CALLBACK REQUIRED</footer>

@@ -44,7 +44,10 @@ describe("Veyra interaction contracts", () => {
     expect(home).toContain("await handleWalletConnect();");
     expect(home).toContain("downloadAuditCsv");
     expect(home).toContain("copyProof");
-    expect(home).toContain("onClick={startSignup}");
+    expect(home).toContain(
+      "WALLET ACTIONS APPEAR AFTER WORKSPACE CONTEXT IS AVAILABLE."
+    );
+    expect(home).not.toContain("onClick={startSignup}");
     expect(home).toContain("onClick={openWalletPicker}");
   });
 
