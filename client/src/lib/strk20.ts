@@ -225,6 +225,23 @@ async function requestInvoke(
 }
 
 /**
+ * Submit one reviewed Launchpad escrow contract call through the connected
+ * wallet’s standard invoke request. This is intentionally separate from the
+ * private STRK20 route: a public escrow contract uses wallet_addInvokeTransaction,
+ * while private payments may only use wallet_strk20InvokeTransaction.
+ */
+export async function submitLaunchpadEscrowCall(
+  wallet: VeilWallet,
+  network: VeilNetwork,
+  call: StarknetContractCall
+): Promise<{ transaction_hash: string }> {
+  assertWalletNetwork(wallet, network);
+  if (!wallet.request)
+    throw new Error("This wallet does not expose the Starknet wallet API.");
+  return requestInvoke(wallet, [call]);
+}
+
+/**
  * Adapt a raw injected Starknet wallet to the official Starknet wallet-api
  * request names. The request is still capability-based: unsupported wallets
  * reject the exact STRK20 request, and no generic `execute` fallback is used

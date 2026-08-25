@@ -13,6 +13,7 @@ import {
   onchainCapability,
   requestWalletQrConnection,
   STRK_TOKEN,
+  submitLaunchpadEscrowCall,
   submitShieldedRoute,
   type StarknetWalletOption,
   type VeilWallet,
@@ -108,6 +109,55 @@ describe("STRK20 on-chain adapter", () => {
         amountSmallestUnit: 1n,
       })
     ).toThrow("Beneficiary address is invalid");
+  });
+
+  it("submits a Launchpad escrow call through wallet_addInvokeTransaction on Mainnet", async () => {
+    const requests: Array<{ type: string; params?: Record<string, unknown> }> = [];
+    const result = await submitLaunchpadEscrowCall(
+      {
+        chainId: MAINNET_CHAIN_ID,
+        request: async request => {
+          requests.push(request);
+          return { transaction_hash: "0xlaunchpad" };
+        },
+      },
+      "mainnet",
+      buildLaunchpadEscrowCall("0x1234", {
+        type: "activate_project",
+        projectId: 7n,
+      })
+    );
+    expect(result).toEqual({ transaction_hash: "0xlaunchpad" });
+    expect(requests).toEqual([
+      {
+        type: "wallet_addInvokeTransaction",
+        params: {
+          calls: [
+            {
+              contract_address: "0x1234",
+              entry_point: "activate_project",
+              calldata: ["0x7"],
+            },
+          ],
+        },
+      },
+    ]);
+  });
+
+  it("rejects Launchpad escrow signing on a non-Mainnet wallet", async () => {
+    await expect(
+      submitLaunchpadEscrowCall(
+        {
+          chainId: "0x534e5f5345504f4c4941",
+          request: async () => ({ transaction_hash: "0xunexpected" }),
+        },
+        "mainnet",
+        buildLaunchpadEscrowCall("0x1234", {
+          type: "activate_project",
+          projectId: 7n,
+        })
+      )
+    ).rejects.toThrow("reporting Starknet mainnet before signing");
   });
 
   it("builds a deposit action for a valid shielded route intent", () => {
