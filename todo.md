@@ -762,3 +762,14 @@
 - [x] Expand the 81-second outcome-led core into an approximately two-minute official STRK20 demo using only authentic live Veyra interactions and evidence-safe product states.
 - [x] Add a captioned export with one short lower-third line at a time, excluding teaser scenes and never covering active controls.
 - [x] Visually and technically QA the two-minute clean and captioned masters before delivery.
+
+## Downloadable video package repair
+
+- [x] Package the two-minute clean and captioned Veyra masters with explicit `.mp4` filenames so the user can download and open them reliably.
+- [x] Upload and verify a direct downloadable package containing both MP4 files.
+
+## Official hackathon competitor comparison
+
+- [x] Review the official STRK20 hackathon project list and collect verifiable evidence for the visible top ten competitors.
+- [x] Compare Veyra and the visible top ten against the official judging dimensions without assuming unverified capabilities.
+- [x] Deliver an honest ranked comparison, identifying Veyra’s defensible advantages and winner-critical gaps.

@@ -1,0 +1,345 @@
+{
+  "generated_at": "2026-08-25T13:52:52.448Z",
+  "total_projects": 146,
+  "completeness_proxy_method": "mainnet/demo/video requirements, verified STRK20 transactions, listed contracts, hub-provided innovation/complexity flags, activity, and stars; not an official leaderboard",
+  "top_ten": [
+    {
+      "slug": "philoxenia",
+      "name": "philoxenia",
+      "repo_url": "https://github.com/SergioSSantiago/philoxenia",
+      "summary": "A private peer-to-peer hospitality network for trusted stays.",
+      "demo_url": "https://philoxenia-iota.vercel.app",
+      "demo_video": "https://philoxenia-iota.vercel.app/demo/philoxenia-commercial.mp4",
+      "verified_txs": 3,
+      "contracts": 3,
+      "requirements": {
+        "demo": true,
+        "video": true,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": true,
+        "why_innovative": "introduces private peer-to-peer hospitality without public listings or traditional marketplace features.",
+        "why_complex": "utilizes multiple Cairo contracts for escrow and privacy, including BookingEscrow and a custom anonymizer.",
+        "reason": "the project's architecture supports private transactions and unique social discovery in hospitality.",
+        "facts_v2": true
+      },
+      "active_days": 3,
+      "stars": 0,
+      "score": 93
+    },
+    {
+      "slug": "morrow",
+      "name": "Morrow",
+      "repo_url": "https://github.com/nftkingiii/Morrow",
+      "summary": "Prepares STRK20 milestone grants with privacy insights and funding route analysis.",
+      "demo_url": "https://morrow-production.up.railway.app",
+      "demo_video": "https://morrow-production.up.railway.app/morrow-demo.mp4",
+      "verified_txs": 3,
+      "contracts": 1,
+      "requirements": {
+        "demo": true,
+        "video": true,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": false,
+        "why_innovative": "Morrow provides a privacy preflight for milestone grants, determining funding structures distinctly.",
+        "why_complex": "No deployed contracts or significant engineering depth are demonstrated yet.",
+        "reason": "Morrow's preflight uniquely clarifies privacy boundaries in milestone funding.",
+        "facts_v2": true
+      },
+      "active_days": 6,
+      "stars": 0,
+      "score": 85
+    },
+    {
+      "slug": "doom",
+      "name": "Doom",
+      "repo_url": "https://github.com/neromtoobad/doom",
+      "summary": "A private prediction market with public odds and anonymous bettors.",
+      "demo_url": "https://neromtoobad.github.io/doom/",
+      "demo_video": "https://youtu.be/zUd1gX9ZN9Q",
+      "verified_txs": 4,
+      "contracts": 14,
+      "requirements": {
+        "demo": true,
+        "video": true,
+        "mainnet": true
+      },
+      "assessment": null,
+      "active_days": 5,
+      "stars": 0,
+      "score": 83
+    },
+    {
+      "slug": "aperture-strk20",
+      "name": "Aperture",
+      "repo_url": "https://github.com/OoJae/aperture-strk20",
+      "summary": "Sealed-ballot governance and shielded treasury for DAOs.",
+      "demo_url": "https://aperture-strk20.vercel.app",
+      "demo_video": "",
+      "verified_txs": 7,
+      "contracts": 4,
+      "requirements": {
+        "demo": true,
+        "video": false,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": true,
+        "why_innovative": "Aperture uses shielded transfers for governance and treasury management in DAOs, enhancing privacy.",
+        "why_complex": "It implements a custom tally service and governance anonymizer using Cairo contracts for secure voting.",
+        "reason": "Aperture provides a private governance solution leveraging shielded transactions for DAOs.",
+        "facts_v2": true
+      },
+      "active_days": 7,
+      "stars": 0,
+      "score": 82
+    },
+    {
+      "slug": "lantern",
+      "name": "Lantern",
+      "repo_url": "https://github.com/PhiBao/lantern",
+      "summary": "Private crowdfunding with public goals and anonymous donors.",
+      "demo_url": "https://app-wine-seven-35.vercel.app",
+      "demo_video": "https://youtu.be/RE3QUI-8XWY",
+      "verified_txs": 5,
+      "contracts": 1,
+      "requirements": {
+        "demo": true,
+        "video": true,
+        "mainnet": true
+      },
+      "assessment": null,
+      "active_days": 5,
+      "stars": 0,
+      "score": 77
+    },
+    {
+      "slug": "envelope",
+      "name": "envelope",
+      "repo_url": "https://github.com/0xrlawrence/envelope",
+      "summary": "Send private payments via sealed envelopes and link sharing without wallet requirements.",
+      "demo_url": "https://0xrlawrence.github.io/envelope/",
+      "demo_video": "",
+      "verified_txs": 3,
+      "contracts": 1,
+      "requirements": {
+        "demo": true,
+        "video": false,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": true,
+        "why_innovative": "applies privacy to casual payments through URL-based envelope links for non-Starknet users.",
+        "why_complex": "implements the `EnvelopeAnonymizer` contract with non-public funding mechanisms and a secure release signature scheme.",
+        "reason": "Envelopes allow anonymous payments without revealing the funder's identity.",
+        "facts_v2": true
+      },
+      "active_days": 10,
+      "stars": 0,
+      "score": 76
+    },
+    {
+      "slug": "airlock",
+      "name": "Airlock",
+      "repo_url": "https://github.com/kenkomu/airlock",
+      "summary": "A cross-chain privacy tool that allows anonymous bridging without on-chain links.",
+      "demo_url": "https://kenkomu.github.io/airlock/",
+      "demo_video": "",
+      "verified_txs": 4,
+      "contracts": 3,
+      "requirements": {
+        "demo": true,
+        "video": false,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": false,
+        "why_innovative": "It enables unlinkable cross-chain asset movement using a privacy pool mechanism.",
+        "why_complex": "No deployed contracts or proven engineering components are present.",
+        "reason": "Airlock creates a cross-chain privacy solution without direct links between transactions.",
+        "facts_v2": true
+      },
+      "active_days": 7,
+      "stars": 0,
+      "score": 74
+    },
+    {
+      "slug": "cutout",
+      "name": "Cutout",
+      "repo_url": "https://github.com/dmetagame/cutout",
+      "summary": "A wallet-native signing guard for shield transactions using public STRK20 evidence.",
+      "demo_url": "https://cutout.rouma.online/",
+      "demo_video": "",
+      "verified_txs": 4,
+      "contracts": 0,
+      "requirements": {
+        "demo": true,
+        "video": false,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": true,
+        "why_innovative": "Cutout uses deterministic public STRK20 evidence to avoid predictable deposit amounts.",
+        "why_complex": "The architecture includes a supervised incremental indexer and CUTOUT-v1.3 evaluation logic.",
+        "reason": "Cutout provides privacy-aware deposit recommendations based on public cohort evidence.",
+        "facts_v2": true
+      },
+      "active_days": 7,
+      "stars": 0,
+      "score": 74
+    },
+    {
+      "slug": "booty-bank",
+      "name": "Booty Bank",
+      "repo_url": "https://github.com/odinfree/booty-bank",
+      "summary": "A banking app for OnlyFans creators with credit management and income tracking.",
+      "demo_url": "https://bootybank.app/",
+      "demo_video": "",
+      "verified_txs": 3,
+      "contracts": 0,
+      "requirements": {
+        "demo": true,
+        "video": false,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": true,
+        "why_innovative": "It provides private income credentials for OnlyFans creators, which is uncommon in financial services.",
+        "why_complex": "It uses the `IncomeCredential` and `BootyFalconAccount` Cairo contracts for unique credential management and account creation.",
+        "reason": "Booty Bank enables private income verification for creators using advanced cryptographic techniques.",
+        "facts_v2": true
+      },
+      "active_days": 4,
+      "stars": 1,
+      "score": 74
+    },
+    {
+      "slug": "aegis-rescue",
+      "name": "Aegis Rescue",
+      "repo_url": "https://github.com/justbiar/aegis",
+      "summary": "A whitehat rescue bot that sweeps exposed on-chain funds to safety.",
+      "demo_url": "https://aegis-peach-six.vercel.app",
+      "demo_video": "",
+      "verified_txs": 3,
+      "contracts": 1,
+      "requirements": {
+        "demo": true,
+        "video": false,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": false,
+        "why_innovative": "It rescues exposed on-chain funds by using privacy to thwart potential theft in a novel domain.",
+        "why_complex": "No deployed contracts or complex Cairo logic has been presented yet.",
+        "reason": "The project converts a privacy pool into a safe box for accidentally leaked keys.",
+        "facts_v2": true
+      },
+      "active_days": 5,
+      "stars": 0,
+      "score": 70
+    }
+  ],
+  "all_submission_complete": [
+    {
+      "slug": "philoxenia",
+      "name": "philoxenia",
+      "repo_url": "https://github.com/SergioSSantiago/philoxenia",
+      "summary": "A private peer-to-peer hospitality network for trusted stays.",
+      "demo_url": "https://philoxenia-iota.vercel.app",
+      "demo_video": "https://philoxenia-iota.vercel.app/demo/philoxenia-commercial.mp4",
+      "verified_txs": 3,
+      "contracts": 3,
+      "requirements": {
+        "demo": true,
+        "video": true,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": true,
+        "why_innovative": "introduces private peer-to-peer hospitality without public listings or traditional marketplace features.",
+        "why_complex": "utilizes multiple Cairo contracts for escrow and privacy, including BookingEscrow and a custom anonymizer.",
+        "reason": "the project's architecture supports private transactions and unique social discovery in hospitality.",
+        "facts_v2": true
+      },
+      "active_days": 3,
+      "stars": 0,
+      "score": 93
+    },
+    {
+      "slug": "morrow",
+      "name": "Morrow",
+      "repo_url": "https://github.com/nftkingiii/Morrow",
+      "summary": "Prepares STRK20 milestone grants with privacy insights and funding route analysis.",
+      "demo_url": "https://morrow-production.up.railway.app",
+      "demo_video": "https://morrow-production.up.railway.app/morrow-demo.mp4",
+      "verified_txs": 3,
+      "contracts": 1,
+      "requirements": {
+        "demo": true,
+        "video": true,
+        "mainnet": true
+      },
+      "assessment": {
+        "innovative": true,
+        "complex": false,
+        "why_innovative": "Morrow provides a privacy preflight for milestone grants, determining funding structures distinctly.",
+        "why_complex": "No deployed contracts or significant engineering depth are demonstrated yet.",
+        "reason": "Morrow's preflight uniquely clarifies privacy boundaries in milestone funding.",
+        "facts_v2": true
+      },
+      "active_days": 6,
+      "stars": 0,
+      "score": 85
+    },
+    {
+      "slug": "doom",
+      "name": "Doom",
+      "repo_url": "https://github.com/neromtoobad/doom",
+      "summary": "A private prediction market with public odds and anonymous bettors.",
+      "demo_url": "https://neromtoobad.github.io/doom/",
+      "demo_video": "https://youtu.be/zUd1gX9ZN9Q",
+      "verified_txs": 4,
+      "contracts": 14,
+      "requirements": {
+        "demo": true,
+        "video": true,
+        "mainnet": true
+      },
+      "assessment": null,
+      "active_days": 5,
+      "stars": 0,
+      "score": 83
+    },
+    {
+      "slug": "lantern",
+      "name": "Lantern",
+      "repo_url": "https://github.com/PhiBao/lantern",
+      "summary": "Private crowdfunding with public goals and anonymous donors.",
+      "demo_url": "https://app-wine-seven-35.vercel.app",
+      "demo_video": "https://youtu.be/RE3QUI-8XWY",
+      "verified_txs": 5,
+      "contracts": 1,
+      "requirements": {
+        "demo": true,
+        "video": true,
+        "mainnet": true
+      },
+      "assessment": null,
+      "active_days": 5,
+      "stars": 0,
+      "score": 77
+    }
+  ]
+}
