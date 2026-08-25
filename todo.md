@@ -887,3 +887,7 @@
 ## Legacy institutional homepage background
 - [x] Replace the current abstract homepage background with a restrained legacy institutional treatment that remains subordinate to the hero content.
 - [x] Integrate the background as a web-safe project asset and verify contrast, responsive behavior, tests, TypeScript, build, and visual QA.
+
+## Homepage two-column surface map fix
+- [x] Change the homepage surface directory to exactly two full-width boxes per desktop row so the final row has no large empty column.
+- [x] Verify the two-column desktop map, mobile stacking, destination links, tests, TypeScript, build, and responsive QA.

@@ -1586,7 +1586,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-8 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-8 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-2">
                 {productSurfaces.map(surface => {
                   const Icon = surface.icon;
                   return (
