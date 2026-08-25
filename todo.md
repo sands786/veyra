@@ -690,7 +690,7 @@
 
 - [x] Exercise the workspace, route, treasury, proof, claim, and Launchpad flows in clearly labeled Demo Mode without submitting a wallet action.
 - [ ] Exercise authenticated record-only flows without signing or submitting a Mainnet transaction, and report every observed state accurately.
-- [ ] Keep the unresolved Ready X private-transfer recipient-delivery investigation isolated from this feature-test pass.
+- [x] Keep the unresolved Ready X private-transfer recipient-delivery investigation isolated from this feature-test pass.
 - [x] Verify the user-created recipient claim link remains an off-chain claim record until a supported wallet action returns a Mainnet transaction hash and receipt.
 - [x] Locate the sender-side route action after a recorded claim and correct the hand-off copy so it directs the owner to claim review rather than implying settlement.
 
@@ -836,7 +836,7 @@
 - [x] Implement and locally validate a Starknet-native non-upgradable commit–reveal Cairo contract.
 - [x] Add strict calldata builders, wallet-signed commit/reveal controls, and receipt/state verification to Veyra.
 - [x] Add honest documentation that commit–reveal hides committed values until reveal but does not make wallet identities or transfers anonymous.
-- [x] Deploy and verify a fresh Mainnet commit/reveal lifecycle with owner-signed transactions.
+- [ ] Deploy and verify a fresh Mainnet commit/reveal lifecycle with owner-signed transactions.
 
 ## Veyra Agent selected architecture
 - [x] Build Approach A: wallet-assisted commit–reveal Agent; no autonomous signer or private-key custody.
@@ -846,3 +846,10 @@
 ## Veyra Agent mount regression
 - [x] Fix the malformed Private Markets JSX mount and pass the required `isDemoMode` props for both on-chain panels.
 - [x] Re-run TypeScript, 161 Vitest tests, and the production build after the mount fix.
+
+## Veyra Agent Mainnet deployment pass
+- [ ] Correct prior Veyra Agent evidence labels so local implementation is not described as deployed proof.
+- [ ] Revalidate the Agent Cairo package and deployment helper on the owner branch.
+- [ ] Declare and deploy the Veyra Agent coordinator on Starknet Mainnet with owner confirmation.
+- [ ] Verify declaration and deployment receipts, then execute and verify one complete commit–reveal round.
+- [ ] Configure the verified Agent address and update public metadata without claiming anonymous identity or transfer privacy.

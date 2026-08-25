@@ -136,3 +136,6 @@ mod VeyraAgentCoordinator {
         fn get_reveal(self: @ContractState, round_id: u64, item_id: u64, participant: ContractAddress) -> felt252 { self.reveals.read((round_id, item_id, participant)) }
     }
 }
+
+#[cfg(test)]
+mod tests;
