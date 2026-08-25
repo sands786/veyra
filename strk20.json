@@ -13,7 +13,8 @@
   ],
   "contracts": [
     "0x005d7cb0f5ea0cda8b046d524eaa45e38f3a5c54357f2e4b211da7e2c435bb15",
-    "0x05476ca7064583238f3e82a6815a7f662b14228e1fb585d480838a282b9d7cf2"
+    "0x05476ca7064583238f3e82a6815a7f662b14228e1fb585d480838a282b9d7cf2",
+    "0x07d0e03a99a85176ceba9fad11bc63b66bfc198365e12e36cdf0811aa9d61f69"
   ],
   "demo_video": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4",
   "demo_url": "https://veyra-gamma-gold.vercel.app",
@@ -40,6 +41,37 @@
         "bid_state": "SETTLED",
         "committed_balance": "0"
       }
+    },
+    "veyra_agent": {
+      "network": "mainnet",
+      "contract": "0x07d0e03a99a85176ceba9fad11bc63b66bfc198365e12e36cdf0811aa9d61f69",
+      "declared_class_hash": "0x044d4d37b817d4c272bf1baeaa0a3fc2af60df9e314cfeb240b61e37c4d2fc91",
+      "declaration": "0x0667be712451ca60be50c0066f5260af80748e7b550c72a349835ec6e732bbaa",
+      "deployment": "0x06de0575c5ca8c0df680f37987d50e91c8f1d4b0ce7181119bf5001de6312a9c",
+      "lifecycle": {
+        "create_round_1": "0x041133c705a9e01b2636c6e89a32fa5488d34fda4a9cd3502308e306b1c232eb",
+        "open_round_1": "0x00ac3a7e285c73de8be1a495cf3eecb5eb3a7703d949322cd7299e4536c33f57",
+        "commit_round_1": "0x0406365d897a1297b7e1e8ae056ab98f897f27f2eec2a90027b14018d779372e",
+        "close_round_1": "0x03faea08a144331bd138d2f0f2075e43dcabec10d8f3e22c3a248b13f2457ac7",
+        "failed_reveal_round_1": "not_recorded_transaction_reverted_commitment_mismatch",
+        "create_round_2": "0x017ca35047d18a156901a3e0af14cb50cee6ea37cd377efd3daaef3391c28ffd",
+        "open_round_2": "0x07c9aab8d8842f796d688ae163c12d4d1cf5763a4ec6b572761e77e92c5d109d",
+        "commit_round_2": "0x048bfb36bc26e1b3dfbd6d4593a0e85e9ab6d7428e6b8abb081c44464f8c7153",
+        "close_round_2": "0x011bdbec711b575305df1700598888ec754182bd12e73836dc5b8f41c969ab10",
+        "reveal_round_2": "0x01260dd0733ceac5a8c8704efb118995bb179b8953c481298e353f8dd23a0af7",
+        "resolve_round_2": "0x02ab82ecd93ad847d2e5963b5e6cf28f90ce2ca571436df494c26d3c9c76a0a5"
+      },
+      "round_2": {
+        "round_id": 2,
+        "item_id": 1,
+        "round_state": "CLOSED",
+        "commitment": "0x1e9effdf66a49645a2cc57654bf27a605562266270094b0cba87d4adf4517a3",
+        "revealed_value": "42",
+        "nonce": "20260826",
+        "resolved_winner": "0x07d743492fc8c6eaf585d4c4770372eb5c32b01db9ff4231539175253dd96e01",
+        "commitment_hash": "Poseidon([42, 20260826])"
+      },
+      "privacy_boundary": "Commitment hides the value until reveal; wallet callers, the revealed value, and any public transfer or settlement remain observable on Mainnet."
     }
   }
 }
