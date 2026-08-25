@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CLIP="${1:?Usage: record-veyra-outcome-clip.sh <payroll_outcome|primitives_outcome|launchpad_outcome|proof_outcome|markets_context>}"
+CLIP="${1:?Usage: record-veyra-outcome-clip.sh <payroll_outcome|operations_outcome|treasury_outcome|claims_outcome|primitives_outcome|launchpad_outcome|proof_outcome|markets_context>}"
 OUT_DIR="${2:-/home/ubuntu/webdev-static-assets/veyra-demo-v2/live-capture/rebuild-recorded}"
 DISPLAY_NUM=":96"
 DEBUG_PORT=9222
@@ -10,7 +10,7 @@ ROOT="/home/ubuntu/veilpay-private-sprint"
 mkdir -p "$OUT_DIR"
 
 case "$CLIP" in
-  payroll_outcome|launchpad_outcome|proof_outcome) URL="http://127.0.0.1:3000/demo" ;;
+  payroll_outcome|operations_outcome|treasury_outcome|claims_outcome|launchpad_outcome|proof_outcome) URL="http://127.0.0.1:3000/demo" ;;
   primitives_outcome) URL="http://127.0.0.1:3000/private-primitives" ;;
   markets_context) URL="http://127.0.0.1:3000/private-markets" ;;
   *) echo "Unknown clip: $CLIP" >&2; exit 2 ;;
@@ -53,6 +53,25 @@ case "$CLIP" in
     tab_activate 19 1.4
     # Focus remains on Add recipient; five subsequent tab stops reach the route simulation action.
     tab_activate 5 2.4
+    ;;
+  operations_outcome)
+    # 9 activates Operations. The remaining product tabs and the surface-error
+    # control occupy five focus stops before the action itself.
+    tab_activate 9 1.0
+    tab_activate 6 1.0
+    tab_activate 1 2.6
+    ;;
+  treasury_outcome)
+    # 10 activates Treasury; five subsequent stops reach the dry-run action.
+    tab_activate 10 1.0
+    tab_activate 5 1.0
+    tab_activate 1 2.6
+    ;;
+  claims_outcome)
+    # 11 activates Claims; four subsequent stops reach redeem then retry.
+    tab_activate 11 1.0
+    tab_activate 4 1.0
+    tab_activate 1 2.6
     ;;
   primitives_outcome)
     # A fresh Primitives page reaches Selective Proof on tab 3. The resulting

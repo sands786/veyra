@@ -1,0 +1,23 @@
+Speak in English with a calm US accent, decisive and precise, like a trusted product operator explaining a live system. Maintain a measured, confident pace. Do not oversell. Use short pauses only between product chapters:
+
+Financial coordination should not expose the people behind it. Veyra is a privacy-first operating layer for Starknet teams that coordinate money, approvals, and evidence without publishing a roster.
+
+Start with private payroll. The operator adds a recipient, prepares a route, and moves its local state from draft to shielded. The receipt becomes submitted. This is a guided rehearsal, not a blockchain transaction.
+
+Operations adds a governed cadence. A scheduled run can fail, recover, and write the outcome into an operator ledger without publishing a payroll roster.
+
+Treasury guardrails run before capital moves. Veyra checks the network, daily limit, and policy. Here the dry-run passes because the route is below its limit.
+
+Claims keep a recipient workflow private. A claim can be redeemed without creating a public directory of names.
+
+Selective proof chooses the smallest verifiable disclosure. The reviewer sees an aggregate outcome; roster, individual amounts, and encrypted terms remain hidden.
+
+Private Markets applies the same pattern to price discovery: public signals, unlinkable traders, and gated execution.
+
+In the Launchpad, an operator selects a project and reserves a shielded allocation. Governance comes before release. This guided state remains visibly simulated.
+
+When public evidence is required, Veyra publishes an aggregate proof, not a recipient list.
+
+The production boundary is precise. Settlement starts only after a Mainnet wallet is connected and approved, returns a hash, and Veyra verifies the Starknet receipt.
+
+Veyra. Move the money. Keep the roster private.

@@ -750,3 +750,15 @@
 - [x] Diagnose the concrete pacing, visual, live-interaction, and closing-treatment failures in the rejected 112-second master.
 - [x] Rebuild the product film around deliberate on-screen outcomes rather than generic route changes or static dwell shots.
 - [x] Re-render and visually QA a replacement cut before any recommendation or delivery claim.
+
+## Official demo-duration verification
+
+- [x] Verify the current STRK20 hackathon rule for demo-video minimum and maximum duration against the official source.
+- [x] Compare the verified rule with the delivered Veyra outcome-led judge cut and record any required edit.
+- [x] User decision: retain a concise two-minute outcome-led demo instead of extending the 81-second cut to a three-minute version; the official wording caveat remains documented.
+
+## Approved two-minute official demo extension
+
+- [x] Expand the 81-second outcome-led core into an approximately two-minute official STRK20 demo using only authentic live Veyra interactions and evidence-safe product states.
+- [x] Add a captioned export with one short lower-third line at a time, excluding teaser scenes and never covering active controls.
+- [x] Visually and technically QA the two-minute clean and captioned masters before delivery.
