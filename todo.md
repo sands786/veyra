@@ -857,3 +857,9 @@
 ## Veyra Agent visibility regression
 - [x] Expose the deployed Veyra Agent as a visible sidebar entry and navigable route, with direct access to the wallet-signed panel.
 - [x] Verify Agent visibility with focused tests, TypeScript, production build, and responsive route QA.
+
+## Institutional homepage redesign
+- [x] Reframe the front page as an information-first institutional overview without adding Agent functionality to the homepage.
+- [x] Make existing Veyra functions and dedicated action routes visibly legible to judges, including Payroll, Proof Ledger, Treasury, Claims, Operations, Private Primitives, Private Markets, Launchpad, and Veyra Agent.
+- [x] Add an institutional footer with clear navigation, evidence/privacy boundary, and project identity.
+- [x] Verify homepage responsiveness, route links, focused tests, TypeScript, and production build.

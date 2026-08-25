@@ -125,6 +125,99 @@ const activity = [
   },
 ];
 
+const productSurfaces = [
+  {
+    group: "WORKSPACE",
+    title: "Private payroll",
+    copy: "Build governed STRK20 payment intents while recipient rosters stay inside the workspace boundary.",
+    signal: "CORE FLOW",
+    action: "OPEN ROUTE BUILDER",
+    icon: WalletCards,
+    targetType: "section",
+    target: "routes",
+  },
+  {
+    group: "PROOF",
+    title: "Proof ledger",
+    copy: "Inspect public receipt states, transaction evidence, and shareable proof metadata without exposing the roster.",
+    signal: "RECEIPT-FIRST",
+    action: "OPEN PROOF LEDGER",
+    icon: Shield,
+    targetType: "section",
+    target: "ledger",
+  },
+  {
+    group: "CONTROL",
+    title: "Operations",
+    copy: "Run governance, operational analytics, audit export, and unresolved-receipt monitoring from one control surface.",
+    signal: "OPERATING LAYER",
+    action: "OPEN OPERATIONS",
+    icon: Workflow,
+    targetType: "section",
+    target: "operations",
+  },
+  {
+    group: "CONTROL",
+    title: "Treasury guardrails",
+    copy: "Set policy limits, approval rules, network constraints, and dry-run checks before a wallet signs.",
+    signal: "POLICY BEFORE CAPITAL",
+    action: "OPEN TREASURY",
+    icon: LockKeyhole,
+    targetType: "section",
+    target: "treasury",
+  },
+  {
+    group: "CONTROL",
+    title: "Recipient claims",
+    copy: "Create expiring private claim links so recipients can reconcile their route without publishing the roster.",
+    signal: "PRIVATE CLAIMS",
+    action: "OPEN CLAIMS",
+    icon: Link2,
+    targetType: "section",
+    target: "claims",
+  },
+  {
+    group: "PROTOCOL",
+    title: "Private primitives",
+    copy: "Keep the official STRK20 wallet boundary explicit: the wallet signs, the chain returns a public receipt.",
+    signal: "WALLET-NATIVE",
+    action: "VIEW PRIMITIVES",
+    icon: Blocks,
+    targetType: "route",
+    target: "/private-primitives",
+  },
+  {
+    group: "PROTOCOL",
+    title: "Private markets",
+    copy: "Coordinate sealed-bid market workflows with a deployed Mainnet escrow and observable settlement state.",
+    signal: "MAINNET ESCROW",
+    action: "VIEW PRIVATE MARKETS",
+    icon: LineChart,
+    targetType: "route",
+    target: "/private-markets",
+  },
+  {
+    group: "PROTOCOL",
+    title: "Launchpad",
+    copy: "Move from project room to milestone release with a deployed Starknet escrow and wallet-reviewed actions.",
+    signal: "MILESTONE ESCROW",
+    action: "VIEW LAUNCHPAD",
+    icon: Sparkles,
+    targetType: "route",
+    target: "/launchpad",
+  },
+  {
+    group: "PROTOCOL",
+    title: "Veyra Agent",
+    copy: "Coordinate a decision with commit–reveal: commit first, reveal later, and verify every state transition.",
+    signal: "COMMIT–REVEAL",
+    action: "VIEW AGENT",
+    icon: Bot,
+    targetType: "route",
+    target: "/agent",
+  },
+] as const;
+
 export default function Home() {
   // The useAuth hook provides authentication state.
   // To implement login/logout, call logout(), or start login from an event
@@ -977,6 +1070,20 @@ export default function Home() {
     goToSection("operations");
   }
 
+  function openProductSurface(surface: (typeof productSurfaces)[number]) {
+    if (surface.targetType === "section") {
+      if (surface.target === "routes" || surface.target === "ledger") {
+        goToSection(surface.target);
+      } else if (surface.target === "operations") {
+        goToOperations("overview");
+      } else {
+        goToOperations(surface.target);
+      }
+      return;
+    }
+    navigateTo(surface.target);
+  }
+
   async function copyProof() {
     const copiedSuccessfully = await copyText("veilpay://proof/VP-019/strk20");
     if (!copiedSuccessfully) {
@@ -1405,6 +1512,17 @@ export default function Home() {
                     size={15}
                   />
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    document
+                      .getElementById("system-map")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                  }
+                  className="group h-12 rounded-full border-white/20 bg-transparent px-6 font-mono text-[10px] tracking-[0.13em] text-[#F3EEE5] hover:border-[#F0563A]/60 hover:bg-[#F0563A]/10"
+                >
+                  EXPLORE THE SYSTEM <ArrowUpRight className="ml-2" size={15} />
+                </Button>
                 <span className="font-mono text-[10px] leading-5 tracking-[0.1em] text-[#AEB8BE]">
                   PUBLICLY VERIFIABLE
                   <br />
@@ -1468,6 +1586,57 @@ export default function Home() {
                     Wallet → Receipt → Proof
                   </div>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            id="system-map"
+            className="border-b border-white/10 bg-[#111210] px-5 py-16 sm:px-8 lg:px-8 lg:py-24"
+            aria-labelledby="system-map-title"
+          >
+            <div className="mx-auto max-w-[1180px]">
+              <div className="flex flex-col gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-[720px]">
+                  <div className="eyebrow text-[#F0563A]">03 / INSTITUTIONAL MAP</div>
+                  <h2 id="system-map-title" className="mt-5 font-display text-[clamp(3rem,6vw,6.8rem)] font-semibold leading-[0.86] tracking-[-0.08em] text-[#F3EEE5]">
+                    One system.
+                    <br />
+                    <span className="text-[#F0563A]">Nine operating surfaces.</span>
+                  </h2>
+                  <p className="mt-6 max-w-2xl text-[15px] leading-7 text-[#BDB5A9]">
+                    Veyra is not a single transfer screen. It is an institutional operating layer for private financial coordination on Starknet: prepare the intent, govern the risk, coordinate the protocol, and leave an inspectable proof trail.
+                  </p>
+                </div>
+                <div className="max-w-[270px] border-l border-[#F0563A]/50 pl-4 font-mono text-[10px] leading-5 tracking-[0.1em] text-[#AEB8BE]">
+                  EVERY SURFACE HAS A DESTINATION.
+                  <br />
+                  EVERY LIVE ACTION HAS A BOUNDARY.
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
+                {productSurfaces.map(surface => {
+                  const Icon = surface.icon;
+                  return (
+                    <article key={surface.title} className="group flex min-h-[260px] flex-col justify-between bg-[#151D21] p-5 transition-colors hover:bg-[#1B2930] sm:p-6">
+                      <div>
+                        <div className="flex items-center justify-between gap-3 font-mono text-[9px] tracking-[0.12em] text-[#7F8F97]">
+                          <span className="text-[#F0563A]">{surface.group}</span>
+                          <Icon size={17} className="text-[#70D49D]" aria-hidden="true" />
+                        </div>
+                        <h3 className="mt-6 font-display text-2xl font-semibold tracking-[-0.04em] text-[#F3EEE5]">{surface.title}</h3>
+                        <p className="mt-3 text-sm leading-6 text-[#AEB8BE]">{surface.copy}</p>
+                      </div>
+                      <div className="mt-7 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+                        <span className="font-mono text-[9px] tracking-[0.1em] text-[#70D49D]">{surface.signal}</span>
+                        <button type="button" onClick={() => openProductSurface(surface)} className="inline-flex items-center gap-1 font-mono text-[9px] tracking-[0.1em] text-[#F3EEE5] transition-colors hover:text-[#F0563A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0563A]/70">
+                          {surface.action} <ArrowUpRight size={12} aria-hidden="true" />
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -2941,15 +3110,44 @@ export default function Home() {
             )}
           </section>
 
-          <footer className="flex flex-col gap-5 px-5 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-8">
-            <div className="flex items-center gap-3">
-              <Sparkles size={15} className="text-[#F0563A]" />
-              <span className="font-mono text-[10px] tracking-[0.12em] text-[#AEB8BE]">
-                BUILT FOR THE STRK20 PRIVATE SPRINT
-              </span>
-            </div>
-            <div className="font-mono text-[9px] tracking-[0.1em] text-[#7F8F97]">
-              OPEN SOURCE / MAINNET-READY / PRIVACY BY DEFAULT
+          <footer className="border-t border-white/10 bg-[#0D1010] px-5 py-12 sm:px-8 lg:px-8 lg:py-16">
+            <div className="mx-auto max-w-[1180px]">
+              <div className="grid gap-10 lg:grid-cols-[1.25fr_.75fr_.75fr]">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <VeyraBrand compact />
+                    <span className="font-mono text-[9px] tracking-[0.12em] text-[#F0563A]">STARKNET / MAINNET</span>
+                  </div>
+                  <p className="mt-6 max-w-md font-display text-3xl leading-[0.95] tracking-[-0.05em] text-[#F3EEE5]">
+                    Private coordination for teams that still need proof.
+                  </p>
+                  <p className="mt-5 max-w-md text-sm leading-6 text-[#AEB8BE]">
+                    Veyra coordinates payroll, treasury, claims, markets, launches, and commit–reveal workflows without pretending that public chain edges are private.
+                  </p>
+                </div>
+                <div>
+                  <div className="nav-group-label">EXPLORE</div>
+                  <div className="mt-4 grid gap-3 font-mono text-[10px] tracking-[0.1em] text-[#CFC7BC]">
+                    <button type="button" onClick={() => goToSection("routes")} className="text-left hover:text-[#F0563A]">PRIVATE PAYROLL</button>
+                    <button type="button" onClick={() => goToSection("operations")} className="text-left hover:text-[#F0563A]">OPERATIONS / TREASURY / CLAIMS</button>
+                    <button type="button" onClick={() => goToSection("ledger")} className="text-left hover:text-[#F0563A]">PROOF LEDGER</button>
+                    <button type="button" onClick={() => navigateTo("/agent")} className="text-left hover:text-[#F0563A]">VEYRA AGENT</button>
+                  </div>
+                </div>
+                <div>
+                  <div className="nav-group-label">PROTOCOL</div>
+                  <div className="mt-4 grid gap-3 font-mono text-[10px] tracking-[0.1em] text-[#CFC7BC]">
+                    <button type="button" onClick={() => navigateTo("/private-primitives")} className="text-left hover:text-[#F0563A]">PRIVATE PRIMITIVES</button>
+                    <button type="button" onClick={() => navigateTo("/private-markets")} className="text-left hover:text-[#F0563A]">PRIVATE MARKETS</button>
+                    <button type="button" onClick={() => navigateTo("/launchpad")} className="text-left hover:text-[#F0563A]">LAUNCHPAD</button>
+                    <a href="https://github.com/sands786/veyra/blob/main/strk20.json" target="_blank" rel="noreferrer" className="hover:text-[#F0563A]">PUBLIC EVIDENCE ↗</a>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-5 font-mono text-[9px] leading-5 tracking-[0.1em] text-[#7F8F97] sm:flex-row sm:items-center sm:justify-between">
+                <span>VEYRA / PRIVATE FINANCIAL COORDINATION ON STARKNET</span>
+                <span>WALLET SIGNS · RECEIPT PROVES · ROSTER STAYS PRIVATE</span>
+              </div>
             </div>
           </footer>
           {isAuthenticated && walletPickerOpen && (
