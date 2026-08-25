@@ -128,10 +128,10 @@ const activity = [
 const productSurfaces = [
   {
     group: "WORKSPACE",
-    title: "Private payroll",
+    title: "Payment routes",
     copy: "Build governed STRK20 payment intents while recipient rosters stay inside the workspace boundary.",
     signal: "CORE FLOW",
-    action: "OPEN ROUTE BUILDER",
+    action: "OPEN PAYMENT ROUTES",
     icon: WalletCards,
     targetType: "section",
     target: "routes",
@@ -147,6 +147,16 @@ const productSurfaces = [
     target: "ledger",
   },
   {
+    group: "WORKSPACE",
+    title: "Identity keys",
+    copy: "Review the connected wallet boundary, network context, and signing readiness before any production action.",
+    signal: "WALLET CONTEXT",
+    action: "OPEN IDENTITY KEYS",
+    icon: KeyRound,
+    targetType: "section",
+    target: "identity",
+  },
+  {
     group: "CONTROL",
     title: "Operations",
     copy: "Run governance, operational analytics, audit export, and unresolved-receipt monitoring from one control surface.",
@@ -158,7 +168,7 @@ const productSurfaces = [
   },
   {
     group: "CONTROL",
-    title: "Treasury guardrails",
+    title: "Treasury",
     copy: "Set policy limits, approval rules, network constraints, and dry-run checks before a wallet signs.",
     signal: "POLICY BEFORE CAPITAL",
     action: "OPEN TREASURY",
@@ -168,7 +178,7 @@ const productSurfaces = [
   },
   {
     group: "CONTROL",
-    title: "Recipient claims",
+    title: "Claims",
     copy: "Create expiring private claim links so recipients can reconcile their route without publishing the roster.",
     signal: "PRIVATE CLAIMS",
     action: "OPEN CLAIMS",
@@ -1072,7 +1082,7 @@ export default function Home() {
 
   function openProductSurface(surface: (typeof productSurfaces)[number]) {
     if (surface.targetType === "section") {
-      if (surface.target === "routes" || surface.target === "ledger") {
+      if (surface.target === "routes" || surface.target === "ledger" || surface.target === "identity") {
         goToSection(surface.target);
       } else if (surface.target === "operations") {
         goToOperations("overview");

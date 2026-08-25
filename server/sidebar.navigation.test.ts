@@ -35,6 +35,28 @@ describe("Veyra sidebar navigation", () => {
     expect(app).toContain('<Route path="/agent" component={Agent} />');
   });
 
+  it("mirrors every canonical sidebar destination in the homepage system map", () => {
+    const homePage = fs.readFileSync(
+      path.join(root, "client", "src", "pages", "Home.tsx"),
+      "utf8"
+    );
+
+    for (const label of [
+      "Payment routes",
+      "Proof ledger",
+      "Identity keys",
+      "Operations",
+      "Treasury",
+      "Claims",
+      "Launchpad",
+      "Private primitives",
+      "Private markets",
+      "Veyra Agent",
+    ]) {
+      expect(homePage).toContain(`title: "${label}"`);
+    }
+  });
+
   it("uses a deliberate control-rail hierarchy for sidebar group labels and route states", () => {
     const navigationStyles = fs.readFileSync(
       path.join(root, "client", "src", "index.css"),

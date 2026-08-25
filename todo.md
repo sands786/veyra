@@ -863,3 +863,7 @@
 - [x] Make existing Veyra functions and dedicated action routes visibly legible to judges, including Payroll, Proof Ledger, Treasury, Claims, Operations, Private Primitives, Private Markets, Launchpad, and Veyra Agent.
 - [x] Add an institutional footer with clear navigation, evidence/privacy boundary, and project identity.
 - [x] Verify homepage responsiveness, route links, focused tests, TypeScript, and production build.
+
+## Canonical homepage surface alignment
+- [x] Mirror the exact sidebar labels and ordering on the homepage system map, including Identity keys and the concise Treasury/Claims labels.
+- [x] Re-verify each canonical homepage action link and responsive presentation after alignment.
