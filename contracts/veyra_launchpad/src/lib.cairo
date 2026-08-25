@@ -21,6 +21,7 @@ mod VeyraLaunchpadEscrow {
     use starknet::get_caller_address;
     use starknet::get_contract_address;
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
+    use super::{IERC20Dispatcher, IERC20DispatcherTrait};
 
     const PROJECT_DRAFT: u8 = 0_u8;
     const PROJECT_ACTIVE: u8 = 1_u8;
