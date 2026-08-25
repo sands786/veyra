@@ -883,3 +883,7 @@
 ## Homepage geometry rollback
 - [x] Restore the homepage function-directory cards to the prior rectangular Copper Veil treatment while keeping the institutional system map and footer.
 - [x] Verify the rollback removes circle clipping, preserves all destination actions, and passes tests, TypeScript, build, and responsive QA.
+
+## Legacy institutional homepage background
+- [x] Replace the current abstract homepage background with a restrained legacy institutional treatment that remains subordinate to the hero content.
+- [x] Integrate the background as a web-safe project asset and verify contrast, responsive behavior, tests, TypeScript, build, and visual QA.

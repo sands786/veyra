@@ -606,3 +606,39 @@ small {
     cursor: pointer;
   }
 }
+
+/* Legacy institutional homepage layer: archival texture behind, never above, the product information. */
+.home-legacy-bg {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgb(8 9 9 / 84%), rgb(10 12 12 / 90%)),
+    url("/manus-storage/veyra-legacy-institutional-bg_f5964d53.jpg") center top / cover no-repeat,
+    #0d1010 !important;
+}
+.home-legacy-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(112deg, rgb(7 8 8 / 84%) 0%, rgb(10 12 12 / 65%) 48%, rgb(12 14 15 / 76%) 100%),
+    radial-gradient(circle at 73% 18%, rgb(240 86 58 / 11%), transparent 34%),
+    linear-gradient(180deg, transparent 0 72%, rgb(7 8 8 / 46%) 100%);
+  background-blend-mode: normal, screen, normal;
+}
+.home-legacy-bg > .pointer-events-none {
+  opacity: 0.08 !important;
+}
+@media (max-width: 640px) {
+  .home-legacy-bg {
+    background-position: 58% top;
+  }
+  .home-legacy-bg::before {
+    background:
+      linear-gradient(112deg, rgb(7 8 8 / 91%) 0%, rgb(10 12 12 / 77%) 62%, rgb(12 14 15 / 84%) 100%),
+      radial-gradient(circle at 62% 14%, rgb(240 86 58 / 8%), transparent 36%),
+      linear-gradient(180deg, transparent 0 72%, rgb(7 8 8 / 56%) 100%);
+  }
+}

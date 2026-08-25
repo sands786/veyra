@@ -1116,7 +1116,7 @@ export default function Home() {
   }
 
   return (
-    <div className="page-shell min-h-screen overflow-hidden bg-[#111210] text-[#F3EEE5] selection:bg-[#70D49D] selection:text-[#111210]">
+    <div className="page-shell home-legacy-bg min-h-screen overflow-hidden bg-[#111210] text-[#F3EEE5] selection:bg-[#70D49D] selection:text-[#111210]">
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.11] [background-image:radial-gradient(#F3EEE5_0.6px,transparent_0.6px)] [background-size:18px_18px]" />
       <div className="relative z-10 flex min-h-screen">
         <aside className="hidden w-[204px] shrink-0 border-r border-[#163B4A]/70 bg-[#111210]/95 px-5 py-6 lg:flex lg:flex-col">
