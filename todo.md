@@ -797,3 +797,9 @@
 - [ ] Require explicit investor deposit, project activation, allocation reservation, milestone approval, release, and refund transitions with replay protection and event emission.
 - [ ] Keep private STRK20 payroll/claim execution separate from the public escrow contract unless a verified protocol-compatible private escrow interface is available.
 - [ ] Require owner-signed Mainnet deployment and at least one end-to-end test lifecycle before changing Launchpad copy from “coordination” to “live settlement.”
+
+## Renewed fully-on-chain requirement
+
+- [ ] Do not leave Launchpad mutations as the only execution path; expose guarded on-chain escrow actions only when a verified contract address and supported wallet capability are available.
+- [ ] Keep the Launchpad UI’s live/settled labels driven by verified receipt state rather than optimistic database status.
+- [ ] Reassess and mark the Launchpad as fully on-chain only after public Mainnet deployment and end-to-end receipt evidence.
