@@ -822,3 +822,7 @@
 - [x] Add a guarded official STRK20 wallet-signed Mainnet action panel with no generic public-transfer fallback.
 - [x] Add public receipt capture and verification while keeping private-note discovery wallet/pool-owned.
 - [ ] Verify a fresh user-owned Private Primitives Mainnet receipt and wallet-private note discovery before claiming private delivery.
+
+## Production route regression
+- [x] Fix production `/private-primitives` failure: dynamically imported `PrivatePrimitives` chunk is not fetchable from the deployed asset URL.
+- [x] Rebuild, checkpoint, and verify the production Private Primitives route after the chunk fix.

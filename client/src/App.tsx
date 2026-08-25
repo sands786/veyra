@@ -8,13 +8,13 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { DemoModeProvider, useDemoMode } from "./contexts/DemoModeContext";
 import Home from "./pages/Home";
+import PrivatePrimitives from "./pages/PrivatePrimitives";
 
 const Launchpad = lazy(() => import("./pages/Launchpad"));
 const Proof = lazy(() => import("./pages/Proof"));
 const Claim = lazy(() => import("./pages/Claim"));
 const DemoMode = lazy(() => import("./pages/DemoMode"));
 const Documentation = lazy(() => import("./pages/Documentation"));
-const PrivatePrimitives = lazy(() => import("./pages/PrivatePrimitives"));
 const PrivateMarkets = lazy(() => import("./pages/PrivateMarkets"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 
