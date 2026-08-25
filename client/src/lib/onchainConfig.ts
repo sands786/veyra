@@ -21,7 +21,10 @@ const env = (_network: VeilNetwork) => {
     payroll: address(import.meta.env[`VITE_VEYRA_PAYROLL_CONTRACT_${suffix}`]),
     treasury: address(import.meta.env[`VITE_VEYRA_TREASURY_CONTRACT_${suffix}`]),
     claims: address(import.meta.env[`VITE_VEYRA_CLAIMS_CONTRACT_${suffix}`]),
-    launchpad: address(import.meta.env[`VITE_VEYRA_LAUNCHPAD_CONTRACT_${suffix}`]),
+    launchpad: address(
+      import.meta.env[`VITE_VEYRA_LAUNCHPAD_CONTRACT_${suffix}`] ??
+        import.meta.env.VITE_LAUNCHPAD_ESCROW_ADDRESS
+    ),
     markets: address(import.meta.env[`VITE_VEYRA_MARKETS_CONTRACT_${suffix}`]),
     proof: address(import.meta.env[`VITE_VEYRA_PROOF_CONTRACT_${suffix}`]),
   } satisfies ProtocolContracts;
