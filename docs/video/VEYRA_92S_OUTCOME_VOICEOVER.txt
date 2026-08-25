@@ -1,0 +1,17 @@
+Speak in English with a calm US accent, decisive and precise, like a trusted product operator explaining a live system. Keep an even medium pace. Do not oversell. Brief pauses should feel intentional:
+
+Private financial coordination should not expose the people behind it. [short pause]
+
+In Veyra, the operator adds a recipient inside a private payroll route. This guided run is local: no wallet prompt, no transaction. But the outcome is visible—the route is prepared as shielded and the receipt state is submitted.
+
+Selective proof makes the disclosure choice explicit. A reviewer can see an aggregate outcome, while the roster, amounts, and encrypted terms stay private.
+
+The same rule governs capital. In the Launchpad, a team selects a project and reserves a shielded allocation. This is visibly simulated—not settlement.
+
+When public evidence is needed, Veyra publishes an aggregate proof, not a recipient list.
+
+Private Markets applies that model to price discovery: public signals, private identity, and wallet-gated Mainnet execution.
+
+Real settlement starts only when a Mainnet wallet is approved, returns a hash, and the receipt is confirmed.
+
+Veyra. Private financial coordination.

@@ -42,6 +42,22 @@ if [[ -n "${VEYRA_TAB_COUNT:-}" ]]; then
   sleep 3
 fi
 
+if [[ -n "${VEYRA_POST_TAB_COUNT:-}" ]]; then
+  for ((i = 0; i < VEYRA_POST_TAB_COUNT; i += 1)); do
+    DISPLAY="$DISPLAY_NUM" xdotool key Tab
+  done
+  DISPLAY="$DISPLAY_NUM" xdotool key space
+  sleep 3
+fi
+
+if [[ -n "${VEYRA_POST2_TAB_COUNT:-}" ]]; then
+  for ((i = 0; i < VEYRA_POST2_TAB_COUNT; i += 1)); do
+    DISPLAY="$DISPLAY_NUM" xdotool key Tab
+  done
+  DISPLAY="$DISPLAY_NUM" xdotool key space
+  sleep 3
+fi
+
 DISPLAY="$DISPLAY_NUM" xdotool mousemove 960 540
 ffmpeg -y -f x11grab -video_size 1920x1080 -i "$DISPLAY_NUM" -frames:v 1 "$OUT_DIR/live_capture_baseline.png" >/dev/null 2>&1
 echo "Captured $OUT_DIR/live_capture_baseline.png"

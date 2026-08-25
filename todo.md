@@ -744,3 +744,9 @@
 - [x] Replace both rejected brand scenes with the user-approved teaser opening and ending clips, keeping the middle exclusively for real Veyra product footage; the clean master’s opening, 2:48 product handoff, and final punchline lockup were visually verified.
 - [x] Replace the animated screenshot middle with concise authentic live Veyra interaction recordings that demonstrate real navigation, input, state change, and a visible outcome before recommending the hackathon video for submission.
 - [x] Rebuild the demo as a maximum 120-second teaser-framed judge cut that contains only authentic live interaction proof, highest-value Veyra features, and the approved teaser closing sequence.
+
+## User-rejected live judge cut rebuild
+
+- [x] Diagnose the concrete pacing, visual, live-interaction, and closing-treatment failures in the rejected 112-second master.
+- [x] Rebuild the product film around deliberate on-screen outcomes rather than generic route changes or static dwell shots.
+- [x] Re-render and visually QA a replacement cut before any recommendation or delivery claim.

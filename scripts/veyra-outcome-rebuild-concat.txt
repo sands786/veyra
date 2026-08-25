@@ -1,0 +1,7 @@
+file '/home/ubuntu/webdev-static-assets/veyra-demo-v2/judge-cut-outcome-rebuild/segments/00_teaser_open.mp4'
+file '/home/ubuntu/webdev-static-assets/veyra-demo-v2/judge-cut-outcome-rebuild/segments/01_payroll_outcome.mp4'
+file '/home/ubuntu/webdev-static-assets/veyra-demo-v2/judge-cut-outcome-rebuild/segments/02_primitives_outcome.mp4'
+file '/home/ubuntu/webdev-static-assets/veyra-demo-v2/judge-cut-outcome-rebuild/segments/03_launchpad_outcome.mp4'
+file '/home/ubuntu/webdev-static-assets/veyra-demo-v2/judge-cut-outcome-rebuild/segments/04_proof_outcome.mp4'
+file '/home/ubuntu/webdev-static-assets/veyra-demo-v2/judge-cut-outcome-rebuild/segments/05_markets_context.mp4'
+file '/home/ubuntu/webdev-static-assets/veyra-demo-v2/judge-cut-outcome-rebuild/segments/06_teaser_close.mp4'
