@@ -69,6 +69,26 @@ export type ShieldedRouteIntent = {
   recipient?: string;
 };
 
+export type LaunchpadEscrowAction =
+  | { type: "create_project"; projectId: bigint; creator: string }
+  | { type: "activate_project"; projectId: bigint }
+  | { type: "deposit"; projectId: bigint; amountSmallestUnit: bigint }
+  | {
+      type: "reserve_allocation";
+      projectId: bigint;
+      allocationId: bigint;
+      beneficiary: string;
+      amountSmallestUnit: bigint;
+    }
+  | {
+      type: "approve_milestone";
+      projectId: bigint;
+      milestoneId: bigint;
+      allocationId: bigint;
+    }
+  | { type: "release_milestone"; projectId: bigint; milestoneId: bigint }
+  | { type: "refund"; projectId: bigint; amountSmallestUnit: bigint };
+
 type WalletRequest = (request: {
   type: string;
   params?: Record<string, unknown>;
@@ -530,6 +550,81 @@ export function buildShieldedRouteActions(
         ]
       : []),
   ];
+}
+
+function assertContractAddress(value: string, label: string): void {
+  if (!/^0x[0-9a-fA-F]+$/.test(value) || BigInt(value) === BigInt(0))
+    throw new Error(`${label} address is invalid.`);
+}
+
+function assertPositiveId(value: bigint, label: string): void {
+  if (value <= BigInt(0)) throw new Error(`${label} must be greater than zero.`);
+}
+
+function u256Calldata(value: bigint, label: string): string[] {
+  if (value <= BigInt(0)) throw new Error(`${label} must be greater than zero.`);
+  const lowMask = (BigInt(1) << BigInt(128)) - BigInt(1);
+  return [bigintToHex(value & lowMask), bigintToHex(value >> BigInt(128))];
+}
+
+export function buildLaunchpadEscrowCall(
+  contractAddress: string,
+  action: LaunchpadEscrowAction
+): StarknetContractCall {
+  assertContractAddress(contractAddress, "Launchpad escrow contract");
+  switch (action.type) {
+    case "create_project":
+      assertPositiveId(action.projectId, "Project id");
+      assertContractAddress(action.creator, "Creator");
+      return {
+        contractAddress,
+        entrypoint: action.type,
+        calldata: [bigintToHex(action.projectId), action.creator],
+      };
+    case "activate_project":
+      assertPositiveId(action.projectId, "Project id");
+      return { contractAddress, entrypoint: action.type, calldata: [bigintToHex(action.projectId)] };
+    case "deposit":
+      assertPositiveId(action.projectId, "Project id");
+      return {
+        contractAddress,
+        entrypoint: action.type,
+        calldata: [bigintToHex(action.projectId), ...u256Calldata(action.amountSmallestUnit, "Deposit amount")],
+      };
+    case "reserve_allocation":
+      assertPositiveId(action.projectId, "Project id");
+      assertPositiveId(action.allocationId, "Allocation id");
+      assertContractAddress(action.beneficiary, "Beneficiary");
+      return {
+        contractAddress,
+        entrypoint: action.type,
+        calldata: [bigintToHex(action.projectId), bigintToHex(action.allocationId), action.beneficiary, ...u256Calldata(action.amountSmallestUnit, "Allocation amount")],
+      };
+    case "approve_milestone":
+      assertPositiveId(action.projectId, "Project id");
+      assertPositiveId(action.milestoneId, "Milestone id");
+      assertPositiveId(action.allocationId, "Allocation id");
+      return {
+        contractAddress,
+        entrypoint: action.type,
+        calldata: [bigintToHex(action.projectId), bigintToHex(action.milestoneId), bigintToHex(action.allocationId)],
+      };
+    case "release_milestone":
+      assertPositiveId(action.projectId, "Project id");
+      assertPositiveId(action.milestoneId, "Milestone id");
+      return {
+        contractAddress,
+        entrypoint: action.type,
+        calldata: [bigintToHex(action.projectId), bigintToHex(action.milestoneId)],
+      };
+    case "refund":
+      assertPositiveId(action.projectId, "Project id");
+      return {
+        contractAddress,
+        entrypoint: action.type,
+        calldata: [bigintToHex(action.projectId), ...u256Calldata(action.amountSmallestUnit, "Refund amount")],
+      };
+  }
 }
 
 export function buildPayrollRegistryCreateCall(

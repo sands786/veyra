@@ -781,3 +781,19 @@
 - [x] Improve Veyra’s operator-facing evidence, privacy-boundary explanation, and reviewer path using verified protocol concepts and explicit limitations.
 - [x] Add regression coverage for the new integration/evidence behavior and run tests, typecheck, build, and visual checks.
 - [x] Update the top-three assessment honestly; do not claim top-three placement, Mainnet settlement, contract deployment, or recipient delivery without evidence.
+
+## Fully on-chain Launchpad scope
+
+- [x] Audit Launchpad routes, schema, server procedures, existing wallet adapter, and official STRK20/Privacy references.
+- [x] Define a minimal audited-scope Launchpad contract model for projects, commitments, milestone approvals, and releases; do not add unverified token custody.
+- [ ] Implement only the verified contract and wallet execution path that can be safely supported by the current Mainnet environment.
+- [ ] Integrate receipt-first on-chain state into server and UI, keeping database records as indexed coordination metadata rather than settlement authority.
+- [ ] Add Cairo/TypeScript regression tests, typecheck, production build, visual checks, and deployment documentation.
+- [ ] Do not claim the Launchpad is fully on-chain until a deployed Mainnet contract, verified wallet transaction, receipt, and state transition exist.
+
+### Selected architecture decision
+
+- [x] Implement the first Launchpad contract as a non-upgradable milestone escrow for one verified Mainnet token, with no owner withdrawal or upgrade path.
+- [ ] Require explicit investor deposit, project activation, allocation reservation, milestone approval, release, and refund transitions with replay protection and event emission.
+- [ ] Keep private STRK20 payroll/claim execution separate from the public escrow contract unless a verified protocol-compatible private escrow interface is available.
+- [ ] Require owner-signed Mainnet deployment and at least one end-to-end test lifecycle before changing Launchpad copy from “coordination” to “live settlement.”

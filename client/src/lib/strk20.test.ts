@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildLaunchpadEscrowCall,
   buildPayrollRegistryCreateCall,
   buildShieldedRouteActions,
   describeStrk20Readiness,
@@ -59,6 +60,54 @@ describe("STRK20 on-chain adapter", () => {
         "mainnet"
       ).detail
     ).toContain("private-note discovery");
+  });
+
+  it("builds reviewed Launchpad escrow calls with explicit entrypoints and u256 calldata", () => {
+    expect(
+      buildLaunchpadEscrowCall("0x1234", {
+        type: "deposit",
+        projectId: 7n,
+        amountSmallestUnit: 2_840_000_000n,
+      })
+    ).toEqual({
+      contractAddress: "0x1234",
+      entrypoint: "deposit",
+      calldata: ["0x7", "0xa946f600", "0x0"],
+    });
+    expect(
+      buildLaunchpadEscrowCall("0x1234", {
+        type: "reserve_allocation",
+        projectId: 7n,
+        allocationId: 2n,
+        beneficiary: "0xabc",
+        amountSmallestUnit: 200n,
+      }).entrypoint
+    ).toBe("reserve_allocation");
+  });
+
+  it("rejects unsafe Launchpad escrow call inputs before any wallet request", () => {
+    expect(() =>
+      buildLaunchpadEscrowCall("0x0", {
+        type: "activate_project",
+        projectId: 1n,
+      })
+    ).toThrow("contract address is invalid");
+    expect(() =>
+      buildLaunchpadEscrowCall("0x1234", {
+        type: "deposit",
+        projectId: 1n,
+        amountSmallestUnit: 0n,
+      })
+    ).toThrow("Deposit amount must be greater than zero");
+    expect(() =>
+      buildLaunchpadEscrowCall("0x1234", {
+        type: "reserve_allocation",
+        projectId: 1n,
+        allocationId: 1n,
+        beneficiary: "not-an-address",
+        amountSmallestUnit: 1n,
+      })
+    ).toThrow("Beneficiary address is invalid");
   });
 
   it("builds a deposit action for a valid shielded route intent", () => {
