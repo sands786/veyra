@@ -28,7 +28,7 @@ import {
 
 const teaserVideo = documentationTeaserAsset;
 
-const chapters = documentationChapters.map(id => ({
+const chapters = [...documentationChapters, "references"].map(id => ({
   id,
   label:
     id === "why"
@@ -41,8 +41,43 @@ const chapters = documentationChapters.map(id => ({
             ? "Starknet flow"
             : id === "demo"
               ? "Demo Mode"
-              : "Overview",
+              : id === "references"
+                ? "Reference layer"
+                : "Overview",
 }));
+
+const protocolReferences = [
+  {
+    label: "Protocol concepts",
+    title: "STRK20 by Example",
+    copy: "Note-based privacy, registration, channels, discovery, actions, proofs, and compliance boundaries.",
+    href: "https://strk20-by-example.org/what-is-strk20",
+  },
+  {
+    label: "Wallet integration",
+    title: "STRK20 Starter Kit",
+    copy: "WalletAccountV6 patterns for shielding, private transfer, balances, and privacy_invoke helpers.",
+    href: "https://github.com/Akashneelesh/strk20-starter-kit",
+  },
+  {
+    label: "Canonical implementation",
+    title: "Starknet Privacy",
+    copy: "The SDK, discovery service, proving service, pool contracts, anonymizers, and end-to-end test layers.",
+    href: "https://github.com/starkware-libs/starknet-privacy",
+  },
+  {
+    label: "Builder index",
+    title: "Awesome STRK20",
+    copy: "A curated map of the Wallet API, Privacy SDK, helper contracts, bridge work, and reference applications.",
+    href: "https://github.com/Akashneelesh/awesome-strk20",
+  },
+  {
+    label: "Agent skills",
+    title: "STRK20 Skills",
+    copy: "Freshness checks, Wallet API guidance, privacy SDK notes, and anonymizer contract patterns for builders.",
+    href: "https://github.com/odinfree/strk20-skills",
+  },
+] as const;
 
 const productSurfaces = [
   {
@@ -514,7 +549,9 @@ export default function Documentation() {
                     <p className="mt-2 text-sm leading-6 text-[#918C83]">
                       The product can show workflow health, approvals, and
                       aggregate proofs without making every participant a public
-                      data point.
+                      data point. STRK20’s public edges still include deposits,
+                      withdrawals, and timing; Veyra does not promise that those
+                      protocol facts disappear.
                     </p>
                   </div>
                 </div>
@@ -543,10 +580,63 @@ export default function Documentation() {
           </section>
 
           <section
+            id="references"
+            className="scroll-mt-24 border-t border-white/10 pt-20 mt-24"
+          >
+            <SectionLabel>07 / Reference layer</SectionLabel>
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+              <div>
+                <h2 className="font-sans text-4xl font-semibold tracking-[-0.06em] sm:text-6xl">
+                  Build on the
+                  <br />
+                  <span className="text-[#F0563A]">real protocol.</span>
+                </h2>
+                <p className="mt-5 max-w-xl leading-7 text-[#AAA49A]">
+                  Veyra follows the public STRK20 references instead of hiding
+                  protocol assumptions behind product language. Accounts must be
+                  registered before they can hold or receive private notes;
+                  discovery is wallet-owned; proof freshness and receipt
+                  confirmation are separate steps; and a wallet action is never
+                  replaced with a public-transfer fallback. The reference
+                  implementation also keeps a proving block behind the latest
+                  head so earlier state changes are included before proof.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {protocolReferences.map(reference => (
+                  <a
+                    key={reference.href}
+                    href={reference.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group border border-white/10 bg-[#151D21] p-5 transition-[border-color,background-color] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:border-[#F0563A]/55 hover:bg-[#1B2930] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6DE3A1]"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-[#F0563A]">
+                        {reference.label}
+                      </span>
+                      <ArrowUpRight
+                        size={14}
+                        className="text-[#6DE3A1] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      />
+                    </div>
+                    <h3 className="mt-7 font-sans text-xl tracking-[-0.04em] text-[#F2EEE7]">
+                      {reference.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-[#918C83]">
+                      {reference.copy}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section
             id="demo"
             className="scroll-mt-24 border-t border-white/10 pt-20 mt-24"
           >
-            <SectionLabel>07 / Demo Mode</SectionLabel>
+            <SectionLabel>08 / Demo Mode</SectionLabel>
             <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
               <div>
                 <h2 className="font-sans text-4xl font-semibold tracking-[-0.06em] sm:text-6xl">

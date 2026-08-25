@@ -49,6 +49,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   connectVeilWallet,
+  describeStrk20Readiness,
   describeStrk20SubmissionError,
   disconnectVeilWallet,
   discoverStarknetWallets,
@@ -525,6 +526,7 @@ export default function Home() {
   const [walletQrLoading, setWalletQrLoading] = useState(false);
   const walletNetwork = networkFromChainId(wallet?.chainId);
   const executionCapability = onchainCapability(wallet, selectedNetwork);
+  const strk20Readiness = describeStrk20Readiness(wallet, selectedNetwork);
   const walletCanSubmitStrk20 = Boolean(
     wallet?.strk20InvokeTransaction || wallet?.request
   );
@@ -1956,14 +1958,15 @@ export default function Home() {
                     STRK20 ADAPTER
                   </div>
                   <div className="mt-2 font-mono text-[10px] text-[#70D49D]">
-                    {executionCapability.canExecute
-                      ? "READY / ON-CHAIN"
-                      : wallet
-                        ? "NETWORK OR API MISMATCH"
-                        : "WAITING FOR WALLET"}
+                    {strk20Readiness.label}
                   </div>
                 </div>
               </div>
+              <p className="mt-4 max-w-2xl text-xs leading-5 text-[#918C83]">
+                {strk20Readiness.detail} A returned hash is still only submitted
+                evidence; Veyra marks a route confirmed only after receipt
+                verification.
+              </p>
               <div className="mt-6 flex flex-wrap gap-2">
                 {isAuthenticated ? (
                   <>

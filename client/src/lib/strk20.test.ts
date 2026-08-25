@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildPayrollRegistryCreateCall,
   buildShieldedRouteActions,
+  describeStrk20Readiness,
   describeStrk20SubmissionError,
   connectVeilWallet,
   disconnectVeilWallet,
@@ -30,6 +31,34 @@ describe("STRK20 on-chain adapter", () => {
     expect(describeStrk20SubmissionError(new Error("User rejected"))).toBe(
       undefined
     );
+  });
+
+  it("describes wallet-owned STRK20 readiness without claiming registration", () => {
+    expect(describeStrk20Readiness(undefined, "mainnet")).toMatchObject({
+      status: "connect",
+      label: "WAITING FOR WALLET",
+    });
+    expect(
+      describeStrk20Readiness({ chainId: "0x534e5f4d41494e" }, "mainnet")
+    ).toMatchObject({
+      status: "wallet-api",
+      label: "STRK20 API UNAVAILABLE",
+    });
+    expect(
+      describeStrk20Readiness(
+        { chainId: "0x534e5f4d41494e", request: async () => ({}) },
+        "mainnet"
+      )
+    ).toMatchObject({
+      status: "registration",
+      label: "API DETECTED / REGISTRATION UNVERIFIED",
+    });
+    expect(
+      describeStrk20Readiness(
+        { chainId: "0x534e5f4d41494e", request: async () => ({}) },
+        "mainnet"
+      ).detail
+    ).toContain("private-note discovery");
   });
 
   it("builds a deposit action for a valid shielded route intent", () => {

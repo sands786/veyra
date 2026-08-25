@@ -773,3 +773,11 @@
 - [x] Review the official STRK20 hackathon project list and collect verifiable evidence for the visible top ten competitors.
 - [x] Compare Veyra and the visible top ten against the official judging dimensions without assuming unverified capabilities.
 - [x] Deliver an honest ranked comparison, identifying Veyra’s defensible advantages and winner-critical gaps.
+
+## Top-three STRK20 improvement pass
+
+- [x] Audit the official STRK20 skills, starter kit, protocol documentation, ecosystem directory, and privacy-protocol repository against Veyra’s current integration.
+- [x] Add only safe, source-aligned STRK20 integration improvements without copying unverified code or weakening the wallet-owned fail-closed boundary.
+- [x] Improve Veyra’s operator-facing evidence, privacy-boundary explanation, and reviewer path using verified protocol concepts and explicit limitations.
+- [x] Add regression coverage for the new integration/evidence behavior and run tests, typecheck, build, and visual checks.
+- [x] Update the top-three assessment honestly; do not claim top-three placement, Mainnet settlement, contract deployment, or recipient delivery without evidence.

@@ -42,9 +42,9 @@ This repository is designed to make that sequence inspectable. It is not a landi
 |      Time | Do this                                                                                                                             | What it demonstrates                                                                                                       |
 | --------: | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | **00:00** | [Watch the cinematic teaser](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4) | The core thesis: a private roster must not become a public payment record.                                                 |
-| **00:30** | [Open the live workspace](https://veyra-gamma-gold.vercel.app)                                                                       | Routes, roles, operations, wallet state, proof ledger, Launchpad, and Private Markets are product surfaces—not mock cards. |
+| **00:30** | [Open the live workspace](https://veyra-gamma-gold.vercel.app)                                                                      | Routes, roles, operations, wallet state, proof ledger, Launchpad, and Private Markets are product surfaces—not mock cards. |
 | **01:00** | [Read the architecture](docs/ARCHITECTURE.md)                                                                                       | The browser, account API, database, wallet, RPC provider, and Cairo registry sit in distinct trust domains.                |
-| **01:30** | [Verify the evidence](docs/REVIEWER_GUIDE.md)                                                                                       | Follow the exact code paths for receipt verification, proof gating, risk enforcement, and the 152-test suite.             |
+| **01:30** | [Verify the evidence](docs/REVIEWER_GUIDE.md)                                                                                       | Follow the exact code paths for receipt verification, proof gating, risk enforcement, and the 152-test suite.              |
 
 ---
 
@@ -104,6 +104,21 @@ The deep architecture package includes OAuth sequence diagrams, entity model, st
 
 ---
 
+## STRK20 protocol alignment
+
+Veyra is aligned to the public STRK20 reference model rather than treating privacy as a visual label. STRK20 is a note-based pool: registration and wallet-owned note discovery precede private balances and transfers, zero-knowledge proofs are verified by the protocol, and public deposits, withdrawals, and timing remain visible. The product therefore separates **intent**, **wallet authorization**, **submitted hash**, **verified receipt**, and **selective proof** instead of collapsing them into one optimistic status.
+
+| Reference                                                                                                                     | What Veyra takes from it                                                                                                     | What Veyra deliberately does not copy                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [STRK20 by Example](https://strk20-by-example.org/what-is-strk20)                                                             | Registration, note discovery, public/private edges, actions, phases, proofs, and compliance boundaries.                      | It does not claim that a public receipt proves private-note discovery or recipient delivery.                         |
+| [STRK20 Starter Kit](https://github.com/Akashneelesh/strk20-starter-kit)                                                      | WalletAccountV6-era Wallet API concepts, explicit wallet actions, and the rule that demo helper values stay labeled as demo. | It does not import the starter’s echo helper or placeholder contract as production settlement logic.                 |
+| [Starknet privacy source](https://github.com/starkware-libs/starknet-privacy)                                                 | The separation between SDK, discovery, proving, pool, anonymizer, E2E, and audit layers.                                     | It does not present an unaudited custom anonymizer or fund-moving Cairo contract as shipped infrastructure.          |
+| [STRK20 skills](https://github.com/odinfree/strk20-skills) · [Awesome STRK20](https://github.com/Akashneelesh/awesome-strk20) | A maintained map of the official Wallet API, Privacy SDK, helper-contract, and ecosystem references.                         | It does not copy external repositories wholesale; only source-verified, regression-tested behavior belongs in Veyra. |
+
+This distinction is intentional. A generic Starknet `execute` call is not equivalent to the official private wallet action, and a locally prepared route is not a Mainnet result. Veyra remains Mainnet-only, wallet-owned, receipt-first, and fail-closed when a wallet lacks the required STRK20 capability or protocol registration.
+
+---
+
 ## Product system
 
 | Surface                        | What it coordinates                                                                                         | Enforcement boundary                                                                                               |
@@ -148,7 +163,7 @@ Read the complete **[Decision Record](docs/DECISIONS.md)** to understand the tra
 
 | Evidence            | Where to inspect                                                          | What it proves                                                                                                   |
 | ------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Product**         | [Live workspace](https://veyra-gamma-gold.vercel.app)                      | The designed operational surface and state language are live.                                                    |
+| **Product**         | [Live workspace](https://veyra-gamma-gold.vercel.app)                     | The designed operational surface and state language are live.                                                    |
 | **Film**            | Direct players in the [Film library](#film-library)                       | Product narrative and end-to-end guided context.                                                                 |
 | **Backend**         | [`server/routers.ts`](server/routers.ts) · [`server/db.ts`](server/db.ts) | Protected procedures, workspace scoping, policy and receipt gates, persistence, audit behavior.                  |
 | **Lifecycle logic** | [`shared/operations.ts`](shared/operations.ts)                            | Shared market transition, risk, policy, disclosure, and scheduling logic.                                        |
@@ -210,8 +225,8 @@ scarb build
 
 The repository includes a Vercel-ready **frontend deployment package**. It serves the Vite application from Vercel and rewrites same-origin API and storage paths to the managed Veyra backend, preserving Veyra’s same-origin tRPC account contract without exposing backend secrets to the browser.
 
-| Included                                                                                                                                 | Intentional boundary                                                                                                                                                  |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Included                                                                                                                                 | Intentional boundary                                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`vercel.json`](vercel.json), [`.env.vercel.example`](.env.vercel.example), and [`docs/VERCEL_DEPLOYMENT.md`](docs/VERCEL_DEPLOYMENT.md) | Vercel hosts the client and proxies `/api/*`; the managed backend retains the database, protected API, Veyra account verification, receipt verification, and server-only credentials. |
 
 Before a manual Vercel deployment, set only the documented safe public Vite values. The deployed account flow uses same-origin `/api/*` rewrites to the managed backend; it does not require an external OAuth callback allowlist. The [deployment guide](docs/VERCEL_DEPLOYMENT.md) provides the exact import, environment, verification, and rollback-safe sequence.
@@ -220,8 +235,8 @@ Before a manual Vercel deployment, set only the documented safe public Vite valu
 
 ## Release posture
 
-| Ready now                                                                                                                                                                                                   | Requires owner-operated evidence or further engineering                                                                                                                                                                   |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ready now                                                                                                                                                                                                                                                      | Requires owner-operated evidence or further engineering                                                                                                              |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Full-stack workspace, typed API, database model, protected workflow, lifecycle semantics, audit events, policy/risk controls, documentation system, product films, Vercel judge path, three verified public STRK20 pool receipts, and Cairo commitment source. | Recipient-wallet private-note discovery for the historic transfer, any fund-moving Cairo interface, independent contract review, and owned production observability. |
 
 Root [`strk20.json`](strk20.json) contains exactly three verified successful Mainnet STRK20 privacy-pool transaction hashes. These public receipts establish pool interaction, not Veyra-originated recipient-note delivery; the historic recipient outcome remains explicitly unresolved. No transaction hash, deployed contract address, settlement status, audit result, or testimonial is fabricated in this repository.

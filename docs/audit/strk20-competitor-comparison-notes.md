@@ -8,16 +8,16 @@ The official repository describes an 18-day mainnet sprint. A named panel scores
 
 ## Initial high-signal evidence
 
-| Candidate | Observable strength | Material caveat |
-|---|---|---|
-| Crosslink | Live mainnet pool analysis, three listed receipts, hosted score API/npm package, explicit privacy refusal logic. | Its full cross-chain corridor and outbound anonymizer remain roadmap; wallet registration/availability friction is candidly documented. |
-| GhostBook | Deployed Mainnet anonymizer, Cairo enforcement of order-plan terms, Ekubo integration, detailed contract/testing narrative. | Repository explicitly says it cannot currently complete a private Mainnet transaction because of wallet registration/proving limits. |
-| Offbook | Specific private OTC/RFQ workflow, deployed settlement-helper address, explicit lock/claim lifecycle and private-secret boundary. | Need verify qualifying transaction metadata and live workflow independently; some market-board storage depends on Postgres. |
-| Aether | Most developed privacy methodology: live attack-model analytics, deterministic planner, mainnet-grounded fact checks, 114 tests. | Its splitter is not deployed; private execution evidence is still landing and contracts are unaudited. |
-| Rhizome | Very strong mainnet-data-driven privacy economics and candid fee/timing analysis. | Mainnet anonymizer is not deployed; paid execution fails closed, so depth does not equal a working full product. |
-| Sevrin | Coherent confidential allocation system with Cairo vault/claim adapter and concrete credential model. | Mainnet addresses, qualifying transactions, public demo, and video are stated as pending. |
-| Veyl | Strong consumer thesis and polished private launch/trading terminal narrative. | Repository states sealed-bid contract/back end and Mainnet demo are still active development; core is starter-kit base plus UI. |
-| Nomos | Concrete merchant checkout/payout gateway with ledger, webhooks, and transaction verification. | Custodial operating-wallet model; live production configuration needs real infrastructure and manual shielding reconciliation. |
+| Candidate | Observable strength                                                                                                               | Material caveat                                                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Crosslink | Live mainnet pool analysis, three listed receipts, hosted score API/npm package, explicit privacy refusal logic.                  | Its full cross-chain corridor and outbound anonymizer remain roadmap; wallet registration/availability friction is candidly documented. |
+| GhostBook | Deployed Mainnet anonymizer, Cairo enforcement of order-plan terms, Ekubo integration, detailed contract/testing narrative.       | Repository explicitly says it cannot currently complete a private Mainnet transaction because of wallet registration/proving limits.    |
+| Offbook   | Specific private OTC/RFQ workflow, deployed settlement-helper address, explicit lock/claim lifecycle and private-secret boundary. | Need verify qualifying transaction metadata and live workflow independently; some market-board storage depends on Postgres.             |
+| Aether    | Most developed privacy methodology: live attack-model analytics, deterministic planner, mainnet-grounded fact checks, 114 tests.  | Its splitter is not deployed; private execution evidence is still landing and contracts are unaudited.                                  |
+| Rhizome   | Very strong mainnet-data-driven privacy economics and candid fee/timing analysis.                                                 | Mainnet anonymizer is not deployed; paid execution fails closed, so depth does not equal a working full product.                        |
+| Sevrin    | Coherent confidential allocation system with Cairo vault/claim adapter and concrete credential model.                             | Mainnet addresses, qualifying transactions, public demo, and video are stated as pending.                                               |
+| Veyl      | Strong consumer thesis and polished private launch/trading terminal narrative.                                                    | Repository states sealed-bid contract/back end and Mainnet demo are still active development; core is starter-kit base plus UI.         |
+| Nomos     | Concrete merchant checkout/payout gateway with ledger, webhooks, and transaction verification.                                    | Custodial operating-wallet model; live production configuration needs real infrastructure and manual shielding reconciliation.          |
 
 ## Official hub dataset finding
 
@@ -29,18 +29,32 @@ An evidence-completeness proxy over those official fields—not an official rank
 
 ## Additional top-candidate evidence
 
-| Candidate | Observable strength | Material caveat |
-|---|---|---|
-| Philoxenia | Three verified pool transactions, three listed contracts, live public demo/video, full-stack hospitality product with private payment/escrow surfaces. | Private payment support is tightly coupled to Ready X environment and ecosystem-specific operational prerequisites. |
-| Doom | Four verified pool transactions, 14 listed contracts, a three-minute end-to-end demo, and live private prediction-market lifecycle. | Its own README acknowledges claim-secret and timing-correlation limitations. |
-| Lantern | Five verified transactions, deployed STRK20 anonymizer, live campaign lifecycle from private contribution through private payout claim. | Narrower application scope than Veyra, but much stronger end-to-end product proof. |
-| Aperture | 22 manifest hashes, four listed contracts, Mainnet anonymizer, detailed public evidence and candid failure record. | Its video field was still absent and multiple governance limitations remain. |
-| Morrow | Has a live app/video and strong privacy-boundary documentation. | Repository itself says its helper is not deployed and a complete user flow has not been achieved; it is weaker than hub completeness fields imply. |
-| Envelope | Deployed link-payment anonymizer, SDK/CLI, front-running-resistant claim signatures, and detailed privacy boundaries. | Amounts and funding/claim legs remain publicly visible and related; walletless claim applies only to its public-funding fallback. |
-| Airlock | Mainnet bucketer, live pool census, 49 Cairo + 59 TypeScript tests, denomination/timing threat model. | A real full wallet round-trip remains the unclosed integration proof; cross-chain lane is not yet wired. |
-| Cutout | Exceptionally disciplined signing guard, independent receipts, reproducible policy/indexer, and explicit fail-closed scope. | It is a narrow privacy preflight; it does not deliver a private coordination workflow or prove an end-to-end transfer. |
-| Booty Bank | Broad consumer product surface with careful roadmap labeling, strong account/credential engineering, and substantial test claims. | Many banking rails are intentionally preview/partner/roadmap; private payout anonymizer is gated work. |
-| Aegis Rescue | Live registry scan, genuine rescue problem, verified owner claim model, and real mainnet safe-wallet/pool evidence. | Private payout still requires a manually connected wallet and unattended scanning/execution increases operational risk. |
+| Candidate    | Observable strength                                                                                                                                    | Material caveat                                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Philoxenia   | Three verified pool transactions, three listed contracts, live public demo/video, full-stack hospitality product with private payment/escrow surfaces. | Private payment support is tightly coupled to Ready X environment and ecosystem-specific operational prerequisites.                                |
+| Doom         | Four verified pool transactions, 14 listed contracts, a three-minute end-to-end demo, and live private prediction-market lifecycle.                    | Its own README acknowledges claim-secret and timing-correlation limitations.                                                                       |
+| Lantern      | Five verified transactions, deployed STRK20 anonymizer, live campaign lifecycle from private contribution through private payout claim.                | Narrower application scope than Veyra, but much stronger end-to-end product proof.                                                                 |
+| Aperture     | 22 manifest hashes, four listed contracts, Mainnet anonymizer, detailed public evidence and candid failure record.                                     | Its video field was still absent and multiple governance limitations remain.                                                                       |
+| Morrow       | Has a live app/video and strong privacy-boundary documentation.                                                                                        | Repository itself says its helper is not deployed and a complete user flow has not been achieved; it is weaker than hub completeness fields imply. |
+| Envelope     | Deployed link-payment anonymizer, SDK/CLI, front-running-resistant claim signatures, and detailed privacy boundaries.                                  | Amounts and funding/claim legs remain publicly visible and related; walletless claim applies only to its public-funding fallback.                  |
+| Airlock      | Mainnet bucketer, live pool census, 49 Cairo + 59 TypeScript tests, denomination/timing threat model.                                                  | A real full wallet round-trip remains the unclosed integration proof; cross-chain lane is not yet wired.                                           |
+| Cutout       | Exceptionally disciplined signing guard, independent receipts, reproducible policy/indexer, and explicit fail-closed scope.                            | It is a narrow privacy preflight; it does not deliver a private coordination workflow or prove an end-to-end transfer.                             |
+| Booty Bank   | Broad consumer product surface with careful roadmap labeling, strong account/credential engineering, and substantial test claims.                      | Many banking rails are intentionally preview/partner/roadmap; private payout anonymizer is gated work.                                             |
+| Aegis Rescue | Live registry scan, genuine rescue problem, verified owner claim model, and real mainnet safe-wallet/pool evidence.                                    | Private payout still requires a manually connected wallet and unattended scanning/execution increases operational risk.                            |
+
+## Official STRK20 reference review for top-three improvement pass (25 August 2026)
+
+The user-provided official/reference sources were inspected before any code change. The `strk20-skills` repository describes four reusable areas—privacy concepts/router, Wallet API private dapps, Cairo anonymizer contracts, and Privacy SDK—and highlights freshness checks, two approvals for shielding, proof-base freshness (`provingBlockId = currentBlock - 10`), anonymizer balance-delta/approval patterns, and the fact that deposits, withdrawals, open-note amounts, and timing remain public. Source: https://github.com/odinfree/strk20-skills.
+
+The `strk20-starter-kit` is a lean Next.js WalletAccountV6 reference with shield, unshield, private transfer, shielded balances, and a `privacy_invoke` echo helper. Its README explicitly says demo fixed values and the echo helper are placeholders, `OPEN`/`${poolAddress}`/`${openNoteIds[0]}` are wallet-substituted literals, and real helper logic plus audit remain project-owned. Source: https://github.com/Akashneelesh/strk20-starter-kit.
+
+The STRK20-by-example documentation states that STRK20 is a note-based pool rather than a mixer, registration/viewing-key setup is required before private balances or transfers, proofs are verified in-protocol, and public edges expose deposits/withdrawals and timing. It also distinguishes anonymizer DeFi activity from fully private transfers. Source: https://strk20-by-example.org/what-is-strk20.
+
+The `awesome-strk20` directory organizes the canonical pool, SDK, Wallet API spec, anonymizer/helper contracts, Privacy Bridge, and reference applications. Source: https://github.com/Akashneelesh/awesome-strk20.
+
+The `starknet-privacy` source repository maps the protocol into SDK, discovery service, proving service, pool contract, anonymizers, E2E tests, deployment, audit, and formal-verification layers; it lists the canonical pool, Ekubo and Vesu anonymizers, and current build/test commands. Source: https://github.com/starkware-libs/starknet-privacy.
+
+Implementation conclusion: do not copy repositories wholesale or import demo helpers as production behavior. The safe improvement path is to align Veyra’s diagnostics, evidence language, proof freshness, wallet capability handling, and test coverage with these references while preserving Veyra’s existing Mainnet-only, wallet-owned, receipt-first, fail-closed boundary. A custom fund-moving anonymizer remains unsafe to add without verified contract/interface/deployment evidence and independent review.
 
 ## Source additions
 

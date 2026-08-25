@@ -556,6 +556,48 @@ export function buildPayrollRegistryCreateCall(
   };
 }
 
+export type Strk20Readiness = {
+  status: "connect" | "network" | "wallet-api" | "registration";
+  label: string;
+  detail: string;
+};
+
+export function describeStrk20Readiness(
+  wallet: VeilWallet | undefined,
+  network: VeilNetwork
+): Strk20Readiness {
+  if (!wallet) {
+    return {
+      status: "connect",
+      label: "WAITING FOR WALLET",
+      detail:
+        "Connect a wallet before Veyra can inspect the Mainnet STRK20 action capability.",
+    };
+  }
+  const walletNetwork = networkFromChainId(wallet.chainId);
+  if (walletNetwork !== network) {
+    return {
+      status: "network",
+      label: "NETWORK MISMATCH",
+      detail: `The wallet must report ${NETWORKS[network].label}; Veyra will not sign on another network.`,
+    };
+  }
+  if (!wallet.strk20InvokeTransaction && !wallet.request) {
+    return {
+      status: "wallet-api",
+      label: "STRK20 API UNAVAILABLE",
+      detail:
+        "This wallet does not expose the official STRK20 wallet action. No generic invoke fallback is available.",
+    };
+  }
+  return {
+    status: "registration",
+    label: "API DETECTED / REGISTRATION UNVERIFIED",
+    detail:
+      "Wallet capability is present, but registration, recipient channel context, and private-note discovery remain wallet-owned prerequisites.",
+  };
+}
+
 export function onchainCapability(
   wallet: VeilWallet | undefined,
   network: VeilNetwork
