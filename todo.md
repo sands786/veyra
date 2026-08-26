@@ -891,3 +891,7 @@
 ## Homepage two-column surface map fix
 - [x] Change the homepage surface directory to exactly two full-width boxes per desktop row so the final row has no large empty column.
 - [x] Verify the two-column desktop map, mobile stacking, destination links, tests, TypeScript, build, and responsive QA.
+
+## StarkGate bounty scope validation
+- [x] Compare Veyra’s Agent, Launchpad, Markets, and RPC findings against the attached StarkGate-only targets and severity rules.
+- [x] Document which findings are out of scope, which are merely product limitations, and whether any reproducible Veyra bug is a valid StarkGate bounty finding.
