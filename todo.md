@@ -970,3 +970,12 @@
 - [x] Preserve the real Veyra page footage before and after the transition
 - [x] Render the complete 90-second submission at 3840x2160 UHD and 60 fps
 - [x] Verify audio continuity, corrected ending logo, exact duration, and final visual quality
+
+
+## Raise on-chain and privacy credibility
+
+- [x] Audit current live Mainnet evidence, contract-state reads, receipt links, and privacy-boundary presentation
+- [x] Strengthen judge-visible on-chain evidence for Launchpad, Private Markets, and Veyra Agent without inventing settlement claims
+- [x] Strengthen the privacy explanation and user-owned private-note discovery handoff without claiming unverified delivery
+- [x] Add regression coverage and verify the improved evidence surfaces
+- [x] Document the exact user-owned Mainnet action required before a true 10/10 privacy-credibility claim

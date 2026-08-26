@@ -11,6 +11,7 @@ import {
   type VeyraAgentAction,
 } from "@/lib/strk20";
 import { toast } from "sonner";
+import { MainnetEvidenceStrip } from "@/components/MainnetEvidenceStrip";
 
 const agentAddress = import.meta.env.VITE_VEYRA_AGENT_CONTRACT_MAINNET as string | undefined;
 const ROUND_TYPE = "0x5345414c45445f424944";
@@ -77,8 +78,10 @@ export function VeyraAgentOnchainPanel({ isDemoMode }: { isDemoMode: boolean }) 
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div><div className="font-mono text-[10px] tracking-[0.13em] text-[#F0563A]">VEYRA AGENT / COMMIT–REVEAL / MAINNET</div><p className="mt-2 max-w-3xl text-sm leading-6 text-[#CFC7BC]">The Agent prepares a sealed-bid coordination payload, but your wallet signs every state change. Commit–reveal hides the value until reveal; it does not anonymize wallet addresses or transfers.</p></div>
       <span className="font-mono text-[10px] text-[#AEB8BE]">{agentAddress ? shortHash(agentAddress) : "CONTRACT NOT CONFIGURED"}</span>
-    </div>
-    {!wallet ? <div className="mt-4 flex flex-wrap gap-2">{wallets.length ? wallets.map(option => <Button key={option.id} disabled={busy} onClick={() => connect(option.wallet)} className="h-10 rounded-[9px] bg-[#F3EEE5] px-4 font-mono text-[10px] text-[#111210]">{busy ? "CONNECTING…" : `CONNECT ${option.name.toUpperCase()}`}</Button>) : <span className="font-mono text-[10px] text-[#F0563A]">NO SUPPORTED MAINNET WALLET DETECTED</span>}</div> : <>
+        </div>
+    {agentAddress && <MainnetEvidenceStrip title="Veyra Agent" contract={agentAddress} verifiedLabel="ROUND 2 RESOLVED / RECEIPT-BACKED" lifecycle="CREATE → OPEN → COMMIT → CLOSE → REVEAL → RESOLVE" privacyNote="The commitment hides the value until reveal, but wallet callers, revealed values, and any public transfer remain observable on Mainnet. Private recipient-note delivery is not claimed here." explorerPath="contract/0x07d0e03a99a85176ceba9fad11bc63b66bfc198365e12e36cdf0811aa9d61f69" evidencePath="tx/0x02ab82ecd93ad847d2e5963b5e6cf28f90ce2ca571436df494c26d3c9c76a0a5" />}
+    {!wallet ? <div className="mt-4 flex flex-wrap gap-2">
+{wallets.length ? wallets.map(option => <Button key={option.id} disabled={busy} onClick={() => connect(option.wallet)} className="h-10 rounded-[9px] bg-[#F3EEE5] px-4 font-mono text-[10px] text-[#111210]">{busy ? "CONNECTING…" : `CONNECT ${option.name.toUpperCase()}`}</Button>) : <span className="font-mono text-[10px] text-[#F0563A]">NO SUPPORTED MAINNET WALLET DETECTED</span>}</div> : <>
       <div className="mt-4 flex flex-wrap items-center gap-3"><span className="font-mono text-[10px] text-[#70D49D]">CONNECTED / {shortHash(address)}</span><span className="font-mono text-[10px] text-[#AEB8BE]">{status}</span></div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2"><label className="font-mono text-[10px] text-[#AEB8BE]">ROUND ID<input value={roundId} onChange={e => setRoundId(e.target.value)} className="mt-2 h-10 w-full rounded-[8px] border border-white/15 bg-black/20 px-3 text-sm text-[#F3EEE5]" inputMode="numeric" /></label><label className="font-mono text-[10px] text-[#AEB8BE]">ITEM ID<input value={itemId} onChange={e => setItemId(e.target.value)} className="mt-2 h-10 w-full rounded-[8px] border border-white/15 bg-black/20 px-3 text-sm text-[#F3EEE5]" inputMode="numeric" /></label></div>
       <label className="mt-3 block font-mono text-[10px] text-[#AEB8BE]">COMMITMENT FELT<input value={commitment} onChange={e => setCommitment(e.target.value)} placeholder="0x… Poseidon(value, nonce)" className="mt-2 h-10 w-full rounded-[8px] border border-white/15 bg-black/20 px-3 text-sm text-[#F3EEE5]" /></label>

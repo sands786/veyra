@@ -10,6 +10,7 @@ import {
   type VeilWallet,
 } from "@/lib/strk20";
 import { toast } from "sonner";
+import { MainnetEvidenceStrip } from "@/components/MainnetEvidenceStrip";
 
 const escrowAddress = import.meta.env.VITE_LAUNCHPAD_ESCROW_ADDRESS as string | undefined;
 
@@ -106,6 +107,7 @@ export function LaunchpadOnchainPanel({
         </div>
         <span className="font-mono text-[9px] text-[#AEB8BE]">{escrowAddress ? shortHash(escrowAddress) : "NOT CONFIGURED"}</span>
       </div>
+      {escrowAddress && <MainnetEvidenceStrip title="Launchpad" contract={escrowAddress} verifiedLabel="DEPLOYED / RECEIPT-BACKED" lifecycle="CREATE → ACTIVATE → MILESTONE" privacyNote="Project and milestone state are public on Mainnet. Private recipient identity or private-note delivery is not claimed by this escrow contract." explorerPath="contract/0x005d7cb0f5ea0cda8b046d524eaa45e38f3a5c54357f2e4b211da7e2c435bb15" evidencePath="tx/0x05337ff0e576dfbfe9df66bdd7aaeafa2f0382e4ba9c31f96dda95ffdd35dc71" />}
       {!wallet ? (
         <div className="mt-4 flex flex-wrap gap-2">
           {wallets.length ? wallets.map((option) => (
