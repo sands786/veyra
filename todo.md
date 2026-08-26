@@ -962,3 +962,11 @@
 - [x] Keep the insert clearly marked as conceptual and preserve real-page evidence footage
 - [x] Preserve the corrected narration, localized logo fix, and 90-second timeline
 - [x] Verify and deliver the enhanced demo export
+
+
+## 4K cinematic insert cleanup
+
+- [x] Replace the oversized privacy inset with a clean full-frame cinematic transition and restrained conceptual label
+- [x] Preserve the real Veyra page footage before and after the transition
+- [x] Render the complete 90-second submission at 3840x2160 UHD and 60 fps
+- [x] Verify audio continuity, corrected ending logo, exact duration, and final visual quality
