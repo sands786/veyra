@@ -895,3 +895,15 @@
 ## StarkGate bounty scope validation
 - [x] Compare Veyra’s Agent, Launchpad, Markets, and RPC findings against the attached StarkGate-only targets and severity rules.
 - [x] Document which findings are out of scope, which are merely product limitations, and whether any reproducible Veyra bug is a valid StarkGate bounty finding.
+
+## Authorized StarkGate-only security review
+- [ ] Review only the StarkGate Cairo/Solidity repositories and StarkGate website targets listed in the attached HackenProof scope.
+- [ ] Validate any Critical/High hypothesis with safe local evidence and prepare private platform-only reporting notes; do not test Veyra or out-of-scope infrastructure.
+
+
+## New Veyra submission demo
+
+- [x] Create a new judge-facing Veyra submission demo narrative using existing on-chain and privacy-first surfaces
+- [x] Make the demo visibly highlight Payment routes, Proof Ledger, Treasury, Claims, Launchpad, Private Primitives, Private Markets, and Veyra Agent
+- [x] Preserve honest Demo Mode and wallet/on-chain evidence boundaries; do not add unsupported functionality
+- [x] Verify the demo flow, responsive presentation, and submission-ready guidance
