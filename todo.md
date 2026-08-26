@@ -995,3 +995,10 @@
 - [x] Add verified public Mainnet fallbacks while retaining environment-variable overrides
 - [x] Add regression coverage and verify both protocol pages visually
 - [x] Push the configuration fix to GitHub `main` for Vercel synchronization
+
+
+## Restore visible wallet access
+
+- [x] Trace where the Connect Wallet action is currently hidden or gated
+- [x] Restore a clear Connect Wallet action without restoring Sign In, Sign Up, or Sign Out controls
+- [x] Add regression coverage and verify wallet access at desktop and mobile widths

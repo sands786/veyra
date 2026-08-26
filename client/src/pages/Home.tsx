@@ -670,10 +670,6 @@ export default function Home() {
   const stageCopy = useMemo(() => stages[stage], [stage]);
 
   function openWalletPicker() {
-    if (!isAuthenticated) {
-      startLogin();
-      return;
-    }
     setWalletQrUri("");
     setWalletQrImage("");
     const options = discoverStarknetWallets();
@@ -1293,19 +1289,17 @@ export default function Home() {
                 <span className="sm:hidden">MAINNET</span>
                 <span className="hidden sm:inline">STARKNET MAINNET</span>
               </div>
-              {isAuthenticated && (
-                <Button
-                  disabled={isWalletActionLocked(walletConnecting)}
-                  onClick={openWalletPicker}
-                  className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]"
-                >
-                  {walletConnecting
-                    ? "CONNECTING…"
-                    : connected
-                      ? `${walletName || "WALLET"} · ${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}`
-                      : "ADD WALLET"}
-                </Button>
-              )}
+              <Button
+                disabled={isWalletActionLocked(walletConnecting)}
+                onClick={openWalletPicker}
+                className="h-9 rounded-full bg-[#F0563A] px-4 font-mono text-[10px] tracking-[0.12em] text-[#111210] hover:bg-[#FF7257]"
+              >
+                {walletConnecting
+                  ? "CONNECTING…"
+                  : connected
+                    ? `${walletName || "WALLET"} · ${walletAddress.slice(0, 4)}…${walletAddress.slice(-4)}`
+                    : "CONNECT WALLET"}
+              </Button>
             </div>
           </header>
 

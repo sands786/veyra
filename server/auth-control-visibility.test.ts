@@ -44,6 +44,13 @@ describe("visible authentication controls", () => {
 
     expect(home).toContain("const { user, loading, error, isAuthenticated } = useAuth();");
     expect(home).toContain("startLogin();");
+    expect(home).toContain('"CONNECT WALLET"');
+    expect(home).toContain("function openWalletPicker()");
+    const pickerSource = home.slice(
+      home.indexOf("function openWalletPicker()"),
+      home.indexOf("async function handleWalletConnect")
+    );
+    expect(pickerSource).not.toContain("startLogin();");
     expect(launchpad).toContain("const { isAuthenticated } = useAuth();");
     expect(privateMarkets).toContain("const { isAuthenticated } = useAuth();");
   });
