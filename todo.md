@@ -1062,3 +1062,10 @@
 - [x] Increase lifecycle stage card dimensions and internal spacing so the six stages use the panel width more assertively
 - [x] Increase stage labels, metadata, and supporting copy to improve at-a-glance readability
 - [x] Add regression coverage and verify desktop/mobile presentation after the scale change
+
+
+## Scale all remaining protocol members
+
+- [x] Apply the larger card dimensions, typography, spacing, and full-width control treatment to Launchpad, Private Markets, and Private Primitives
+- [x] Apply consistent rounded institutional geometry to their evidence and action surfaces
+- [x] Add regression coverage and verify all three protocol routes on desktop and mobile

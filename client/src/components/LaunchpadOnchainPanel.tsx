@@ -96,7 +96,7 @@ export function LaunchpadOnchainPanel({
   if (isDemoMode) return null;
 
   return (
-    <div className="mt-6 rounded-[14px] border border-[#70D49D]/25 bg-[#70D49D]/[0.05] p-5">
+    <div className="mt-7 rounded-[18px] border border-[#70D49D]/25 bg-[#70D49D]/[0.05] p-6 sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="font-mono text-[9px] tracking-[0.13em] text-[#70D49D]">LIVE MAINNET ESCROW</div>
@@ -108,21 +108,21 @@ export function LaunchpadOnchainPanel({
       </div>
       {escrowAddress && <MainnetEvidenceStrip title="Launchpad" contract={escrowAddress} verifiedLabel="DEPLOYED / RECEIPT-BACKED" lifecycle="CREATE → ACTIVATE → MILESTONE" privacyNote="Project and milestone state are public on Mainnet. Private recipient identity or private-note delivery is not claimed by this escrow contract." explorerPath="contract/0x005d7cb0f5ea0cda8b046d524eaa45e38f3a5c54357f2e4b211da7e2c435bb15" evidencePath="tx/0x05337ff0e576dfbfe9df66bdd7aaeafa2f0382e4ba9c31f96dda95ffdd35dc71" />}
       {!wallet ? (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {wallets.length ? wallets.map((option) => (
-            <Button key={option.id} disabled={connecting} onClick={() => connect(option.wallet)} className="h-10 rounded-[9px] bg-[#F3EEE5] px-4 font-mono text-[9px] text-[#111210]">
+            <Button key={option.id} disabled={connecting} onClick={() => connect(option.wallet)} className="min-h-14 rounded-[12px] bg-[#F3EEE5] px-5 font-mono text-xs font-semibold tracking-[0.04em] text-[#111210]">
               {connecting ? "CONNECTING…" : `CONNECT ${option.name.toUpperCase()}`}
             </Button>
           )) : <span className="font-mono text-[9px] text-[#F0563A]">NO SUPPORTED MAINNET WALLET DETECTED</span>}
         </div>
       ) : (
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <span className="font-mono text-[9px] text-[#70D49D]">CONNECTED / {shortHash(address)}</span>
-          <Button disabled={submitting} onClick={() => submit("create_project")} className="h-10 rounded-[9px] bg-[#F0563A] px-4 font-mono text-[9px] text-[#111210]">{submitting ? "SIGNING…" : "CREATE ON-CHAIN ROOM"}</Button>
-          <Button disabled={submitting} onClick={() => submit("activate_project")} className="h-10 rounded-[9px] border border-white/20 px-4 font-mono text-[9px] text-[#F3EEE5]">ACTIVATE ON-CHAIN ROOM</Button>
+        <div className="mt-5 grid gap-3 sm:grid-cols-[auto_1fr_1fr] sm:items-center">
+          <span className="font-mono text-[10px] text-[#70D49D]">CONNECTED / {shortHash(address)}</span>
+          <Button disabled={submitting} onClick={() => submit("create_project")} className="min-h-14 rounded-[12px] bg-[#F0563A] px-5 font-mono text-xs font-semibold tracking-[0.04em] text-[#111210]">{submitting ? "SIGNING…" : "CREATE ON-CHAIN ROOM"}</Button>
+          <Button disabled={submitting} onClick={() => submit("activate_project")} className="min-h-14 rounded-[12px] border border-white/20 px-5 font-mono text-xs font-semibold tracking-[0.04em] text-[#F3EEE5]">ACTIVATE ON-CHAIN ROOM</Button>
         </div>
       )}
-      {lastHash && <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[9px] text-[#AEB8BE]">SUBMITTED RECEIPT / {lastHash}<div className="mt-2 flex flex-wrap items-center gap-2"><Button disabled={verifying} onClick={verifyMainnetEvidence} className="h-8 rounded-[8px] border border-[#70D49D]/40 px-3 text-[9px] text-[#70D49D]">{verifying ? "VERIFYING…" : "VERIFY RECEIPT + STATE"}</Button><span className="text-[#F3EEE5]">{receiptStatus}</span>{chainState && <span className="text-[#70D49D]">PROJECT {chainState.projectState.toString()} / MILESTONE {chainState.milestoneState.toString()} / BALANCE {chainState.projectBalance.toString()} LOWEST</span>}</div></div>}
+      {lastHash && <div className="mt-6 rounded-[14px] border-t border-white/10 pt-5 font-mono text-[9px] text-[#AEB8BE]">SUBMITTED RECEIPT / {lastHash}<div className="mt-2 flex flex-wrap items-center gap-2"><Button disabled={verifying} onClick={verifyMainnetEvidence} className="min-h-11 rounded-[10px] border border-[#70D49D]/40 px-4 text-[10px] font-semibold text-[#70D49D]">{verifying ? "VERIFYING…" : "VERIFY RECEIPT + STATE"}</Button><span className="text-[#F3EEE5]">{receiptStatus}</span>{chainState && <span className="text-[#70D49D]">PROJECT {chainState.projectState.toString()} / MILESTONE {chainState.milestoneState.toString()} / BALANCE {chainState.projectBalance.toString()} LOWEST</span>}</div></div>}
     </div>
   );
 }
