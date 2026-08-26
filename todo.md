@@ -1108,3 +1108,10 @@
 - [x] Add smooth accessible transitions for protocol content when switching routes
 - [x] Refine the mobile protocol bar into a sleek horizontal scrollable list
 - [x] Add regression coverage and verify desktop/mobile interaction behavior
+
+
+## Box-free Institutional Map
+
+- [x] Replace enclosed homepage protocol cards with an open editorial directory treatment
+- [x] Preserve all protocol labels, descriptions, destinations, hover/focus behavior, and mobile readability
+- [x] Add regression coverage and verify the box-free section visually

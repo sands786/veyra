@@ -1579,11 +1579,11 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-8 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-2">
+              <div className="mt-8 grid gap-0 border-t border-white/10 sm:grid-cols-2">
                 {productSurfaces.map(surface => {
                   const Icon = surface.icon;
                   return (
-                    <article key={surface.title} className="group flex min-h-[260px] flex-col justify-between border border-white/10 bg-[#151D21] p-5 transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-[#F0563A]/45 hover:bg-[#1B2930] hover:shadow-[0_18px_42px_rgba(0,0,0,0.28)] focus-within:-translate-y-1 focus-within:border-[#F0563A]/55 focus-within:shadow-[0_18px_42px_rgba(0,0,0,0.24)] motion-reduce:transform-none sm:p-6">
+                    <article key={surface.title} className="group flex min-h-[260px] flex-col justify-between border-b border-white/10 p-5 transition-[background-color,transform] duration-200 ease-out hover:bg-white/[0.025] hover:-translate-y-0.5 focus-within:bg-white/[0.025] motion-reduce:transform-none sm:p-7 lg:p-8">
                       <div>
                         <div className="flex items-center justify-between gap-3 font-mono text-[9px] tracking-[0.12em] text-[#7F8F97]">
                           <span className="text-[#F0563A]">{surface.group}</span>
