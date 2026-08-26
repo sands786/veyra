@@ -1055,3 +1055,10 @@
 - [x] Make the six lifecycle stage controls fill the available evidence-panel width with balanced spacing
 - [x] Apply restrained rounded corners to lifecycle boxes and evidence action buttons while preserving the Copper Veil visual language
 - [x] Add regression coverage and verify desktop/mobile layout after the geometry change
+
+
+## Enlarge lifecycle stage presentation
+
+- [x] Increase lifecycle stage card dimensions and internal spacing so the six stages use the panel width more assertively
+- [x] Increase stage labels, metadata, and supporting copy to improve at-a-glance readability
+- [x] Add regression coverage and verify desktop/mobile presentation after the scale change
