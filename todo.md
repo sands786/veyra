@@ -934,18 +934,18 @@
 
 ## Preserve original 90-second submission footage
 
-- [ ] Preserve all original video frames and the exact 90-second duration from the user-uploaded cut
-- [ ] Add narration only to the original silent ending interval
-- [ ] Replace only the incorrect logo region without substituting the entire final segment
-- [ ] Verify frame-preserving output, ending audio, and localized logo correction
+- [x] Preserve all original video frames and the exact 90-second duration from the user-uploaded cut
+- [x] Add narration only to the original silent ending interval
+- [x] Replace only the incorrect logo region without substituting the entire final segment
+- [x] Verify frame-preserving output, ending audio, and localized logo correction
 
 
 ## AI cinematic inserts for submission cut
 
-- [ ] Generate one or two short conceptual AI cinematic inserts for Veyra’s privacy and proof narrative
-- [ ] Label conceptual inserts clearly and keep real Veyra footage as the product-evidence layer
-- [ ] Integrate the inserts without weakening the preserved 90-second walkthrough or ending correction
-- [ ] Verify the enhanced export and deliver the final video asset
+- [x] Generate one or two short conceptual AI cinematic inserts for Veyra’s privacy and proof narrative
+- [x] Label conceptual inserts clearly and keep real Veyra footage as the product-evidence layer
+- [x] Integrate the inserts without weakening the preserved 90-second walkthrough or ending correction
+- [x] Verify the enhanced export and deliver the final video asset
 
 
 ## Cross-account Veyra video handoff
@@ -954,3 +954,11 @@
 - [x] Specify the AI insert concept, Copper Veil aesthetic, timing, labeling, and integration requirements
 - [x] Include the original 90-second preservation and corrected-logo/narration requirements
 - [x] Deliver the handoff prompt as a reusable Markdown file
+
+
+## User-provided privacy cinematic insert integration
+
+- [x] Integrate the uploaded `veyra_privacy_cinematic_insert.mp4` into the preserved real-page submission demo
+- [x] Keep the insert clearly marked as conceptual and preserve real-page evidence footage
+- [x] Preserve the corrected narration, localized logo fix, and 90-second timeline
+- [x] Verify and deliver the enhanced demo export
