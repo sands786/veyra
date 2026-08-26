@@ -923,3 +923,10 @@
 - [x] Visit each real surface and highlight the exact real panel being explained
 - [x] Keep the explanation honest about wallet-required actions, persisted workspace behavior, and verified Mainnet evidence
 - [x] Re-render and verify the corrected real-page video
+
+
+## Submission video ending correction
+
+- [x] Extend narration through the final ten seconds of the uploaded submission cut
+- [x] Replace the incorrect closing logo with the correct Veyra shield mark
+- [x] Verify the corrected ending audio, logo, duration, and final video output
