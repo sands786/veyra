@@ -5,6 +5,8 @@ export type ProtocolSurface = "privacy" | "payroll" | "treasury" | "claims" | "l
 // Public Mainnet deployment fallback. The environment variable can override this,
 // but the UI must not hide a verified public contract when a frontend host omits it.
 export const VERIFIED_VEYRA_AGENT_MAINNET = "0x07d0e03a99a85176ceba9fad11bc63b66bfc198365e12e36cdf0811aa9d61f69";
+export const VERIFIED_VEYRA_LAUNCHPAD_MAINNET = "0x005d7cb0f5ea0cda8b046d524eaa45e38f3a5c54357f2e4b211da7e2c435bb15";
+export const VERIFIED_VEYRA_MARKETS_MAINNET = "0x05476ca7064583238f3e82a6815a7f662b14228e1fb585d480838a282b9d7cf2";
 
 export type ProtocolContractConfig = {
   address: string;

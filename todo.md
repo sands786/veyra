@@ -987,3 +987,11 @@
 - [x] Correct the deployment-facing Agent contract configuration without changing on-chain behavior
 - [x] Add regression coverage for the configured Mainnet Agent address and fallback behavior
 - [x] Verify the Agent page and document any Vercel environment-variable requirement
+
+
+## Launchpad and Private Markets deployment configuration fix
+
+- [x] Trace why deployed Launchpad and Private Markets pages show missing contract configuration
+- [x] Add verified public Mainnet fallbacks while retaining environment-variable overrides
+- [x] Add regression coverage and verify both protocol pages visually
+- [x] Push the configuration fix to GitHub `main` for Vercel synchronization

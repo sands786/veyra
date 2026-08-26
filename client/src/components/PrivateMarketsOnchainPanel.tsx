@@ -14,8 +14,9 @@ import {
 } from "@/lib/strk20";
 import { toast } from "sonner";
 import { MainnetEvidenceStrip } from "@/components/MainnetEvidenceStrip";
+import { VERIFIED_VEYRA_MARKETS_MAINNET } from "@/lib/onchainConfig";
 
-const marketsAddress = import.meta.env.VITE_VEYRA_MARKETS_CONTRACT_MAINNET as string | undefined;
+const marketsAddress = (import.meta.env.VITE_VEYRA_MARKETS_CONTRACT_MAINNET as string | undefined) || VERIFIED_VEYRA_MARKETS_MAINNET;
 const STRK_DECIMALS = BigInt("1000000000000000000");
 
 function shortHash(value: string) { return `${value.slice(0, 10)}…${value.slice(-8)}`; }

@@ -11,8 +11,9 @@ import {
 } from "@/lib/strk20";
 import { toast } from "sonner";
 import { MainnetEvidenceStrip } from "@/components/MainnetEvidenceStrip";
+import { VERIFIED_VEYRA_LAUNCHPAD_MAINNET } from "@/lib/onchainConfig";
 
-const escrowAddress = import.meta.env.VITE_LAUNCHPAD_ESCROW_ADDRESS as string | undefined;
+const escrowAddress = (import.meta.env.VITE_LAUNCHPAD_ESCROW_ADDRESS as string | undefined) || VERIFIED_VEYRA_LAUNCHPAD_MAINNET;
 
 function shortHash(value: string) {
   return `${value.slice(0, 10)}…${value.slice(-8)}`;
