@@ -642,3 +642,24 @@ small {
       linear-gradient(180deg, transparent 0 72%, rgb(7 8 8 / 56%) 100%);
   }
 }
+
+.protocol-member-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(240 86 58 / 38%) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.protocol-member-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+.protocol-member-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.protocol-member-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(240 86 58 / 38%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .protocol-member-scroll a {
+    transition: none !important;
+  }
+}

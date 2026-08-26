@@ -1099,3 +1099,12 @@
 - [x] Add regression coverage and verify the expanded header visually
 
 - [x] Ensure the expanded protocol bar remains visible across the full desktop breakpoint range, including widths just below the XL threshold
+
+
+## Protocol tab interaction polish
+
+- [x] Preserve large protocol tab typography while adding a subtle copper glow on hover
+- [x] Add a distinct active-state indicator to the expanded protocol tabs
+- [x] Add smooth accessible transitions for protocol content when switching routes
+- [x] Refine the mobile protocol bar into a sleek horizontal scrollable list
+- [x] Add regression coverage and verify desktop/mobile interaction behavior
