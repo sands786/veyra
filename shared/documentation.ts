@@ -1,6 +1,8 @@
 export const documentationRoute = "/docs";
 export const documentationTeaserAsset =
   "/manus-storage/veyra-30s-logo-led-stable-teaser_edb01985.mp4";
+export const documentationProductFilmAsset =
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4";
 
 export const documentationChapters = [
   "overview",

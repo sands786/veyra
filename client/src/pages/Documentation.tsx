@@ -21,12 +21,14 @@ import { VeyraBrand } from "@/components/VeyraBrand";
 import { WorkspaceReturnButton } from "@/components/WorkspaceReturnButton";
 import {
   documentationChapters,
+  documentationProductFilmAsset,
   documentationProductSurfaces,
   documentationTeaserAsset,
   documentationVideoGuides,
 } from "@shared/documentation";
 
 const teaserVideo = documentationTeaserAsset;
+const productFilmVideo = documentationProductFilmAsset;
 
 const chapters = [...documentationChapters, "references"].map(id => ({
   id,
@@ -256,7 +258,7 @@ export default function Documentation() {
                       playsInline
                       preload="metadata"
                     >
-                      <source src={teaserVideo} type="video/mp4" />
+                      <source src={productFilmVideo} type="video/mp4" />
                       Your browser does not support the Veyra product film.
                     </video>
                   </div>

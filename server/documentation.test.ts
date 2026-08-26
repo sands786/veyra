@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   documentationChapters,
+  documentationProductFilmAsset,
   documentationProductSurfaces,
   documentationRoute,
   documentationTeaserAsset,
@@ -38,6 +39,23 @@ describe("documentation contract", () => {
 
   it("uses the published Veyra cinematic teaser asset", () => {
     expect(documentationTeaserAsset).toMatch(veyraManagedTeaserPattern);
+  });
+
+  it("uses the updated published product film in the Documentation hero", () => {
+    expect(documentationProductFilmAsset).toMatch(veyraVideoCdnPattern);
+    expect(documentationProductFilmAsset).toContain("veJaWSgpcQWfhFVT.mp4");
+
+    const documentationPage = fs.readFileSync(
+      path.join(root, "client", "src", "pages", "Documentation.tsx"),
+      "utf8"
+    );
+
+    expect(documentationPage).toContain(
+      "const productFilmVideo = documentationProductFilmAsset;"
+    );
+    expect(documentationPage).toContain(
+      "<source src={productFilmVideo} type=\"video/mp4\" />"
+    );
   });
 
   it("maps every standalone function video to a published Veyra guide asset", () => {
