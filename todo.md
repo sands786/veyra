@@ -930,3 +930,27 @@
 - [x] Extend narration through the final ten seconds of the uploaded submission cut
 - [x] Replace the incorrect closing logo with the correct Veyra shield mark
 - [x] Verify the corrected ending audio, logo, duration, and final video output
+
+
+## Preserve original 90-second submission footage
+
+- [ ] Preserve all original video frames and the exact 90-second duration from the user-uploaded cut
+- [ ] Add narration only to the original silent ending interval
+- [ ] Replace only the incorrect logo region without substituting the entire final segment
+- [ ] Verify frame-preserving output, ending audio, and localized logo correction
+
+
+## AI cinematic inserts for submission cut
+
+- [ ] Generate one or two short conceptual AI cinematic inserts for Veyra’s privacy and proof narrative
+- [ ] Label conceptual inserts clearly and keep real Veyra footage as the product-evidence layer
+- [ ] Integrate the inserts without weakening the preserved 90-second walkthrough or ending correction
+- [ ] Verify the enhanced export and deliver the final video asset
+
+
+## Cross-account Veyra video handoff
+
+- [x] Create a self-contained prompt for another Manus account covering Veyra context, video goals, source assets, and evidence boundaries
+- [x] Specify the AI insert concept, Copper Veil aesthetic, timing, labeling, and integration requirements
+- [x] Include the original 90-second preservation and corrected-logo/narration requirements
+- [x] Deliver the handoff prompt as a reusable Markdown file
