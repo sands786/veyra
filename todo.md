@@ -1076,3 +1076,17 @@
 - [x] Add direct header-bar links for Launchpad, Private Primitives, Private Markets, and Veyra Agent
 - [x] Keep Connect Wallet prominent and preserve the hidden account controls
 - [x] Add regression coverage and verify desktop/mobile header behavior
+
+
+## Institutional protocol tabs
+
+- [ ] Increase protocol navigation tab height, padding, and type scale
+- [ ] Strengthen framed-bar geometry, active state, separators, and focus treatment
+- [ ] Add regression coverage and verify the header on desktop and mobile
+
+
+## Fill protocol tab bar
+
+- [x] Make all four protocol tabs evenly cover the available desktop navigation bar
+- [x] Preserve the protocol marker, Connect Wallet priority, and responsive mobile overflow
+- [x] Add regression coverage and verify balanced desktop/mobile presentation

@@ -11,15 +11,15 @@ export function ProtocolMemberBar() {
   const [location] = useLocation();
 
   return (
-    <nav aria-label="Protocol members" className="flex min-w-0 items-center gap-1 overflow-x-auto border border-white/10 bg-[#151D21]/80 p-1 backdrop-blur-sm">
-      <span className="hidden shrink-0 px-3 font-mono text-[9px] font-semibold tracking-[0.16em] text-[#7F8F97] lg:inline">PROTOCOL</span>
+    <nav aria-label="Protocol members" className="flex min-w-0 items-stretch gap-1 overflow-x-auto rounded-[14px] border border-white/15 bg-[#111210]/90 p-1.5 shadow-[0_14px_40px_rgba(0,0,0,0.22)] backdrop-blur-sm">
+      <span className="hidden shrink-0 items-center border-r border-white/10 px-4 font-mono text-[10px] font-semibold tracking-[0.18em] text-[#7F8F97] lg:inline-flex">PROTOCOL</span>
       {members.map((member) => {
         const active = location === member.path;
         return (
           <Link
             key={member.path}
             href={member.path}
-            className={`inline-flex min-h-10 shrink-0 items-center justify-center rounded-[9px] px-3 font-mono text-[9px] font-semibold tracking-[0.08em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0563A]/70 sm:px-4 ${active ? "bg-[#F0563A] text-[#111210]" : "text-[#CFC7BC] hover:bg-white/10 hover:text-[#F3EEE5]"}`}
+            className={`group inline-flex min-h-14 min-w-[148px] flex-1 items-center justify-center rounded-[11px] border px-5 font-mono text-[10px] font-semibold tracking-[0.09em] transition-[background-color,border-color,color,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0563A]/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#111210] sm:min-w-0 sm:px-4 ${active ? "border-[#F0563A]/70 bg-[#F0563A] text-[#111210] shadow-[0_8px_20px_rgba(240,86,58,0.18)]" : "border-transparent text-[#CFC7BC] hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[0.07] hover:text-[#F3EEE5]"}`}
             aria-current={active ? "page" : undefined}
           >
             {member.label.toUpperCase()}
