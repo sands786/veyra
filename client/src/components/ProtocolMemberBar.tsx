@@ -11,7 +11,7 @@ export function ProtocolMemberBar() {
   const [location] = useLocation();
 
   return (
-    <nav aria-label="Protocol members" className="flex min-w-0 items-stretch gap-1 overflow-x-auto rounded-[14px] border border-white/15 bg-[#111210]/90 p-1.5 shadow-[0_14px_40px_rgba(0,0,0,0.22)] backdrop-blur-sm">
+    <nav aria-label="Protocol members" className="flex w-full min-w-0 items-stretch gap-1 overflow-x-auto rounded-[14px] border border-white/15 bg-[#111210]/90 p-1.5 shadow-[0_14px_40px_rgba(0,0,0,0.22)] backdrop-blur-sm">
       <span className="hidden shrink-0 items-center border-r border-white/10 px-4 font-mono text-[10px] font-semibold tracking-[0.18em] text-[#7F8F97] lg:inline-flex">PROTOCOL</span>
       {members.map((member) => {
         const active = location === member.path;

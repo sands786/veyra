@@ -1280,8 +1280,8 @@ export default function Home() {
               <VeyraBrand compact mobileMarkOnly />
             </div>
 
-            <div className="ml-auto flex min-w-0 items-center justify-end gap-2 sm:gap-3">
-              <div className="hidden xl:block">
+            <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
+              <div className="hidden min-w-0 flex-1 xl:block">
                 <ProtocolMemberBar />
               </div>
               <div className="shrink-0 rounded-full border border-[#F0563A]/40 bg-[#201815] px-2 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] sm:px-3">

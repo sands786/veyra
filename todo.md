@@ -1090,3 +1090,10 @@
 - [x] Make all four protocol tabs evenly cover the available desktop navigation bar
 - [x] Preserve the protocol marker, Connect Wallet priority, and responsive mobile overflow
 - [x] Add regression coverage and verify balanced desktop/mobile presentation
+
+
+## Expand protocol bar footprint
+
+- [x] Make the desktop protocol bar stretch across the available header region instead of remaining shrink-wrapped
+- [x] Keep all four tabs evenly distributed while preserving Connect Wallet and mobile behavior
+- [x] Add regression coverage and verify the expanded header visually
