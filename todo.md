@@ -979,3 +979,11 @@
 - [x] Strengthen the privacy explanation and user-owned private-note discovery handoff without claiming unverified delivery
 - [x] Add regression coverage and verify the improved evidence surfaces
 - [x] Document the exact user-owned Mainnet action required before a true 10/10 privacy-credibility claim
+
+
+## Agent deployment configuration fix
+
+- [x] Trace why the deployed Agent page resolves the verified Mainnet contract as `NOT CONFIGURED`
+- [x] Correct the deployment-facing Agent contract configuration without changing on-chain behavior
+- [x] Add regression coverage for the configured Mainnet Agent address and fallback behavior
+- [x] Verify the Agent page and document any Vercel environment-variable requirement

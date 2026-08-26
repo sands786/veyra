@@ -2,8 +2,9 @@ import { ArrowUpRight, EyeOff, Fingerprint, LockKeyhole, ShieldCheck, Sparkles }
 import { useDemoMode } from "@/contexts/DemoModeContext";
 import { WorkspaceReturnButton } from "@/components/WorkspaceReturnButton";
 import { VeyraAgentOnchainPanel } from "@/components/VeyraAgentOnchainPanel";
+import { VERIFIED_VEYRA_AGENT_MAINNET } from "@/lib/onchainConfig";
 
-const agentAddress = import.meta.env.VITE_VEYRA_AGENT_CONTRACT_MAINNET as string | undefined;
+const agentAddress = (import.meta.env.VITE_VEYRA_AGENT_CONTRACT_MAINNET as string | undefined) || VERIFIED_VEYRA_AGENT_MAINNET;
 
 function shortHash(value: string) {
   return `${value.slice(0, 10)}…${value.slice(-8)}`;
