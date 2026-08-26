@@ -1034,3 +1034,10 @@
 - [x] Add a factual commit–reveal lifecycle visualization to the Veyra Agent page using the verified protocol stages and available on-chain evidence
 - [x] Add subtle professional hover/focus treatment to protocol member cards without changing their destinations or privacy claims
 - [x] Add regression coverage and verify desktop/mobile visual quality and reduced-motion behavior
+
+
+## Interactive Agent lifecycle tooltips
+
+- [x] Add detailed factual tooltip content for CREATE, OPEN, COMMIT, CLOSE, REVEAL, and RESOLVE
+- [x] Make every lifecycle stage hoverable and keyboard-focusable with accessible tooltip semantics
+- [x] Add regression coverage and verify tooltip layout on desktop and mobile
