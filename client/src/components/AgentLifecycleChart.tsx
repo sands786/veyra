@@ -26,21 +26,21 @@ export function AgentLifecycleChart() {
         {stages.map(({ label, detail, proof, explanation, observability, icon: Icon }, index) => (
           <Tooltip key={label}>
             <TooltipTrigger asChild>
-              <button type="button" className="group relative min-h-[184px] w-full border border-white/15 bg-[#12201D] p-4 text-left transition-[transform,border-color,background-color] duration-200 hover:-translate-y-1 hover:border-[#F0563A]/60 hover:bg-[#172A25] focus-visible:-translate-y-1 focus-visible:border-[#F0563A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0563A]/70 motion-reduce:transform-none" aria-label={`${label}: ${explanation}`}>
+              <button type="button" className="group relative min-h-[184px] w-full border border-white/15 bg-[#12201D] p-4 text-left transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-[#F0563A]/70 hover:bg-[#172A25] hover:shadow-[0_14px_28px_rgba(0,0,0,0.24),0_0_0_1px_rgba(240,86,58,0.18)] focus-visible:-translate-y-1 focus-visible:border-[#F0563A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0563A]/70 motion-reduce:transform-none motion-reduce:transition-none" aria-label={`${label}: ${explanation}`}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-mono text-[10px] font-semibold tracking-[0.12em] text-[#F0563A]">{String(index + 1).padStart(2, "0")}</span>
-                  <Icon className="h-4 w-4 text-[#70D49D]" aria-hidden="true" />
+                  <Icon className="h-4 w-4 text-[#70D49D] transition-[transform,color] duration-200 ease-out group-hover:scale-110 group-hover:text-[#F0563A] motion-reduce:transition-none" aria-hidden="true" />
                 </div>
-                <div className="mt-5 font-display text-lg font-semibold text-[#F3EEE5]">{label}</div>
+                <div className="mt-5 font-display text-lg font-semibold text-[#F3EEE5] transition-[transform,color] duration-200 ease-out group-hover:-translate-y-0.5 group-hover:text-[#FFF9EF] motion-reduce:transition-none">{label}</div>
                 <div className="mt-2 text-xs leading-5 text-[#CFC7BC]">{detail}</div>
                 <div className="mt-5 border-t border-white/10 pt-3 font-mono text-[9px] leading-4 tracking-[0.05em] text-[#70D49D]">{proof}</div>
                 <div className="mt-2 font-mono text-[8px] tracking-[0.08em] text-[#7F8F97]">FOCUS FOR DETAIL ↗</div>
                 {index < stages.length - 1 && <span className="absolute -right-2 top-1/2 z-10 hidden -translate-y-1/2 bg-[#0B1716] px-1 font-mono text-xs text-[#F0563A] lg:block" aria-hidden="true">→</span>}
               </button>
             </TooltipTrigger>
-            <TooltipContent side="top" align="start" className="max-w-[290px] border-[#F0563A]/40 bg-[#171B1A] p-4 text-[#F3EEE5] shadow-2xl">
+            <TooltipContent side="top" align="start" className="max-w-[290px] border border-[#F0563A]/45 bg-[#111210]/98 p-4 font-mono text-[#F3EEE5] shadow-[0_18px_40px_rgba(0,0,0,0.38)] backdrop-blur-sm">
               <div className="font-mono text-[10px] font-semibold tracking-[0.12em] text-[#F0563A]">{String(index + 1).padStart(2, "0")} / {label}</div>
-              <p className="mt-2 text-xs leading-5 text-[#F3EEE5]">{explanation}</p>
+              <p className="mt-2 text-[11px] leading-5 text-[#F3EEE5]">{explanation}</p>
               <div className="mt-3 border-t border-white/10 pt-3 font-mono text-[9px] leading-4 tracking-[0.05em] text-[#70D49D]">OBSERVABLE EDGE · {observability}</div>
             </TooltipContent>
           </Tooltip>

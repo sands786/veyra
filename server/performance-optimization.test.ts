@@ -46,6 +46,11 @@ describe("Veyra smooth-operation delivery contracts", () => {
     expect(chart).toContain("aria-label={`${label}: ${explanation}`}");
     expect(chart).toContain("The commitment acts as a binding fingerprint");
     expect(chart).toContain("The contract checks that the revealed payload matches");
+    expect(chart).toContain("hover:shadow-[0_14px_28px_rgba(0,0,0,0.24),0_0_0_1px_rgba(240,86,58,0.18)]");
+    expect(chart).toContain("group-hover:scale-110");
+    expect(chart).toContain("font-mono text-[#F3EEE5]");
+    expect(chart).toContain("border border-[#F0563A]/45");
+    expect(chart).toContain("motion-reduce:transition-none");
     expect(chart).toContain("not a performance metric");
     expect(home).toContain("hover:-translate-y-1");
     expect(home).toContain("focus-within:border-[#F0563A]/55");

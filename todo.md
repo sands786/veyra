@@ -1041,3 +1041,10 @@
 - [x] Add detailed factual tooltip content for CREATE, OPEN, COMMIT, CLOSE, REVEAL, and RESOLVE
 - [x] Make every lifecycle stage hoverable and keyboard-focusable with accessible tooltip semantics
 - [x] Add regression coverage and verify tooltip layout on desktop and mobile
+
+
+## Lifecycle interaction polish
+
+- [x] Add smooth premium hover/focus highlighting to lifecycle stage cards with reduced-motion support
+- [x] Refine lifecycle tooltip borders, background contrast, and monospace typography
+- [x] Add regression coverage and verify desktop/mobile interaction presentation
