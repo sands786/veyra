@@ -1020,3 +1020,10 @@
 - [x] Add or update regression coverage and verify desktop/mobile readability with a production build
 
 - [x] Extend the institutional evidence-panel application and QA requirement to every protocol member, including Private Primitives
+
+
+## Remove loading interface from all protocol routes
+
+- [x] Remove visible route-loading overlays or loading screens from Launchpad, Private Markets, Private Primitives, and Veyra Agent
+- [x] Preserve only local data-fetching feedback inside the relevant control surface without blocking the page shell
+- [x] Add regression coverage and verify direct navigation across all protocol routes

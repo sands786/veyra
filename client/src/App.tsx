@@ -19,23 +19,6 @@ const PrivateMarkets = lazy(() => import("./pages/PrivateMarkets"));
 const Agent = lazy(() => import("./pages/Agent"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 
-function RouteLoadingBoundary() {
-  return (
-    <main className="route-loading-shell grid min-h-screen place-items-center bg-[#111210] px-6 text-[#F3EEE5]" aria-live="polite" aria-busy="true">
-      <div className="route-loading-panel w-full max-w-sm border border-white/15 bg-[#151D21] px-6 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
-        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full border border-[#F0563A]/40 bg-[#201815] text-[#F0563A]">
-          <span className="h-2 w-2 rounded-full bg-[#F0563A] shadow-[0_0_16px_#F0563A]" />
-        </div>
-        <div className="font-mono text-[10px] tracking-[0.16em] text-[#F0563A]">VEYRA / SECURE ROUTE</div>
-        <p className="mt-2 text-sm text-[#AEB8BE]">Preparing your private workspace…</p>
-        <div className="route-loading-bar mt-5 h-1 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
-          <div className="h-full w-1/3 rounded-full bg-[#F0563A]" />
-        </div>
-      </div>
-    </main>
-  );
-}
-
 function DemoModeIndicator() {
   const { isDemoMode, exitDemo } = useDemoMode();
   const [, setLocation] = useLocation();
@@ -46,7 +29,7 @@ function DemoModeIndicator() {
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
-    <Suspense fallback={<RouteLoadingBoundary />}>
+    <Suspense fallback={null}>
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/launchpad" component={Launchpad} />

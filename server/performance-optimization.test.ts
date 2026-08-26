@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const root = path.resolve(import.meta.dirname, "..");
 
 describe("Veyra smooth-operation delivery contracts", () => {
-  it("defers secondary routes behind a branded Suspense boundary", () => {
+  it("keeps secondary routes lazy without a visible loading interruption", () => {
     const app = fs.readFileSync(
       path.join(root, "client", "src", "App.tsx"),
       "utf8"
@@ -17,8 +17,9 @@ describe("Veyra smooth-operation delivery contracts", () => {
     expect(app).toContain(
       'const Documentation = lazy(() => import("./pages/Documentation"));'
     );
-    expect(app).toContain("<Suspense fallback={<RouteLoadingBoundary />}>");
-    expect(app).toContain("Preparing your private workspace…");
+    expect(app).toContain("<Suspense fallback={null}>");
+    expect(app).not.toContain("RouteLoadingBoundary");
+    expect(app).not.toContain("Preparing your private workspace…");
   });
 
   it("keeps wallet action serialization lightweight and keeps product videos metadata-only", () => {
