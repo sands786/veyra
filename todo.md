@@ -1069,3 +1069,10 @@
 - [x] Apply the larger card dimensions, typography, spacing, and full-width control treatment to Launchpad, Private Markets, and Private Primitives
 - [x] Apply consistent rounded institutional geometry to their evidence and action surfaces
 - [x] Add regression coverage and verify all three protocol routes on desktop and mobile
+
+
+## Header protocol navigation
+
+- [x] Add direct header-bar links for Launchpad, Private Primitives, Private Markets, and Veyra Agent
+- [x] Keep Connect Wallet prominent and preserve the hidden account controls
+- [x] Add regression coverage and verify desktop/mobile header behavior

@@ -79,6 +79,7 @@ import {
 import { copyText } from "@/lib/clipboard";
 import { useDemoMode } from "@/contexts/DemoModeContext";
 import { VeyraBrand } from "@/components/VeyraBrand";
+import { ProtocolMemberBar } from "@/components/ProtocolMemberBar";
 import * as QRCode from "qrcode";
 
 const walletInstallLinks = [
@@ -1280,6 +1281,9 @@ export default function Home() {
             </div>
 
             <div className="ml-auto flex min-w-0 items-center justify-end gap-2 sm:gap-3">
+              <div className="hidden xl:block">
+                <ProtocolMemberBar />
+              </div>
               <div className="shrink-0 rounded-full border border-[#F0563A]/40 bg-[#201815] px-2 py-2 font-mono text-[9px] tracking-[0.1em] text-[#F0563A] sm:px-3">
                 <span className="sm:hidden">MAINNET</span>
                 <span className="hidden sm:inline">STARKNET MAINNET</span>

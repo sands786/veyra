@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 const root = process.cwd();
 const app = readFileSync(resolve(root, "client/src/App.tsx"), "utf8");
 const home = readFileSync(resolve(root, "client/src/pages/Home.tsx"), "utf8");
+const protocolMemberBar = readFileSync(resolve(root, "client/src/components/ProtocolMemberBar.tsx"), "utf8");
 const launchpad = readFileSync(
   resolve(root, "client/src/pages/Launchpad.tsx"),
   "utf8"
@@ -140,6 +141,15 @@ describe("Veyra interaction contracts", () => {
     expect(home).toContain("VERIFY & RECORD EXISTING HASH");
     expect(home).toContain("safeLocalStorageSet(");
     expect(home).toContain("claimWalletActionPending");
+  });
+
+  it("exposes every protocol member from the homepage header bar", () => {
+    expect(home).toContain("ProtocolMemberBar");
+    expect(protocolMemberBar).toContain('path: "/launchpad"');
+    expect(protocolMemberBar).toContain('path: "/private-primitives"');
+    expect(protocolMemberBar).toContain('path: "/private-markets"');
+    expect(protocolMemberBar).toContain('path: "/agent"');
+    expect(home).toContain("CONNECT WALLET");
   });
 
   it("routes workspace headers through safe storage", () => {
