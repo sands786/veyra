@@ -1097,3 +1097,5 @@
 - [x] Make the desktop protocol bar stretch across the available header region instead of remaining shrink-wrapped
 - [x] Keep all four tabs evenly distributed while preserving Connect Wallet and mobile behavior
 - [x] Add regression coverage and verify the expanded header visually
+
+- [x] Ensure the expanded protocol bar remains visible across the full desktop breakpoint range, including widths just below the XL threshold
