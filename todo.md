@@ -1048,3 +1048,10 @@
 - [x] Add smooth premium hover/focus highlighting to lifecycle stage cards with reduced-motion support
 - [x] Refine lifecycle tooltip borders, background contrast, and monospace typography
 - [x] Add regression coverage and verify desktop/mobile interaction presentation
+
+
+## Expand lifecycle controls and soften corners
+
+- [x] Make the six lifecycle stage controls fill the available evidence-panel width with balanced spacing
+- [x] Apply restrained rounded corners to lifecycle boxes and evidence action buttons while preserving the Copper Veil visual language
+- [x] Add regression coverage and verify desktop/mobile layout after the geometry change
