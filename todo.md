@@ -897,8 +897,8 @@
 - [x] Document which findings are out of scope, which are merely product limitations, and whether any reproducible Veyra bug is a valid StarkGate bounty finding.
 
 ## Authorized StarkGate-only security review
-- [ ] Review only the StarkGate Cairo/Solidity repositories and StarkGate website targets listed in the attached HackenProof scope.
-- [ ] Validate any Critical/High hypothesis with safe local evidence and prepare private platform-only reporting notes; do not test Veyra or out-of-scope infrastructure.
+- [x] Review only the StarkGate Cairo/Solidity repositories and StarkGate website targets listed in the attached HackenProof scope.
+- [x] Validate any Critical/High hypothesis with safe local evidence and prepare private platform-only reporting notes; do not test Veyra or out-of-scope infrastructure.
 
 
 ## New Veyra submission demo
@@ -907,3 +907,19 @@
 - [x] Make the demo visibly highlight Payment routes, Proof Ledger, Treasury, Claims, Launchpad, Private Primitives, Private Markets, and Veyra Agent
 - [x] Preserve honest Demo Mode and wallet/on-chain evidence boundaries; do not add unsupported functionality
 - [x] Verify the demo flow, responsive presentation, and submission-ready guidance
+
+
+## New narrated Veyra submission walkthrough
+
+- [x] Map every visible Veyra function into a sequential Demo Mode walkthrough
+- [x] Capture each function with the exact UI panel or box visibly highlighted while it is explained
+- [x] Assemble synchronized narration, callouts, and captions into a new submission video
+- [x] Verify the final walkthrough and deliver the actual video file
+
+
+## Real-page narrated Veyra walkthrough correction
+
+- [x] Replace Demo Mode tour footage with real Veyra page footage for the submission walkthrough
+- [x] Visit each real surface and highlight the exact real panel being explained
+- [x] Keep the explanation honest about wallet-required actions, persisted workspace behavior, and verified Mainnet evidence
+- [x] Re-render and verify the corrected real-page video
