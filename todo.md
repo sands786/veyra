@@ -1115,3 +1115,11 @@
 - [x] Replace enclosed homepage protocol cards with an open editorial directory treatment
 - [x] Preserve all protocol labels, descriptions, destinations, hover/focus behavior, and mobile readability
 - [x] Add regression coverage and verify the box-free section visually
+
+
+## Upper-tier documentation and README
+
+- [x] Audit current in-app Documentation, repository README, contract evidence, and Agent lifecycle facts
+- [x] Rewrite the in-app Documentation to include Veyra Agent, architecture, privacy boundaries, wallet-signing model, and evidence links
+- [x] Upgrade the repository README with current protocol members, Mainnet deployments, setup, testing, and honest capability boundaries
+- [x] Validate documentation consistency against source and on-chain evidence

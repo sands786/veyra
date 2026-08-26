@@ -187,6 +187,41 @@ Read the complete **[Decision Record](docs/DECISIONS.md)** to understand the tra
 
 ---
 
+## Veyra Agent — sealed coordination on Mainnet
+
+Veyra Agent is a dedicated Starknet protocol member for wallet-assisted commit–reveal coordination. It is not an autonomous custodian and it does not hold private keys. The browser prepares a round payload; the connected Starknet wallet signs each state-changing call; the deployed Cairo coordinator records the lifecycle and exposes read-only state for inspection.
+
+```text
+CREATE ROUND → OPEN COMMIT WINDOW → COMMIT POSEIDON HASH → CLOSE WINDOW → REVEAL VALUE → RESOLVE RECIPIENT
+```
+
+| Mainnet evidence | Verified reference |
+| --- | --- |
+| **Veyra Agent coordinator** | [`0x07d0e03a…a9d61f69`](https://voyager.online/contract/0x07d0e03a99a85176ceba9fad11bc63b66bfc198365e12e36cdf0811aa9d61f69) |
+| **Declared class** | [`0x44d4d37b…d2fc91`](https://voyager.online/class/0x044d4d37b817d4c272bf1baeaa0a3fc2af60df9e314cfeb240b61e37c4d2fc91) |
+| **Declaration receipt** | [`0x0667be71…732bbaa`](https://voyager.online/tx/0x0667be712451ca60be50c0066f5260af80748e7b550c72a349835ec6e732bbaa) |
+| **Lifecycle resolution receipt** | [`0x02ab82ec…c76a0a5`](https://voyager.online/tx/0x02ab82ecd93ad847d2e5963b5e6cf28f90ce2ca571436df494c26d3c9c76a0a5) |
+
+The lifecycle evidence demonstrates contract deployment, state transitions, commitment matching, and resolution. It does **not** prove that wallet callers are anonymous, that revealed values are private after reveal, or that public transfers disappear. Those limits are intentional and are repeated in the product UI so reviewers can distinguish contract state from a broader privacy claim.
+
+### Current protocol members
+
+| Member | Role | Evidence posture |
+| --- | --- | --- |
+| **Private Payroll** | Coordinate recipient routes, approvals, schedules, and receipt-gated proof. | Workspace state is separate from wallet-authorized settlement. |
+| **Launchpad** | Govern private project rooms, allocations, milestones, and release intent. | Mainnet contract and receipt links are exposed in the dedicated panel. |
+| **Private Markets** | Coordinate RFQs, sealed bid commitments, risk policy, and settlement lifecycle. | Contract state, bid state, and settlement evidence are separated. |
+| **Private Primitives** | Explain and prepare privacy-oriented STRK20 boundaries. | Wallet-owned discovery and privacy limitations remain explicit. |
+| **Veyra Agent** | Coordinate sealed decisions through commit–reveal–resolve. | Mainnet deployment and lifecycle receipts are linked above. |
+
+### Operating boundaries
+
+> **Veyra coordinates; the wallet authorizes.** No seed phrase, private key, recovery phrase, or keystore is accepted or stored.
+
+> **A submitted hash is not a receipt.** Product evidence distinguishes prepared intent, submitted transaction, confirmed receipt, and selective proof.
+
+> **A public receipt is not private-note proof.** STRK20 discovery, registration, proving, public edges, and recipient privacy are separate claims and must be evidenced separately.
+
 ## Run the system
 
 ### Prerequisites

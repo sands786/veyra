@@ -37,8 +37,10 @@ const chapters = [...documentationChapters, "references"].map(id => ({
         ? "Product map"
         : id === "privacy"
           ? "Privacy model"
-          : id === "starknet"
-            ? "Starknet flow"
+              : id === "agent"
+                ? "Veyra Agent"
+                : id === "starknet"
+                  ? "Starknet flow"
             : id === "demo"
               ? "Demo Mode"
               : id === "references"
@@ -103,6 +105,12 @@ const productSurfaces = [
     index: "04",
     title: documentationProductSurfaces[3],
     copy: "Run private project rooms with milestones, shielded allocations, release requests, and aggregate public proofs.",
+  },
+  {
+    icon: GitBranch,
+    index: "05",
+    title: documentationProductSurfaces[4],
+    copy: "Coordinate sealed decisions with an on-chain commit–reveal lifecycle while the connected wallet authorizes every state change.",
   },
 ];
 
@@ -510,10 +518,55 @@ export default function Documentation() {
           </section>
 
           <section
+            id="agent"
+            className="scroll-mt-24 border-t border-white/10 pt-20 mt-24"
+          >
+            <SectionLabel>06 / Veyra Agent</SectionLabel>
+            <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+              <div>
+                <h2 className="font-sans text-4xl font-semibold tracking-[-0.06em] sm:text-6xl">
+                  Commit first.
+                  <br />
+                  <span className="text-[#F0563A]">Reveal later.</span>
+                </h2>
+                <p className="mt-5 max-w-2xl leading-7 text-[#AAA49A]">
+                  Veyra Agent is a wallet-assisted Starknet coordinator for sealed decisions. It records a Poseidon commitment, closes the commit window, accepts the matching reveal, and resolves the round against a designated recipient. The lifecycle is enforced by the deployed Mainnet contract; Veyra prepares context, while the connected wallet signs every state-changing call.
+                </p>
+                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                  <div className="border border-white/10 p-5">
+                    <div className="font-mono text-[10px] tracking-[0.14em] text-[#F0563A]">01 / COMMIT</div>
+                    <p className="mt-3 text-sm leading-6 text-[#D5CEC4]">The decision is represented by a commitment before its value can be read.</p>
+                  </div>
+                  <div className="border border-white/10 p-5">
+                    <div className="font-mono text-[10px] tracking-[0.14em] text-[#F0563A]">02 / REVEAL</div>
+                    <p className="mt-3 text-sm leading-6 text-[#D5CEC4]">The revealed value must match the prior commitment after the round closes.</p>
+                  </div>
+                  <div className="border border-white/10 p-5">
+                    <div className="font-mono text-[10px] tracking-[0.14em] text-[#F0563A]">03 / RESOLVE</div>
+                    <p className="mt-3 text-sm leading-6 text-[#D5CEC4]">The final state and recipient edge are independently inspectable on Mainnet.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="border border-[#F0563A]/35 bg-[#151D21] p-6">
+                <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#F0563A]">Verified deployment</span>
+                  <span className="font-mono text-[9px] text-[#70D49D]">MAINNET / SUCCEEDED</span>
+                </div>
+                <dl className="mt-5 space-y-4 font-mono text-[10px] leading-5">
+                  <div><dt className="text-[#7F8F97]">CONTRACT</dt><dd className="mt-1 break-all text-[#F2EEE7]">0x07d0e03a99a85176ceba9fad11bc63b66bfc198365e12e36cdf0811aa9d61f69</dd></div>
+                  <div><dt className="text-[#7F8F97]">DECLARATION TX</dt><dd className="mt-1 break-all"><a className="text-[#F0563A] underline-offset-4 hover:underline" href="https://voyager.online/tx/0x0667be712451ca60be50c0066f5260af80748e7b550c72a349835ec6e732bbaa" target="_blank" rel="noreferrer">0x0667be71…732bbaa</a></dd></div>
+                  <div><dt className="text-[#7F8F97]">LIFECYCLE RECEIPT</dt><dd className="mt-1 break-all"><a className="text-[#F0563A] underline-offset-4 hover:underline" href="https://voyager.online/tx/0x02ab82ecd93ad847d2e5963b5e6cf28f90ce2ca571436df494c26d3c9c76a0a5" target="_blank" rel="noreferrer">0x02ab82ec…c76a0a5</a></dd></div>
+                </dl>
+                <p className="mt-6 border-t border-white/10 pt-5 text-sm leading-6 text-[#AAA49A]">This proves contract state and receipt execution. It does not anonymize wallet callers, revealed values, or public transfers.</p>
+              </div>
+            </div>
+          </section>
+
+          <section
             id="starknet"
             className="scroll-mt-24 border-t border-white/10 pt-20 mt-24"
           >
-            <SectionLabel>06 / Starknet flow</SectionLabel>
+            <SectionLabel>07 / Starknet flow</SectionLabel>
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div className="border border-white/10 bg-[#151D21] p-6">
                 <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#AEB8BE]">
@@ -583,7 +636,7 @@ export default function Documentation() {
             id="references"
             className="scroll-mt-24 border-t border-white/10 pt-20 mt-24"
           >
-            <SectionLabel>07 / Reference layer</SectionLabel>
+            <SectionLabel>08 / Reference layer</SectionLabel>
             <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
               <div>
                 <h2 className="font-sans text-4xl font-semibold tracking-[-0.06em] sm:text-6xl">
@@ -636,7 +689,7 @@ export default function Documentation() {
             id="demo"
             className="scroll-mt-24 border-t border-white/10 pt-20 mt-24"
           >
-            <SectionLabel>08 / Demo Mode</SectionLabel>
+            <SectionLabel>09 / Demo Mode</SectionLabel>
             <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
               <div>
                 <h2 className="font-sans text-4xl font-semibold tracking-[-0.06em] sm:text-6xl">

@@ -7,6 +7,7 @@ export const documentationChapters = [
   "why",
   "product",
   "privacy",
+  "agent",
   "starknet",
   "demo",
 ] as const;
@@ -16,6 +17,7 @@ export const documentationProductSurfaces = [
   "Operations + treasury",
   "Private claims",
   "Launchpad governance",
+  "Veyra Agent",
 ] as const;
 
 export type DocumentationChapter = (typeof documentationChapters)[number];

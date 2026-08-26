@@ -23,6 +23,7 @@ describe("documentation contract", () => {
       "why",
       "product",
       "privacy",
+      "agent",
       "starknet",
       "demo",
     ]);
@@ -31,6 +32,7 @@ describe("documentation contract", () => {
       "Operations + treasury",
       "Private claims",
       "Launchpad governance",
+      "Veyra Agent",
     ]);
   });
 
@@ -72,6 +74,10 @@ describe("documentation contract", () => {
     expect(readme).toContain(
       "https://veyra-gamma-gold.vercel.app/documentation#overview"
     );
+    expect(documentationPage).toContain('id="agent"');
+    expect(documentationPage).toContain("Commit first.");
+    expect(readme).toContain("Veyra Agent — sealed coordination on Mainnet");
+    expect(readme).toContain("0x07d0e03a99a85176ceba9fad11bc63b66bfc198365e12e36cdf0811aa9d61f69");
   });
 
   it("keeps film metadata legible below the desktop breakpoint and supplies accessible navigation motion", () => {
