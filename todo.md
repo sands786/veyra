@@ -1010,3 +1010,13 @@
 - [x] Add a shared session-safe wallet state for the connected provider, address, network, and wallet name
 - [x] Wire all four protocol surfaces to reuse the shared connection without storing private keys
 - [x] Add regression coverage and verify navigation/reload behavior at desktop and mobile widths
+
+
+## Institutional Mainnet evidence panel redesign
+
+- [x] Audit the shared evidence strip’s current hierarchy, typography, spacing, and responsive behavior
+- [x] Rebuild the evidence panel with larger technical facts, explicit verification status, lifecycle stages, and stronger institutional grouping
+- [x] Apply the redesigned panel consistently to Launchpad, Private Markets, and Veyra Agent
+- [x] Add or update regression coverage and verify desktop/mobile readability with a production build
+
+- [x] Extend the institutional evidence-panel application and QA requirement to every protocol member, including Private Primitives
