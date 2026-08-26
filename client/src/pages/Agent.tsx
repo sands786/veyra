@@ -2,6 +2,7 @@ import { ArrowUpRight, EyeOff, Fingerprint, LockKeyhole, ShieldCheck, Sparkles }
 import { useDemoMode } from "@/contexts/DemoModeContext";
 import { WorkspaceReturnButton } from "@/components/WorkspaceReturnButton";
 import { VeyraAgentOnchainPanel } from "@/components/VeyraAgentOnchainPanel";
+import { AgentLifecycleChart } from "@/components/AgentLifecycleChart";
 import { VERIFIED_VEYRA_AGENT_MAINNET } from "@/lib/onchainConfig";
 
 const agentAddress = (import.meta.env.VITE_VEYRA_AGENT_CONTRACT_MAINNET as string | undefined) || VERIFIED_VEYRA_AGENT_MAINNET;
@@ -84,6 +85,8 @@ export default function Agent() {
             </div>
           </div>
         </section>
+
+        <AgentLifecycleChart />
 
         {isDemoMode ? (
           <section className="mt-6 border border-[#F0C674]/30 bg-[#201815] p-6 sm:p-8">

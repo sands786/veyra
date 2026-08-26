@@ -22,6 +22,31 @@ describe("Veyra smooth-operation delivery contracts", () => {
     expect(app).not.toContain("Preparing your private workspace…");
   });
 
+  it("includes a factual Agent lifecycle visualization and restrained card interaction treatment", () => {
+    const agent = fs.readFileSync(
+      path.join(root, "client", "src", "pages", "Agent.tsx"),
+      "utf8"
+    );
+    const chart = fs.readFileSync(
+      path.join(root, "client", "src", "components", "AgentLifecycleChart.tsx"),
+      "utf8"
+    );
+    const home = fs.readFileSync(
+      path.join(root, "client", "src", "pages", "Home.tsx"),
+      "utf8"
+    );
+
+    expect(agent).toContain("<AgentLifecycleChart />");
+    expect(chart).toContain("CREATE");
+    expect(chart).toContain("COMMIT");
+    expect(chart).toContain("REVEAL");
+    expect(chart).toContain("RESOLVE");
+    expect(chart).toContain("not a performance metric");
+    expect(home).toContain("hover:-translate-y-1");
+    expect(home).toContain("focus-within:border-[#F0563A]/55");
+    expect(home).toContain("motion-reduce:transform-none");
+  });
+
   it("keeps wallet action serialization lightweight and keeps product videos metadata-only", () => {
     const adapter = fs.readFileSync(
       path.join(root, "client", "src", "lib", "strk20.ts"),

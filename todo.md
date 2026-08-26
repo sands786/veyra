@@ -1027,3 +1027,10 @@
 - [x] Remove visible route-loading overlays or loading screens from Launchpad, Private Markets, Private Primitives, and Veyra Agent
 - [x] Preserve only local data-fetching feedback inside the relevant control surface without blocking the page shell
 - [x] Add regression coverage and verify direct navigation across all protocol routes
+
+
+## Agent visualization and protocol card polish
+
+- [x] Add a factual commit–reveal lifecycle visualization to the Veyra Agent page using the verified protocol stages and available on-chain evidence
+- [x] Add subtle professional hover/focus treatment to protocol member cards without changing their destinations or privacy claims
+- [x] Add regression coverage and verify desktop/mobile visual quality and reduced-motion behavior
