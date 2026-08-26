@@ -5,6 +5,7 @@ import {
   buildPrivateMarketsTokenApprovalCall,
   connectVeilWallet,
   discoverStarknetWallets,
+  useVeilWalletSession,
   STRK_TOKEN,
   submitPrivateMarketsCall,
   readPrivateMarketsChainState,
@@ -29,8 +30,7 @@ function parseStrk(value: string): bigint {
 
 export function PrivateMarketsOnchainPanel({ isDemoMode }: { isDemoMode: boolean }) {
   const wallets = useMemo(() => discoverStarknetWallets(), []);
-  const [wallet, setWallet] = useState<VeilWallet>();
-  const [address, setAddress] = useState("");
+  const { wallet, address } = useVeilWalletSession();
   const [connecting, setConnecting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [marketId, setMarketId] = useState("1");
@@ -49,7 +49,6 @@ export function PrivateMarketsOnchainPanel({ isDemoMode }: { isDemoMode: boolean
     try {
       const result = await connectVeilWallet(option);
       if (!result.live || !result.wallet || !result.address || result.network !== "mainnet") throw new Error("Wallet did not return a verified Starknet Mainnet account.");
-      setWallet(result.wallet); setAddress(result.address);
       toast("Private Markets wallet connected.", { description: "Mainnet wallet API is ready." });
     } catch (error) { toast("Wallet connection failed.", { description: String(error).slice(0, 160) }); }
     finally { setConnecting(false); }

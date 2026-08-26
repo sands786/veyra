@@ -4,6 +4,7 @@ import {
   buildLaunchpadEscrowCall,
   connectVeilWallet,
   discoverStarknetWallets,
+  useVeilWalletSession,
   submitLaunchpadEscrowCall,
   readPrivateMarketsReceipt,
   readLaunchpadChainState,
@@ -27,8 +28,7 @@ export function LaunchpadOnchainPanel({
   isDemoMode: boolean;
 }) {
   const wallets = useMemo(() => discoverStarknetWallets(), []);
-  const [wallet, setWallet] = useState<VeilWallet>();
-  const [address, setAddress] = useState("");
+  const { wallet, address } = useVeilWalletSession();
   const [connecting, setConnecting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [lastHash, setLastHash] = useState("");
@@ -44,8 +44,6 @@ export function LaunchpadOnchainPanel({
       if (!result.live || !result.wallet || !result.address) {
         throw new Error("Wallet did not return a Mainnet account.");
       }
-      setWallet(result.wallet);
-      setAddress(result.address);
       toast("Launchpad wallet connected.", { description: "Mainnet wallet API is ready." });
     } catch (error) {
       toast("Wallet connection failed.", { description: String(error).slice(0, 160) });

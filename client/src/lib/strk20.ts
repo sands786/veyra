@@ -1,4 +1,5 @@
 import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
+import { useSyncExternalStore } from "react";
 
 export type VeilNetwork = "mainnet";
 
@@ -142,6 +143,61 @@ export type StarknetWalletOption = {
 };
 
 export type WalletQrResult = { uri: string; walletId: string };
+
+export type VeilWalletSession = {
+  wallet?: VeilWallet;
+  address: string;
+  network?: VeilNetwork;
+  walletName: string;
+  connected: boolean;
+};
+
+const emptyWalletSession: VeilWalletSession = {
+  address: "",
+  walletName: "",
+  connected: false,
+};
+
+let walletSession: VeilWalletSession = emptyWalletSession;
+const walletSessionListeners = new Set<() => void>();
+
+function publishWalletSession(wallet?: VeilWallet, address = ""): void {
+  walletSession = wallet && address
+    ? {
+        wallet,
+        address,
+        network: networkFromChainId(wallet.chainId),
+        walletName: wallet.name ?? "Starknet wallet",
+        connected: true,
+      }
+    : emptyWalletSession;
+  walletSessionListeners.forEach(listener => listener());
+}
+
+function subscribeWalletSession(listener: () => void): () => void {
+  walletSessionListeners.add(listener);
+  return () => walletSessionListeners.delete(listener);
+}
+
+function getWalletSessionSnapshot(): VeilWalletSession {
+  return walletSession;
+}
+
+export function useVeilWalletSession(): VeilWalletSession {
+  return useSyncExternalStore(
+    subscribeWalletSession,
+    getWalletSessionSnapshot,
+    () => emptyWalletSession
+  );
+}
+
+export function getVeilWalletSession(): VeilWalletSession {
+  return getWalletSessionSnapshot();
+}
+
+export function clearVeilWalletSession(): void {
+  publishWalletSession();
+}
 
 declare global {
   interface Window {
@@ -553,6 +609,7 @@ export async function connectVeilWallet(selectedWallet?: VeilWallet): Promise<{
   const connectedWallet = await hydrateWalletApiAccount(mergedWallet);
   const enhancedWallet = withWalletStandardMethods(connectedWallet);
   const address = addressFromWallet(enhancedWallet);
+  publishWalletSession(enhancedWallet, address ?? "");
   return {
     wallet: enhancedWallet,
     address,

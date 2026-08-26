@@ -9,6 +9,8 @@ import {
   describeStrk20SubmissionError,
   connectVeilWallet,
   disconnectVeilWallet,
+  clearVeilWalletSession,
+  getVeilWalletSession,
   ETH_TOKEN,
   MAINNET_CHAIN_ID,
   networkFromChainId,
@@ -22,6 +24,26 @@ import {
 } from "./strk20";
 
 describe("STRK20 on-chain adapter", () => {
+  it("publishes one reusable wallet session after connection", async () => {
+    clearVeilWalletSession();
+    const wallet = {
+      name: "Test Mainnet Wallet",
+      chainId: MAINNET_CHAIN_ID,
+      connect: async () => ({ accounts: [{ address: "0xabc", chainId: MAINNET_CHAIN_ID }] }),
+    } satisfies VeilWallet;
+    const result = await connectVeilWallet(wallet);
+    expect(result.live).toBe(true);
+    expect(getVeilWalletSession()).toMatchObject({
+      wallet: result.wallet,
+      address: "0xabc",
+      walletName: "Test Mainnet Wallet",
+      connected: true,
+      network: "mainnet",
+    });
+    clearVeilWalletSession();
+    expect(getVeilWalletSession().connected).toBe(false);
+  });
+
   it("classifies STRK20 registration and unsupported-wallet failures without implying a transaction was created", () => {
     expect(
       describeStrk20SubmissionError(new Error("NOT_REGISTERED"))

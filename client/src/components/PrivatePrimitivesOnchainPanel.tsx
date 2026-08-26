@@ -5,6 +5,7 @@ import {
   connectVeilWallet,
   describeStrk20Readiness,
   discoverStarknetWallets,
+  useVeilWalletSession,
   readPrivateMarketsReceipt,
   submitShieldedRoute,
   STRK_TOKEN,
@@ -24,8 +25,7 @@ function shortHash(value: string) { return `${value.slice(0, 10)}…${value.slic
 
 export default function PrivatePrimitivesOnchainPanel() {
   const wallets = useMemo(() => discoverStarknetWallets(), []);
-  const [wallet, setWallet] = useState<VeilWallet>();
-  const [address, setAddress] = useState("");
+  const { wallet, address } = useVeilWalletSession();
   const [amount, setAmount] = useState("0.01");
   const [recipient, setRecipient] = useState("");
   const [hash, setHash] = useState("");
@@ -38,7 +38,6 @@ export default function PrivatePrimitivesOnchainPanel() {
     try {
       const result = await connectVeilWallet(option);
       if (!result.live || !result.wallet || !result.address || result.network !== "mainnet") throw new Error("Wallet did not return a verified Starknet Mainnet account.");
-      setWallet(result.wallet); setAddress(result.address);
       toast("Private Primitives wallet connected.", { description: "The official STRK20 action capability is ready." });
     } catch (error) { toast("Wallet connection failed.", { description: String(error).slice(0, 160) }); }
   }

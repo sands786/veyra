@@ -54,6 +54,7 @@ import {
   describeStrk20SubmissionError,
   
   discoverStarknetWallets,
+  useVeilWalletSession,
   explorerUrl,
   networkFromChainId,
   networkLabel,
@@ -616,11 +617,9 @@ export default function Home() {
     setAmount(next.toLocaleString("en-US"));
   };
   const [stage, setStage] = useState(1);
-  const [connected, setConnected] = useState(false);
+  const walletSession = useVeilWalletSession();
+  const { wallet, address: walletAddress, walletName, connected } = walletSession;
   const [walletConnecting, setWalletConnecting] = useState(false);
-  const [wallet, setWallet] = useState<VeilWallet>();
-  const [walletAddress, setWalletAddress] = useState("");
-  const [walletName, setWalletName] = useState("");
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
   const [walletOptions, setWalletOptions] = useState<StarknetWalletOption[]>(
     []
@@ -692,10 +691,6 @@ export default function Home() {
         });
         return;
       }
-      setWallet(result.wallet);
-      setWalletName(result.wallet.name ?? "Starknet wallet");
-      setWalletAddress(result.address ?? "");
-      setConnected(true);
       setWalletPickerOpen(false);
       const detectedNetwork = result.network;
       toast("Wallet connected.", {

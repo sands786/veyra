@@ -1002,3 +1002,11 @@
 - [x] Trace where the Connect Wallet action is currently hidden or gated
 - [x] Restore a clear Connect Wallet action without restoring Sign In, Sign Up, or Sign Out controls
 - [x] Add regression coverage and verify wallet access at desktop and mobile widths
+
+
+## Persist connected wallet across protocol pages
+
+- [x] Trace why Launchpad, Private Markets, Private Primitives, and Agent each show independent wallet-connect prompts
+- [x] Add a shared session-safe wallet state for the connected provider, address, network, and wallet name
+- [x] Wire all four protocol surfaces to reuse the shared connection without storing private keys
+- [x] Add regression coverage and verify navigation/reload behavior at desktop and mobile widths

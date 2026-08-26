@@ -4,6 +4,7 @@ import {
   buildVeyraAgentCall,
   connectVeilWallet,
   discoverStarknetWallets,
+  useVeilWalletSession,
   readVeyraAgentChainState,
   readVeyraAgentReceipt,
   submitVeyraAgentCall,
@@ -21,8 +22,7 @@ function shortHash(value: string) { return `${value.slice(0, 10)}…${value.slic
 
 export function VeyraAgentOnchainPanel({ isDemoMode }: { isDemoMode: boolean }) {
   const wallets = useMemo(() => discoverStarknetWallets(), []);
-  const [wallet, setWallet] = useState<VeilWallet>();
-  const [address, setAddress] = useState("");
+  const { wallet, address } = useVeilWalletSession();
   const [roundId, setRoundId] = useState("1");
   const [itemId, setItemId] = useState("1");
   const [commitment, setCommitment] = useState("");
@@ -39,7 +39,7 @@ export function VeyraAgentOnchainPanel({ isDemoMode }: { isDemoMode: boolean }) 
     try {
       const result = await connectVeilWallet(option);
       if (!result.live || !result.wallet || !result.address || result.network !== "mainnet") throw new Error("Connect a wallet reporting Starknet Mainnet.");
-      setWallet(result.wallet); setAddress(result.address); setStatus("WALLET READY / SIGNATURE REQUIRED");
+      setStatus("WALLET READY / SIGNATURE REQUIRED");
       toast("Veyra Agent wallet connected.", { description: "Every state-changing action remains wallet-signed." });
     } catch (error) { toast("Wallet connection failed.", { description: String(error).slice(0, 160) }); }
     finally { setBusy(false); }
