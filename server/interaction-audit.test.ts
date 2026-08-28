@@ -143,13 +143,15 @@ describe("Veyra interaction contracts", () => {
     expect(home).toContain("claimWalletActionPending");
   });
 
-  it("exposes every protocol member from the homepage header bar", () => {
-    expect(home).toContain("ProtocolMemberBar");
+  it("keeps Mainnet and wallet controls while removing protocol tabs from the homepage header", () => {
+    expect(home).not.toContain("ProtocolMemberBar");
+    expect(home).not.toContain("<ProtocolMemberBar");
+    expect(home).toContain("STARKNET MAINNET");
+    expect(home).toContain("CONNECT WALLET");
     expect(protocolMemberBar).toContain('path: "/launchpad"');
     expect(protocolMemberBar).toContain('path: "/private-primitives"');
     expect(protocolMemberBar).toContain('path: "/private-markets"');
     expect(protocolMemberBar).toContain('path: "/agent"');
-    expect(home).toContain("CONNECT WALLET");
   });
 
   it("routes workspace headers through safe storage", () => {

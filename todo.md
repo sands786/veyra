@@ -1161,3 +1161,6 @@
 - [x] Validate the uploaded `veyra_submission_judge_cut_90s_4k60_cinematic.mp4` as the official hackathon demo asset.
 - [x] Publish the uploaded judge cut and synchronize Documentation, GitHub README, and hackathon metadata references.
 - [x] Push the synchronized judge-cut update to Vercel’s Production Branch and verify all public demo links.
+
+- [x] Remove the protocol-member navigation buttons from the homepage header while retaining Mainnet status and Connect Wallet.
+- [x] Update header regression coverage and verify desktop/mobile layout after the simplification.
