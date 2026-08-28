@@ -1167,3 +1167,6 @@
 
 - [x] Push all current Veyra source changes to GitHub `main` for Vercel Production.
 - [x] Verify the live Vercel deployment serves the current source and simplified homepage header.
+
+- [ ] Rename the README judge-cut heading to explicitly identify the 90-second 4K60 Demo.
+- [ ] Push and verify the explicit Demo heading on GitHub main and the public submission materials.

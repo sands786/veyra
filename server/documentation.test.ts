@@ -92,7 +92,8 @@ describe("documentation contract", () => {
     expect(documentationPage).toContain('preload="metadata"');
     expect(readme).not.toContain("<video controls");
     expect(readme).toContain("[![Open Film 01");
-    expect(readme).toContain("[![Open Film 00");
+    expect(readme).toContain("[![Open Demo");
+    expect(readme).toContain("### Demo — 90-second 4K60 judge cut");
     expect(readme).toContain(
       "https://veyra-gamma-gold.vercel.app/documentation#overview"
     );
@@ -100,6 +101,7 @@ describe("documentation contract", () => {
       "https://veyra-gamma-gold.vercel.app/manus-storage/veyra_submission_judge_cut_90s_4k60_cinematic_748aa029.mp4"
     );
     expect(readme).toContain("90-second 4K60 judge cut");
+    expect(readme).toContain("Watch the 90-second 4K60 Demo");
     expect(documentationPage).toContain('id="agent"');
     expect(documentationPage).toContain("Commit first.");
     expect(readme).toContain("Veyra Agent — sealed coordination on Mainnet");
