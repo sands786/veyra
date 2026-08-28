@@ -1123,3 +1123,29 @@
 - [x] Rewrite the in-app Documentation to include Veyra Agent, architecture, privacy boundaries, wallet-signing model, and evidence links
 - [x] Upgrade the repository README with current protocol members, Mainnet deployments, setup, testing, and honest capability boundaries
 - [x] Validate documentation consistency against source and on-chain evidence
+
+
+## User-authorized STRK20 registry submission
+
+- [ ] Inspect the official hackathon registry and check for an existing Veyra entry or PR
+- [ ] Prepare the registry object with repo URL and Telegram username Forgeclaw
+- [ ] Open the single public registry pull request with accurate Veyra description
+- [ ] Verify PR status and hub visibility without handling wallet credentials
+
+
+## Professional registry PR copy
+
+- [ ] Research the official registry template and credible hackathon PR conventions
+- [ ] Rewrite Veyra’s PR title and narrative sections in a concise builder-grade voice
+- [ ] Keep the copy within the registry scope and preserve the official checklist/evidence boundaries
+
+
+## Correct official registry target
+
+- [ ] Confirm the existing fork-local PR is not the official submission target
+- [ ] Open the same one-file registry change as a cross-fork PR into `starkience/strk20-hackathon:main`
+- [ ] Verify the official PR automation and hub visibility; do not merge manually
+
+- [x] Verify the latest updated demo asset and demo references are present in the production deployment.
+- [x] Verify all latest Veyra UI, Agent, navigation, documentation, and metadata changes are pushed to the intended Vercel deployment.
+- [x] Repair and redeploy any production mismatch found, then re-run live verification.
