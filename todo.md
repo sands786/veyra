@@ -1150,14 +1150,14 @@
 - [x] Verify all latest Veyra UI, Agent, navigation, documentation, and metadata changes are pushed to the intended Vercel deployment.
 - [x] Repair and redeploy any production mismatch found, then re-run live verification.
 
-- [ ] Replace the Documentation hero product film with the verified 90-second submission cut.
-- [ ] Update film metadata and regression coverage for the 90-second production asset.
-- [ ] Push the 90-second film update to Vercel’s Production Branch and verify the live player.
+- [x] Replace the Documentation hero product film with the verified 90-second submission cut.
+- [x] Update film metadata and regression coverage for the 90-second production asset.
+- [x] Push the 90-second film update to Vercel’s Production Branch and verify the live player.
 
-- [ ] Replace the Documentation hero product film with the verified 90-second submission cut.
-- [ ] Update film metadata, GitHub README references, and regression coverage for the 90-second production asset.
-- [ ] Push the synchronized 90-second film update to Vercel’s Production Branch and verify the live player.
+- [x] Replace the Documentation hero product film with the verified 90-second submission cut.
+- [x] Update film metadata, GitHub README references, and regression coverage for the 90-second production asset.
+- [x] Push the synchronized 90-second film update to Vercel’s Production Branch and verify the live player.
 
-- [ ] Validate the uploaded `veyra_submission_judge_cut_90s_4k60_cinematic.mp4` as the official hackathon demo asset.
-- [ ] Publish the uploaded judge cut and synchronize Documentation, GitHub README, and hackathon metadata references.
-- [ ] Push the synchronized judge-cut update to Vercel’s Production Branch and verify all public demo links.
+- [x] Validate the uploaded `veyra_submission_judge_cut_90s_4k60_cinematic.mp4` as the official hackathon demo asset.
+- [x] Publish the uploaded judge cut and synchronize Documentation, GitHub README, and hackathon metadata references.
+- [x] Push the synchronized judge-cut update to Vercel’s Production Branch and verify all public demo links.
