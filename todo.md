@@ -1165,5 +1165,5 @@
 - [x] Remove the protocol-member navigation buttons from the homepage header while retaining Mainnet status and Connect Wallet.
 - [x] Update header regression coverage and verify desktop/mobile layout after the simplification.
 
-- [ ] Push all current Veyra source changes to GitHub `main` for Vercel Production.
-- [ ] Verify the live Vercel deployment serves the current source and simplified homepage header.
+- [x] Push all current Veyra source changes to GitHub `main` for Vercel Production.
+- [x] Verify the live Vercel deployment serves the current source and simplified homepage header.
