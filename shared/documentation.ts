@@ -2,7 +2,7 @@ export const documentationRoute = "/docs";
 export const documentationTeaserAsset =
   "/manus-storage/veyra-30s-logo-led-stable-teaser_edb01985.mp4";
 export const documentationProductFilmAsset =
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4";
+  "/manus-storage/veyra_submission_judge_cut_90s_4k60_cinematic_748aa029.mp4";
 
 export const documentationChapters = [
   "overview",

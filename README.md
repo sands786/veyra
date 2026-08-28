@@ -41,10 +41,10 @@ This repository is designed to make that sequence inspectable. It is not a landi
 
 |      Time | Do this                                                                                                                             | What it demonstrates                                                                                                       |
 | --------: | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **00:00** | [Watch the cinematic teaser](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4) | The core thesis: a private roster must not become a public payment record.                                                 |
-| **00:30** | [Open the live workspace](https://veyra-gamma-gold.vercel.app)                                                                      | Routes, roles, operations, wallet state, proof ledger, Launchpad, and Private Markets are product surfaces—not mock cards. |
-| **01:00** | [Read the architecture](docs/ARCHITECTURE.md)                                                                                       | The browser, account API, database, wallet, RPC provider, and Cairo registry sit in distinct trust domains.                |
-| **01:30** | [Verify the evidence](docs/REVIEWER_GUIDE.md)                                                                                       | Follow the exact code paths for receipt verification, proof gating, risk enforcement, and the 152-test suite.              |
+| **00:00** | [Watch the 90-second 4K60 judge cut](https://veyra-gamma-gold.vercel.app/manus-storage/veyra_submission_judge_cut_90s_4k60_cinematic_748aa029.mp4) | The official submission film: Veyra’s privacy thesis, protocol members, and judge-facing product path. |
+| **01:30** | [Open the live workspace](https://veyra-gamma-gold.vercel.app) | Routes, roles, operations, wallet state, proof ledger, Launchpad, Private Markets, and Veyra Agent are product surfaces—not mock cards. |
+| **02:00** | [Read the architecture](docs/ARCHITECTURE.md) | The browser, account API, database, wallet, RPC provider, and Cairo registry sit in distinct trust domains. |
+| **02:30** | [Verify the evidence](docs/REVIEWER_GUIDE.md) | Follow the exact code paths for receipt verification, proof gating, risk enforcement, and the Mainnet evidence package. |
 
 ---
 
@@ -58,11 +58,11 @@ This repository is designed to make that sequence inspectable. It is not a landi
 
 The stable 30-second teaser establishes Veyra’s visual system and its private-to-proof operating principle. **[Play the original MP4](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/UWySWLIQYVhglQGv.mp4)** or **[watch inline in the Veyra Documentation room](https://veyra-gamma-gold.vercel.app/documentation#overview)**.
 
-### Film 00 — The operating model
+### Film 00 — The 90-second judge cut
 
-[![Open Film 00 — The Veyra operating model](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/QrIoqSGetmaJtKjn.png)](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4)
+[![Open Film 00 — The Veyra 90-second 4K60 judge cut](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/QrIoqSGetmaJtKjn.png)](https://veyra-gamma-gold.vercel.app/manus-storage/veyra_submission_judge_cut_90s_4k60_cinematic_748aa029.mp4)
 
-The 3:10 product walkthrough traces private routes, wallet/receipt boundaries, claims, governance, Private Markets, and the documentation library without presenting Demo Mode as chain evidence. **[Play the original MP4](https://files.manuscdn.com/user_upload_by_module/session_file/310519663488625248/veJaWSgpcQWfhFVT.mp4)** or **[watch inline in the Veyra Documentation room](https://veyra-gamma-gold.vercel.app/documentation#overview)**.
+The official 90-second 4K60 submission film gives judges a concise pass through Veyra’s privacy thesis, protocol members, Mainnet evidence surfaces, and wallet-to-receipt boundary. **[Play the official judge cut](https://veyra-gamma-gold.vercel.app/manus-storage/veyra_submission_judge_cut_90s_4k60_cinematic_748aa029.mp4)** or **[watch inline in the Veyra Documentation room](https://veyra-gamma-gold.vercel.app/documentation#overview)**.
 
 ---
 

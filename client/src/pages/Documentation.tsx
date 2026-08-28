@@ -247,7 +247,7 @@ export default function Documentation() {
                     Film 00 / Veyra operating model
                   </span>
                   <span className="border border-[#6DE3A1]/35 px-2 py-1 text-[8px] text-[#6DE3A1]">
-                    03:10 stable master
+                    01:30 / 4K60 judge cut
                   </span>
                 </div>
                 <div className="mt-4 border border-white/10 bg-black p-1">
@@ -265,9 +265,9 @@ export default function Documentation() {
                 </div>
                 <div className="mt-5 space-y-4 border-t border-white/10 pt-5">
                   <p className="max-w-2xl font-sans text-[15px] leading-7 text-[#F2EEE7]">
-                    A stable editorial walkthrough of Veyra’s operating model:
-                    deliberate title cards, one-direction product scrolls, and
-                    an explicit receipt boundary.
+                    The official 90-second 4K60 judge cut: a concise walkthrough
+                    of Veyra’s operating model, protocol members, and explicit
+                    wallet-to-receipt boundary.
                   </p>
                   <div className="flex items-baseline justify-between gap-4 border-t border-white/10 pt-4 font-mono text-[8px] uppercase leading-5 tracking-[0.12em]">
                     <span className="text-[#AEB8BE]">Product film</span>

@@ -14,6 +14,8 @@ const veyraVideoCdnPattern =
   /^https:\/\/files\.manuscdn\.com\/user_upload_by_module\/session_file\/\d+\/[A-Za-z0-9]+\.mp4$/;
 const veyraManagedTeaserPattern =
   /^\/manus-storage\/veyra-30s-logo-led-stable-teaser_[a-z0-9]+\.mp4$/;
+const veyraManagedJudgeCutPattern =
+  /^\/manus-storage\/veyra_submission_judge_cut_90s_4k60_cinematic_[a-z0-9]+\.mp4$/;
 const root = path.resolve(import.meta.dirname, "..");
 
 describe("documentation contract", () => {
@@ -41,9 +43,11 @@ describe("documentation contract", () => {
     expect(documentationTeaserAsset).toMatch(veyraManagedTeaserPattern);
   });
 
-  it("uses the updated published product film in the Documentation hero", () => {
-    expect(documentationProductFilmAsset).toMatch(veyraVideoCdnPattern);
-    expect(documentationProductFilmAsset).toContain("veJaWSgpcQWfhFVT.mp4");
+  it("uses the uploaded 90-second 4K60 judge cut in the Documentation hero", () => {
+    expect(documentationProductFilmAsset).toMatch(veyraManagedJudgeCutPattern);
+    expect(documentationProductFilmAsset).toContain(
+      "veyra_submission_judge_cut_90s_4k60_cinematic_748aa029.mp4"
+    );
 
     const documentationPage = fs.readFileSync(
       path.join(root, "client", "src", "pages", "Documentation.tsx"),
@@ -92,6 +96,10 @@ describe("documentation contract", () => {
     expect(readme).toContain(
       "https://veyra-gamma-gold.vercel.app/documentation#overview"
     );
+    expect(readme).toContain(
+      "https://veyra-gamma-gold.vercel.app/manus-storage/veyra_submission_judge_cut_90s_4k60_cinematic_748aa029.mp4"
+    );
+    expect(readme).toContain("90-second 4K60 judge cut");
     expect(documentationPage).toContain('id="agent"');
     expect(documentationPage).toContain("Commit first.");
     expect(readme).toContain("Veyra Agent — sealed coordination on Mainnet");

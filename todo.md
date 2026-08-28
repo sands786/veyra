@@ -537,7 +537,7 @@
 - [x] Audit finding: replace precision-unsafe market utilization arithmetic with exact decimal comparisons
 - [x] Audit finding: route tRPC workspace headers through the shared safe browser-storage boundary
 - [x] Publish the audited Veyra source revision to the public GitHub repository at https://github.com/sands786/veyra.
-- [ ] User-owned final submission remains: include the verified Ready X Mainnet STRK shield receipt in the final hackathon materials and submit them.
+- [x] User-owned final submission remains: include the verified Ready X Mainnet STRK shield receipt in the final hackathon materials and submit them.
 - [x] Audit finding: prevent a production route from advancing to shielded/routed stages when the connected wallet cannot submit the required STRK20 transaction
 - [x] Fix reported Braavos wallet capability detection so supported Starknet Mainnet submission is recognized without weakening the fail-closed guard
 - [x] Fix reported Mainnet asset-integrity gap: prevent a visible USDC route from invoking a hardcoded STRK token action
@@ -730,7 +730,7 @@
 - [x] Re-run complete automated, build, visual, and public-artifact verification: 152 tests across 37 files, TypeScript, production build, diff hygiene, desktop and mobile smoke checks, plus public Vercel and GitHub metadata checks.
 - [x] Correct submission documentation to distinguish the one-time official registry application from the no-manual-final-submission rule.
 - [x] Obtain the team’s public Telegram username and explicit approval, then prepare the minimal official registry branch containing only `https://github.com/sands786/veyra` and `Forgeclaw` for user-owned pull-request submission.
-- [ ] User-owned: open the already prepared official registry pull request from `https://github.com/starkience/strk20-hackathon/compare/main...sands786:strk20-hackathon:register-veyra?expand=1`.
+- [x] User-owned: open the already prepared official registry pull request from `https://github.com/starkience/strk20-hackathon/compare/main...sands786:strk20-hackathon:register-veyra?expand=1`.
 - [x] Remove the UI’s stale direct-method-only STRK20 gate so Mainnet-verified wallets exposing the standard request capability can reach the existing fail-closed `submitShieldedRoute` adapter without enabling any generic-invoke or public-transfer fallback; verified by the 152-test suite, `tsc --noEmit`, and the production build.
 
 ## Approval-first hackathon demo refresh
@@ -1080,9 +1080,9 @@
 
 ## Institutional protocol tabs
 
-- [ ] Increase protocol navigation tab height, padding, and type scale
-- [ ] Strengthen framed-bar geometry, active state, separators, and focus treatment
-- [ ] Add regression coverage and verify the header on desktop and mobile
+- [x] Increase protocol navigation tab height, padding, and type scale
+- [x] Strengthen framed-bar geometry, active state, separators, and focus treatment
+- [x] Add regression coverage and verify the header on desktop and mobile
 
 
 ## Fill protocol tab bar
@@ -1127,25 +1127,37 @@
 
 ## User-authorized STRK20 registry submission
 
-- [ ] Inspect the official hackathon registry and check for an existing Veyra entry or PR
-- [ ] Prepare the registry object with repo URL and Telegram username Forgeclaw
-- [ ] Open the single public registry pull request with accurate Veyra description
-- [ ] Verify PR status and hub visibility without handling wallet credentials
+- [x] Inspect the official hackathon registry and check for an existing Veyra entry or PR
+- [x] Prepare the registry object with repo URL and Telegram username Forgeclaw
+- [x] Open the single public registry pull request with accurate Veyra description
+- [x] Verify PR status and hub visibility without handling wallet credentials
 
 
 ## Professional registry PR copy
 
-- [ ] Research the official registry template and credible hackathon PR conventions
-- [ ] Rewrite Veyra’s PR title and narrative sections in a concise builder-grade voice
-- [ ] Keep the copy within the registry scope and preserve the official checklist/evidence boundaries
+- [x] Research the official registry template and credible hackathon PR conventions
+- [x] Rewrite Veyra’s PR title and narrative sections in a concise builder-grade voice
+- [x] Keep the copy within the registry scope and preserve the official checklist/evidence boundaries
 
 
 ## Correct official registry target
 
-- [ ] Confirm the existing fork-local PR is not the official submission target
-- [ ] Open the same one-file registry change as a cross-fork PR into `starkience/strk20-hackathon:main`
-- [ ] Verify the official PR automation and hub visibility; do not merge manually
+- [x] Confirm the existing fork-local PR is not the official submission target
+- [x] Open the same one-file registry change as a cross-fork PR into `starkience/strk20-hackathon:main`
+- [x] Verify the official PR automation and hub visibility; do not merge manually
 
 - [x] Verify the latest updated demo asset and demo references are present in the production deployment.
 - [x] Verify all latest Veyra UI, Agent, navigation, documentation, and metadata changes are pushed to the intended Vercel deployment.
 - [x] Repair and redeploy any production mismatch found, then re-run live verification.
+
+- [ ] Replace the Documentation hero product film with the verified 90-second submission cut.
+- [ ] Update film metadata and regression coverage for the 90-second production asset.
+- [ ] Push the 90-second film update to Vercel’s Production Branch and verify the live player.
+
+- [ ] Replace the Documentation hero product film with the verified 90-second submission cut.
+- [ ] Update film metadata, GitHub README references, and regression coverage for the 90-second production asset.
+- [ ] Push the synchronized 90-second film update to Vercel’s Production Branch and verify the live player.
+
+- [ ] Validate the uploaded `veyra_submission_judge_cut_90s_4k60_cinematic.mp4` as the official hackathon demo asset.
+- [ ] Publish the uploaded judge cut and synchronize Documentation, GitHub README, and hackathon metadata references.
+- [ ] Push the synchronized judge-cut update to Vercel’s Production Branch and verify all public demo links.
