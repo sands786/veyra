@@ -1,5 +1,6 @@
 {
   "transactions": [
+    "0x00c254e48eabc23bc3f0f25343c98876d8351ff3fe9fe63b9808b4126b9f59c3",
     "0x0336a6a8d3cc51290ed19e17b3f927d253389dea5f5408ff6b33cf926c3bed57",
     "0x03dd3037a3d6cada35b764e57f94f3fac0fc5f55cd6592bb214c1a5ec2c11890",
     "0x02437fc5f800a691602781a26fa98e3eea494eb94c909f6db347ae3003743c9f",
@@ -19,6 +20,15 @@
   "demo_video": "https://veyra-gamma-gold.vercel.app/manus-storage/veyra_submission_judge_cut_90s_4k60_cinematic_748aa029.mp4",
   "demo_url": "https://veyra-gamma-gold.vercel.app",
   "onchain_evidence": {
+    "private_primitives": {
+      "network": "mainnet",
+      "contract": "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+      "transaction": "0x00c254e48eabc23bc3f0f25343c98876d8351ff3fe9fe63b9808b4126b9f59c3",
+      "status": "SUCCEEDED / ACCEPTED_ON_L1",
+      "action": "wallet-native STRK20 pool action",
+      "privacy_boundary": "Successful pool interaction is publicly observable; recipient-side private-note discovery remains wallet/pool-owned.",
+      "integration_note": "This transaction was submitted through the wallet-native STRK20 path and was not routed through Veyra's deployed coordinator contract."
+    },
     "private_markets": {
       "network": "mainnet",
       "contract": "0x05476ca7064583238f3e82a6815a7f662b14228e1fb585d480838a282b9d7cf2",

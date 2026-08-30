@@ -1170,3 +1170,20 @@
 
 - [ ] Rename the README judge-cut heading to explicitly identify the 90-second 4K60 Demo.
 - [ ] Push and verify the explicit Demo heading on GitHub main and the public submission materials.
+
+- [ ] Audit the integration-boundary language in README and release posture for honest, deliberate scope framing.
+- [ ] Review PREMAINNET_10_10_AUDIT.md and SECURITY_AUDIT_STRIX.md for unsupported independent-audit claims or inflated self-scores.
+- [ ] Check official STRK20 rules and relevant disclosure guidance before changing commit attribution.
+- [ ] Run a fresh full `pnpm test` and `pnpm build` and preserve the real output.
+- [ ] Decide whether contributor attribution can be changed safely; do not rewrite history without confirmed requirements and user authorization.
+
+- [x] Leave existing `manus-agent` contributor history unchanged; do not rewrite or force-push repository history.
+- [ ] Complete the remaining safe audit, policy check, full test/build, and documentation review work.
+
+- [ ] Diagnose why the official STRK20 hub shows zero validated transactions for Veyra.
+- [ ] Compare existing public transaction hashes with the registry validator’s pool-touch rules.
+- [ ] Apply only a safe metadata correction supported by existing public receipts; do not fabricate or create new transactions.
+- [ ] Recheck hub processing and document any remaining wallet-owned evidence gap.
+
+- [ ] Validate supplied Mainnet transaction `0x00c254e48eabc23bc3f0f25343c98876d8351ff3fe9fe63b9808b4126b9f59c3` against the STRK20 pool and Veyra-contract requirements.
+- [ ] If and only if validated, add the new hash to `strk20.json` and verify hub reprocessing.
