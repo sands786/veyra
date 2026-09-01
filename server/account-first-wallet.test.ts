@@ -20,7 +20,7 @@ describe("account-first wallet access", () => {
     expect(signInPage).toContain('signInParams.get("mode") === "register"');
   });
 
-  it("hides real wallet discovery from visitors and keeps a defensive authentication boundary in the picker action", () => {
+  it("lets visitors open wallet discovery while keeping a defensive authentication boundary for workspace actions", () => {
     const homePage = fs.readFileSync(
       path.join(root, "client", "src", "pages", "Home.tsx"),
       "utf8"
@@ -31,9 +31,9 @@ describe("account-first wallet access", () => {
       "WALLET ACTIONS APPEAR AFTER WORKSPACE CONTEXT IS AVAILABLE."
     );
     expect(homePage).not.toContain("SIGN UP TO CONNECT");
-    expect(homePage).toContain("{isAuthenticated && walletPickerOpen && (");
-    expect(homePage).toContain(
-      "{isAuthenticated && (\n                <Button\n                  disabled={isWalletActionLocked(walletConnecting)}"
-    );
+    expect(homePage).toContain("{walletPickerOpen && (");
+    expect(homePage).not.toContain("{isAuthenticated && walletPickerOpen && (");
+    expect(homePage).toContain("if (!isAuthenticated) {");
+    expect(homePage).toContain("disabled={isWalletActionLocked(walletConnecting)}");
   });
 });

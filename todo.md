@@ -1187,3 +1187,17 @@
 
 - [ ] Validate supplied Mainnet transaction `0x00c254e48eabc23bc3f0f25343c98876d8351ff3fe9fe63b9808b4126b9f59c3` against the STRK20 pool and Veyra-contract requirements.
 - [ ] If and only if validated, add the new hash to `strk20.json` and verify hub reprocessing.
+
+- [ ] Research the official STRK20 pool ABI and choose one supported action for a minimal integration.
+- [ ] Inspect Markets and wallet architecture for a safe through-Veyra call path.
+- [ ] Implement the minimal STRK20 integration with tests; do not claim success before a real receipt.
+- [ ] Deploy only after local validation; user must approve any Mainnet transaction in their wallet.
+- [ ] Verify the through-Veyra receipt and update registry evidence only after successful Mainnet execution.
+
+- [x] Diagnose the reported Connect Wallet button failure without changing unrelated protocol or registry behavior.
+- [x] Fix wallet discovery/connection and preserve verified Starknet Mainnet plus shared session behavior.
+- [x] Add or update focused wallet regression coverage and verify the flow before release.
+
+- [x] Diagnose the reported Connect Wallet failure in the current deployed-compatible wallet adapter.
+- [x] Implement the minimal wallet discovery/connection fix without changing transaction evidence or protocol behavior.
+- [x] Add or update focused wallet regression coverage and verify the fix before release.

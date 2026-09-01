@@ -3093,7 +3093,7 @@ export default function Home() {
               </div>
             </div>
           </footer>
-          {isAuthenticated && walletPickerOpen && (
+          {walletPickerOpen && (
             <div
               className="fixed inset-0 z-50 grid place-items-center bg-[#111210]/80 p-4 backdrop-blur-sm"
               role="dialog"
