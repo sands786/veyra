@@ -1168,17 +1168,17 @@
 - [x] Push all current Veyra source changes to GitHub `main` for Vercel Production.
 - [x] Verify the live Vercel deployment serves the current source and simplified homepage header.
 
-- [ ] Rename the README judge-cut heading to explicitly identify the 90-second 4K60 Demo.
-- [ ] Push and verify the explicit Demo heading on GitHub main and the public submission materials.
+- [x] Rename the README judge-cut heading to explicitly identify the 90-second 4K60 Demo.
+- [x] Push and verify the explicit Demo heading on GitHub main and the public submission materials.
 
-- [ ] Audit the integration-boundary language in README and release posture for honest, deliberate scope framing.
-- [ ] Review PREMAINNET_10_10_AUDIT.md and SECURITY_AUDIT_STRIX.md for unsupported independent-audit claims or inflated self-scores.
-- [ ] Check official STRK20 rules and relevant disclosure guidance before changing commit attribution.
-- [ ] Run a fresh full `pnpm test` and `pnpm build` and preserve the real output.
-- [ ] Decide whether contributor attribution can be changed safely; do not rewrite history without confirmed requirements and user authorization.
+- [x] Audit the integration-boundary language in README and release posture for honest, deliberate scope framing.
+- [x] Review PREMAINNET_10_10_AUDIT.md and SECURITY_AUDIT_STRIX.md for unsupported independent-audit claims or inflated self-scores.
+- [x] Check official STRK20 rules and relevant disclosure guidance before changing commit attribution.
+- [x] Run a fresh full `pnpm test` and `pnpm build` and preserve the real output.
+- [x] Decide whether contributor attribution can be changed safely; do not rewrite history without confirmed requirements and user authorization.
 
 - [x] Leave existing `manus-agent` contributor history unchanged; do not rewrite or force-push repository history.
-- [ ] Complete the remaining safe audit, policy check, full test/build, and documentation review work.
+- [x] Complete the remaining safe audit, policy check, full test/build, and documentation review work.
 
 - [ ] Diagnose why the official STRK20 hub shows zero validated transactions for Veyra.
 - [ ] Compare existing public transaction hashes with the registry validator’s pool-touch rules.

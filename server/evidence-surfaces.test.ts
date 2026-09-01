@@ -31,9 +31,9 @@ describe("judge-facing evidence surfaces", () => {
 
   it("keeps private-note discovery separate from public receipt proof", () => {
     expect(primitives).toContain("PUBLIC RECEIPT");
-    expect(primitives).toContain("PRIVATE NOTE");
-    expect(primitives).toContain("RECIPIENT PROOF");
-    expect(primitives).toContain("WALLET-OWNED");
-    expect(primitives).toContain("NOT CLAIMED");
+    expect(primitives).toContain("private-note discovery");
+    expect(primitives).toContain("private delivery");
+    expect(primitives).toContain("wallet/pool-owned");
+    expect(primitives).toContain("without claiming");
   });
 });

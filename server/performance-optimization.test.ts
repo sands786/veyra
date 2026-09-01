@@ -53,7 +53,7 @@ describe("Veyra smooth-operation delivery contracts", () => {
     expect(chart).toContain("motion-reduce:transition-none");
     expect(chart).toContain("not a performance metric");
     expect(home).toContain("hover:-translate-y-1");
-    expect(home).toContain("focus-within:border-[#F0563A]/55");
+    expect(home).toContain("focus-within:bg-white/[0.025]");
     expect(home).toContain("motion-reduce:transform-none");
   });
 

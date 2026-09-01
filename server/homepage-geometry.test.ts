@@ -14,10 +14,10 @@ const styleSource = fs.readFileSync(
 describe("homepage rectangular surface geometry", () => {
   it("keeps the ten-surface institutional map in its stable rectangular grid", () => {
     expect(homeSource).toContain(
-      'className="mt-8 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-2"'
+      'className="mt-8 grid gap-0 border-t border-white/10 sm:grid-cols-2"'
     );
     expect(homeSource).toContain(
-      'className="group flex min-h-[260px] flex-col justify-between bg-[#151D21] p-5 transition-colors hover:bg-[#1B2930] sm:p-6"'
+      'className="group flex min-h-[260px] flex-col justify-between border-b border-white/10 p-5 transition-[background-color,transform] duration-200 ease-out hover:bg-white/[0.025] hover:-translate-y-0.5 focus-within:bg-white/[0.025] motion-reduce:transform-none sm:p-7 lg:p-8"'
     );
     expect((homeSource.match(/targetType:/g) ?? []).length).toBe(10);
   });
