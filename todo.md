@@ -1180,16 +1180,16 @@
 - [x] Leave existing `manus-agent` contributor history unchanged; do not rewrite or force-push repository history.
 - [x] Complete the remaining safe audit, policy check, full test/build, and documentation review work.
 
-- [ ] Diagnose why the official STRK20 hub shows zero validated transactions for Veyra.
-- [ ] Compare existing public transaction hashes with the registry validator’s pool-touch rules.
-- [ ] Apply only a safe metadata correction supported by existing public receipts; do not fabricate or create new transactions.
+- [x] Diagnose why the official STRK20 hub shows zero validated transactions for Veyra.
+- [x] Compare existing public transaction hashes with the registry validator’s pool-touch rules.
+- [x] Apply only a safe metadata correction supported by existing public receipts; do not fabricate or create new transactions.
 - [ ] Recheck hub processing and document any remaining wallet-owned evidence gap.
 
-- [ ] Validate supplied Mainnet transaction `0x00c254e48eabc23bc3f0f25343c98876d8351ff3fe9fe63b9808b4126b9f59c3` against the STRK20 pool and Veyra-contract requirements.
+- [x] Validate supplied Mainnet transaction `0x00c254e48eabc23bc3f0f25343c98876d8351ff3fe9fe63b9808b4126b9f59c3` against the STRK20 pool and Veyra-contract requirements.
 - [ ] If and only if validated, add the new hash to `strk20.json` and verify hub reprocessing.
 
-- [ ] Research the official STRK20 pool ABI and choose one supported action for a minimal integration.
-- [ ] Inspect Markets and wallet architecture for a safe through-Veyra call path.
+- [x] Research the official STRK20 pool ABI and choose one supported action for a minimal integration.
+- [x] Inspect Markets and wallet architecture for a safe through-Veyra call path.
 - [ ] Implement the minimal STRK20 integration with tests; do not claim success before a real receipt.
 - [ ] Deploy only after local validation; user must approve any Mainnet transaction in their wallet.
 - [ ] Verify the through-Veyra receipt and update registry evidence only after successful Mainnet execution.
