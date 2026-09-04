@@ -1203,3 +1203,5 @@
 - [x] Add or update focused wallet regression coverage and verify the fix before release.
 
 - [x] Refresh the README verification count to match the latest full Vitest suite and production build.
+
+- [ ] Add a documented privacy-invoke file and wire it through the existing wallet-native STRK20 action boundary without signing or handling private keys.

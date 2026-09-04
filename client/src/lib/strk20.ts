@@ -1,5 +1,6 @@
 import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
 import { useSyncExternalStore } from "react";
+import { submitPrivacyInvoke } from "./privacyInvoke";
 
 export type VeilNetwork = "mainnet";
 
@@ -860,9 +861,7 @@ export async function submitShieldedRoute(
     amountSmallestUnit,
     recipient,
   });
-  if (wallet.strk20InvokeTransaction)
-    return wallet.strk20InvokeTransaction(actions);
-  return requestStrk20Invoke(wallet, actions);
+  return submitPrivacyInvoke(wallet, actions);
 }
 
 export function explorerUrl(
