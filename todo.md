@@ -1205,3 +1205,5 @@
 - [x] Refresh the README verification count to match the latest full Vitest suite and production build.
 
 - [x] Add a documented privacy-invoke file and wire it through the existing wallet-native STRK20 action boundary without signing or handling private keys.
+
+- [x] Diagnose the Cloud Run ServicesPerProject quota deployment failure and document the non-code recovery path.
