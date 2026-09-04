@@ -1207,3 +1207,5 @@
 - [x] Add a documented privacy-invoke file and wire it through the existing wallet-native STRK20 action boundary without signing or handling private keys.
 
 - [x] Diagnose the Cloud Run ServicesPerProject quota deployment failure and document the non-code recovery path.
+
+- [x] Verify Ready X hashes `0x012398de61d53adf17620b93d2ef2eac900cc701cfe25839000977a2f168c147` and `0x0283882844bcaf39a86c0809e75d23480356a4f39262e2e63a6d80257ee872af` as successful Mainnet receipts emitting events from the official STRK20 pool address, then record them in `strk20.json` without claiming through-Veyra routing.

@@ -10,7 +10,9 @@
     "0x0273c1a65199ba16ff0992069b751849fcb47ac13cd7a1a736251ea9ce7cc881",
     "0x03a95eb41459e79e9016f71c3bb6e1dfb1cbec72e6342d9a67c3275f4e5913c6",
     "0x0012be49f9c13f63ffba3baae9eed3f5415331ce485f2fcc97e3a1cb1eb34d86",
-    "0x06e00858408afcc1aa3ec84e7517d92f8a15231131150f21327d15803e0dae93"
+    "0x06e00858408afcc1aa3ec84e7517d92f8a15231131150f21327d15803e0dae93",
+    "0x012398de61d53adf17620b93d2ef2eac900cc701cfe25839000977a2f168c147",
+    "0x0283882844bcaf39a86c0809e75d23480356a4f39262e2e63a6d80257ee872af"
   ],
   "contracts": [
     "0x005d7cb0f5ea0cda8b046d524eaa45e38f3a5c54357f2e4b211da7e2c435bb15",
@@ -27,7 +29,22 @@
       "status": "SUCCEEDED / ACCEPTED_ON_L1",
       "action": "wallet-native STRK20 pool action",
       "privacy_boundary": "Successful pool interaction is publicly observable; recipient-side private-note discovery remains wallet/pool-owned.",
-      "integration_note": "This transaction was submitted through the wallet-native STRK20 path and was not routed through Veyra's deployed coordinator contract."
+      "integration_note": "These transactions were submitted through the wallet-native STRK20 path and were not routed through Veyra's deployed coordinator contract.",
+      "verified_wallet_pool_transactions": [
+        {
+          "hash": "0x012398de61d53adf17620b93d2ef2eac900cc701cfe25839000977a2f168c147",
+          "status": "SUCCEEDED / ACCEPTED_ON_L2",
+          "block": 14367891,
+          "pool_event_emitter": "0x040337b1af3c663e86e333bab5a4b28da8d4652a15a69beee2b677776ffe812a"
+        },
+        {
+          "hash": "0x0283882844bcaf39a86c0809e75d23480356a4f39262e2e63a6d80257ee872af",
+          "status": "SUCCEEDED / ACCEPTED_ON_L2",
+          "block": 14367873,
+          "pool_event_emitter": "0x040337b1af3c663e86e333bab5a4b28da8d4652a15a69beee2b677776ffe812a"
+        }
+      ],
+      "hub_validation_note": "Both receipts were independently checked through the configured Starknet Mainnet RPC: each succeeded, was accepted on L2, and emitted events from the official STRK20 pool address. They improve registry evidence but do not prove a call through Veyra's deployed coordinator contract."
     },
     "private_markets": {
       "network": "mainnet",
