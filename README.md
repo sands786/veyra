@@ -169,7 +169,7 @@ Read the complete **[Decision Record](docs/DECISIONS.md)** to understand the tra
 | **Lifecycle logic** | [`shared/operations.ts`](shared/operations.ts)                            | Shared market transition, risk, policy, disclosure, and scheduling logic.                                        |
 | **Data model**      | [`drizzle/schema.ts`](drizzle/schema.ts)                                  | Typed tables for workspaces, routes, claims, policy, launch governance, markets, transactions, and audit events. |
 | **Cairo boundary**  | [`contracts/veyra_payroll`](contracts/veyra_payroll)                      | Non-custodial commitment registry and its explicit deployment boundary.                                          |
-| **Verification**    | `pnpm test && pnpm build`                                                 | **152 Vitest tests across 37 files** and a production bundle build at the latest hardening verification.         |
+| **Verification**    | `pnpm test && pnpm build`                                                 | **175 Vitest tests across 42 files** and a passing production bundle build at the latest hardening verification.         |
 
 ---
 

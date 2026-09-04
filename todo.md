@@ -1201,3 +1201,5 @@
 - [x] Diagnose the reported Connect Wallet failure in the current deployed-compatible wallet adapter.
 - [x] Implement the minimal wallet discovery/connection fix without changing transaction evidence or protocol behavior.
 - [x] Add or update focused wallet regression coverage and verify the fix before release.
+
+- [x] Refresh the README verification count to match the latest full Vitest suite and production build.
